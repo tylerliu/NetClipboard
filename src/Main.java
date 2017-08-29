@@ -18,9 +18,7 @@ public class Main {
             System.out.println(TransferConnector.inputStream.readUTF());
 
             //clipboard
-
-            while (ClipboardIO.queue.isEmpty()) ClipboardIO.checknew();
-            String s = ClipboardIO.queue.pop();
+            String s = ClipboardIO.getSysClipboardText();
             TransferConnector.outputStream.writeUTF(s);
             System.out.println(TransferConnector.inputStream.readUTF());
         } catch (IOException e) {
