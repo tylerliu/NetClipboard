@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.Clipboard;
 
@@ -38,5 +39,10 @@ public class ClipboardIO {
         }
 
         return "";
+    }
+
+    public static void setSysClipboardText(String s) {
+        StringSelection ss = new StringSelection(s);
+        sysClip.setContents(ss, ss);
     }
 }

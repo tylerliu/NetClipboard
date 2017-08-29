@@ -114,6 +114,7 @@ public class TransferConnector{
             try {
                 s = inputStream.readUTF();
                 System.out.println("Remote Clipboard New: " + s);
+                ClipboardIO.setSysClipboardText(s);
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
