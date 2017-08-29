@@ -15,7 +15,7 @@ public class ClipboardIO {
         String n = getSysClipboardText();
         if (n.length() > 0 && !last.equals(n)){//have new
             last = n;
-            System.out.println("New: " + last);
+            System.out.println("Local Clipboard New: " + last);
         }
     }
 

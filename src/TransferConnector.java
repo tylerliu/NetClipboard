@@ -113,7 +113,7 @@ public class TransferConnector{
         while (true){
             try {
                 s = inputStream.readUTF();
-                System.out.println(s);
+                System.out.println("Remote Clipboard New: " + s);
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
