@@ -37,14 +37,20 @@ public class TransferConnector{
     static void connect(){
         Thread serverThread = new Thread(TransferConnector::serverConn);
         Thread clientThread = new Thread(TransferConnector::clientConn);
-        serverThread.start();
         clientThread.start();
         try {
-            serverThread.join();
-            clientThread.join();
+            Thread.sleep(100);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        if (clientThread.isAlive())
+            serverThread.start();
+        try {
+            while (clientThread.isAlive() && serverThread.isAlive()) Thread.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        assert inputStream != null && outputStream != null;
         System.out.println("connected?");
     }
 
@@ -61,7 +67,7 @@ public class TransferConnector{
                 inputStream = new DataInputStream(socket.getInputStream());
                 outputStream = new DataOutputStream(socket.getOutputStream());
         } catch (ConnectException c){
-            System.out.println(c.getMessage());
+            if (!isConnOpen.get()) c.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -82,7 +88,7 @@ public class TransferConnector{
             inputStream = new DataInputStream(socket.getInputStream());
             outputStream = new DataOutputStream(socket.getOutputStream());
         } catch (BindException b) {
-            System.out.println(b.getMessage());
+            if (!isConnOpen.get()) b.printStackTrace();
         }catch (IOException e) {
             e.printStackTrace();
         }
