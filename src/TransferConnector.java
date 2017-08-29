@@ -118,7 +118,14 @@ public class TransferConnector{
                 e.printStackTrace();
                 System.exit(1);
             }
+
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
+
     }
 
     static void processOutput(){
@@ -130,10 +137,15 @@ public class TransferConnector{
                     s = ClipboardIO.getLast();
                     outputStream.writeUTF(s);
                 }
-                System.out.println(s);
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
+            }
+
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
