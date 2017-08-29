@@ -42,6 +42,7 @@ public class ClipboardIO {
     }
 
     public static void setSysClipboardText(String s) {
+        if (getSysClipboardText().equals(s))return;
         StringSelection ss = new StringSelection(s);
         sysClip.setContents(ss, ss);
     }

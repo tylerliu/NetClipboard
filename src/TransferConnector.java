@@ -128,7 +128,6 @@ public class TransferConnector{
         }
 
     }
-
     static void processOutput(){
         String s = ClipboardIO.getLast();
         while (true){
