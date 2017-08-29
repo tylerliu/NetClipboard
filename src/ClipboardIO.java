@@ -10,6 +10,7 @@ import java.util.ArrayDeque;
 public class ClipboardIO {
     static ArrayDeque<String> queue = new ArrayDeque<>();
     static Clipboard sysClip = Toolkit.getDefaultToolkit().getSystemClipboard();
+
     public static void checknew(){
         String n = getSysClipboardText();
         if (n.length() > 0 && !n.equals(queue.getLast())){//have new
