@@ -12,7 +12,7 @@ public class ClipboardIO {
     static Clipboard sysClip = Toolkit.getDefaultToolkit().getSystemClipboard();
     public static void checknew(){
         String n = getSysClipboardText();
-        if (n.length() > 0 && !n.equalsIgnoreCase(queue.getLast())){//have new name
+        if (n.length() > 0 && !n.equals(queue.getLast())){//have new
             queue.add(getSysClipboardText());
             System.out.println(queue.getLast());
         }

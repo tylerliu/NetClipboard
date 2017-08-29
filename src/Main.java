@@ -18,8 +18,8 @@ public class Main {
             System.out.println(TransferConnector.inputStream.readUTF());
 
             //clipboard
-            ClipboardIO.checknew();
-            while (ClipboardIO.queue.isEmpty());
+
+            while (ClipboardIO.queue.isEmpty()) ClipboardIO.checknew();;
             TransferConnector.outputStream.writeUTF(ClipboardIO.queue.pop());
             System.out.println(TransferConnector.inputStream.readUTF());
         } catch (IOException e) {
