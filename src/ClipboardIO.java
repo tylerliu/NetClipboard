@@ -2,20 +2,19 @@ import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.Clipboard;
-import java.util.ArrayDeque;
 
 /**
  * Created by TylerLiu on 2017/03/22.
  */
 public class ClipboardIO {
-    static ArrayDeque<String> queue = new ArrayDeque<>();
+    private static String last;
     static Clipboard sysClip = Toolkit.getDefaultToolkit().getSystemClipboard();
 
     public static void checknew(){
         String n = getSysClipboardText();
-        if (n.length() > 0 && !n.equals(queue.getLast())){//have new
-            queue.add(getSysClipboardText());
-            System.out.println(queue.getLast());
+        if (n.length() > 0 && !last.equals(n)){//have new
+            last = n;
+            System.out.println(last);
         }
     }
 

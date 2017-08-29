@@ -87,7 +87,7 @@ public class TransferConnector{
             socket = conn_socket;
             inputStream = new DataInputStream(socket.getInputStream());
             outputStream = new DataOutputStream(socket.getOutputStream());
-        } catch (BindException b) {
+        } catch (SocketException b) {
             if (!isConnOpen.get()) b.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();
@@ -96,7 +96,8 @@ public class TransferConnector{
 
     static void close(){
         try {
-            socket.close();
+            if (socket != null)
+                socket.close();
             if (serverSocket != null)
                 serverSocket.close();
         } catch (IOException e) {
