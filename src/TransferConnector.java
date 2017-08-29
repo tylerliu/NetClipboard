@@ -1,3 +1,4 @@
+import javax.sound.sampled.Clip;
 import java.io.*;
 import java.net.*;
 import java.util.Objects;
@@ -93,6 +94,48 @@ public class TransferConnector{
             e.printStackTrace();
         }
     }
+
+    static void DataTransferExecute(){
+        Thread input = new Thread(TransferConnector::processInput);
+        Thread output = new Thread(TransferConnector::processOutput);
+        input.start();
+        output.start();
+        try {
+            input.join();
+            output.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    static void processInput(){
+        String s;
+        while (true){
+            try {
+                s = inputStream.readUTF();
+                System.out.println(s);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    static void processOutput(){
+        String s = null;
+        while (true){
+            try {
+                ClipboardIO.checknew();
+                if (s == null || !s.equals(ClipboardIO.getLast())) {
+                    s = ClipboardIO.getLast();
+                    outputStream.writeUTF(s);
+                }
+                System.out.println(s);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
     static void close(){
         try {

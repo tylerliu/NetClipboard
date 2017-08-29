@@ -7,6 +7,7 @@ import java.awt.datatransfer.Clipboard;
  * Created by TylerLiu on 2017/03/22.
  */
 public class ClipboardIO {
+
     private static String last;
     static Clipboard sysClip = Toolkit.getDefaultToolkit().getSystemClipboard();
 
@@ -17,6 +18,11 @@ public class ClipboardIO {
             System.out.println(last);
         }
     }
+
+    public static String getLast() {
+        return last;
+    }
+
 
     /**
      * 从剪切板获得文字。

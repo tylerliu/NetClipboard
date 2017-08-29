@@ -8,19 +8,8 @@ public class Main {
                 System.out.println("Shutdown: closing ports");
                 TransferConnector.close();
             }));
-	// write your code here
         TransferConnector.connect();
-        try {
-            TransferConnector.outputStream.writeUTF(TransferConnector.localHost.toString());
-            System.out.println(TransferConnector.inputStream.readUTF());
-
-            //clipboard
-            String s = ClipboardIO.getSysClipboardText();
-            TransferConnector.outputStream.writeUTF(s);
-            System.out.println(TransferConnector.inputStream.readUTF());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        TransferConnector.DataTransferExecute();
         TransferConnector.close();
         System.exit(0);
     }
