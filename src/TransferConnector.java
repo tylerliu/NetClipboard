@@ -52,8 +52,6 @@ public class TransferConnector{
         }
         assert inputStream != null && outputStream != null;
         System.out.println("Connected to " + getTarget().getHostAddress() + " at port " + connectionPort);
-        if (serverThread.isAlive()) serverThread.interrupt();
-        if (clientThread.isAlive()) clientThread.interrupt();
     }
 
     private static void clientConn(){

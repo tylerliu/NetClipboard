@@ -19,5 +19,6 @@ public class Main {
             e.printStackTrace();
         }
         TransferConnector.close();
+        System.exit(0);
     }
 }
