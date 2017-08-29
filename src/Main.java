@@ -1,3 +1,4 @@
+import javax.sound.sampled.Clip;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -14,6 +15,12 @@ public class Main {
         TransferConnector.connect();
         try {
             TransferConnector.outputStream.writeUTF(TransferConnector.localHost.toString());
+            System.out.println(TransferConnector.inputStream.readUTF());
+
+            //clipboard
+            ClipboardIO.checknew();
+            while (ClipboardIO.queue.isEmpty());
+            TransferConnector.outputStream.writeUTF(ClipboardIO.queue.pop());
             System.out.println(TransferConnector.inputStream.readUTF());
         } catch (IOException e) {
             e.printStackTrace();
