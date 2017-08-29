@@ -116,6 +116,7 @@ public class TransferConnector{
                 System.out.println(s);
             } catch (IOException e) {
                 e.printStackTrace();
+                System.exit(1);
             }
         }
     }
@@ -132,6 +133,7 @@ public class TransferConnector{
                 System.out.println(s);
             } catch (IOException e) {
                 e.printStackTrace();
+                System.exit(1);
             }
         }
     }

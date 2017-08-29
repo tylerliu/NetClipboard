@@ -8,7 +8,7 @@ import java.awt.datatransfer.Clipboard;
  */
 public class ClipboardIO {
 
-    private static String last;
+    private static String last = "";
     static Clipboard sysClip = Toolkit.getDefaultToolkit().getSystemClipboard();
 
     public static void checknew(){
