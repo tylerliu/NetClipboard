@@ -10,18 +10,23 @@ import java.awt.datatransfer.Clipboard;
 public class ClipboardIO {
 
     private static String last = "";
+    private static boolean isFromRemote;
     static Clipboard sysClip = Toolkit.getDefaultToolkit().getSystemClipboard();
 
     public static void checknew(){
         String n = getSysClipboardText();
         if (n.length() > 0 && !last.equals(n)){//have new
             last = n;
+            isFromRemote = false;
             System.out.println("Local Clipboard New: " + last);
         }
     }
 
     public static String getLast() {
         return last;
+    }
+    public static boolean isLastFromRemote() {
+        return isFromRemote;
     }
 
 
@@ -42,7 +47,8 @@ public class ClipboardIO {
     }
 
     public static void setSysClipboardText(String s) {
-        if (getSysClipboardText().equals(s))return;
+        last = s;
+        isFromRemote = true;
         StringSelection ss = new StringSelection(s);
         sysClip.setContents(ss, ss);
     }

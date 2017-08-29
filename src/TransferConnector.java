@@ -135,7 +135,8 @@ public class TransferConnector{
                 ClipboardIO.checknew();
                 if (!s.equals(ClipboardIO.getLast())) {
                     s = ClipboardIO.getLast();
-                    outputStream.writeUTF(s);
+                    if (!ClipboardIO.isLastFromRemote())
+                        outputStream.writeUTF(s);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
