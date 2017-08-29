@@ -51,7 +51,9 @@ public class TransferConnector{
             e.printStackTrace();
         }
         assert inputStream != null && outputStream != null;
-        System.out.println("connected?");
+        System.out.println("Connected to " + getTarget().getHostAddress() + " at port " + connectionPort);
+        if (serverThread.isAlive()) serverThread.interrupt();
+        if (clientThread.isAlive()) clientThread.interrupt();
     }
 
     private static void clientConn(){
@@ -89,7 +91,7 @@ public class TransferConnector{
             outputStream = new DataOutputStream(socket.getOutputStream());
         } catch (BindException b) {
             if (!isConnOpen.get()) b.printStackTrace();
-        }catch (IOException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
