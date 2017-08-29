@@ -130,11 +130,11 @@ public class TransferConnector{
     }
 
     static void processOutput(){
-        String s = null;
+        String s = ClipboardIO.getLast();
         while (true){
             try {
                 ClipboardIO.checknew();
-                if (s == null || !s.equals(ClipboardIO.getLast())) {
+                if (!s.equals(ClipboardIO.getLast())) {
                     s = ClipboardIO.getLast();
                     outputStream.writeUTF(s);
                 }
