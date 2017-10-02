@@ -77,7 +77,19 @@ public class TransferConnector{
     private static void serverConn(){
         try {
             serverSocket = new ServerSocket(connectionPort);
-            Socket conn_socket = serverSocket.accept();
+            serverSocket.setSoTimeout(500);
+            Socket conn_socket = null;
+            while (conn_socket == null){
+                try {
+                    conn_socket = serverSocket.accept();
+                } catch (SocketTimeoutException s) {
+                    if (isConnOpen.get()) {
+                        serverSocket.close();
+                        serverSocket = null;
+                        return;
+                    }
+                }
+            }
             if (!isConnOpen.compareAndSet(false, true)) {
                 conn_socket.close();
                 serverSocket.close();
@@ -115,6 +127,8 @@ public class TransferConnector{
                 s = inputStream.readUTF();
                 System.out.println("Remote Clipboard New: " + s);
                 ClipboardIO.setSysClipboardText(s);
+            } catch (EOFException e){
+                System.exit(0);
             } catch (IOException e) {
                 e.printStackTrace();
                 System.exit(1);
@@ -129,14 +143,14 @@ public class TransferConnector{
 
     }
     static void processOutput(){
-        String s = ClipboardIO.getLast();
+        int hash = ClipboardIO.getLastHash();
         while (true){
             try {
                 ClipboardIO.checknew();
-                if (!s.equals(ClipboardIO.getLast())) {
-                    s = ClipboardIO.getLast();
+                if (hash != ClipboardIO.getLastHash()) {
+                    hash = ClipboardIO.getLastHash();
                     if (!ClipboardIO.isLastFromRemote())
-                        outputStream.writeUTF(s);
+                        outputStream.writeUTF((String) ClipboardIO.getLast());
                 }
             } catch (IOException e) {
                 e.printStackTrace();

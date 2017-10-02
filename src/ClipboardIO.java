@@ -9,20 +9,24 @@ import java.awt.datatransfer.Clipboard;
  */
 public class ClipboardIO {
 
-    private static String last = "";
+    private static Object last;
+    private static int lastHash;
     private static boolean isFromRemote;
     static Clipboard sysClip = Toolkit.getDefaultToolkit().getSystemClipboard();
 
     public static void checknew(){
         String n = getSysClipboardText();
-        if (n.length() > 0 && !last.equals(n)){//have new
-            last = n;
+        if (n.length() > 0 && lastHash != n.hashCode()){//have new
+            lastHash = n.hashCode();
             isFromRemote = false;
-            System.out.println("Local Clipboard New: " + last);
+            System.out.println("Local Clipboard New: " + n);
         }
     }
 
-    public static String getLast() {
+    public static int getLastHash() {
+        return lastHash;
+    }
+    public static Object getLast() {
         return last;
     }
     public static boolean isLastFromRemote() {
@@ -36,7 +40,11 @@ public class ClipboardIO {
     public static String getSysClipboardText() {
         Transferable clipTf = sysClip.getContents(null);
         if (clipTf != null && clipTf.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+
             try {
+                if (clipTf.isDataFlavorSupported(DataFlavor.selectionHtmlFlavor)){
+                    System.out.println(clipTf.getTransferData(DataFlavor.selectionHtmlFlavor).getClass());
+                }
                 return (String) clipTf.getTransferData(DataFlavor.stringFlavor);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -47,7 +55,7 @@ public class ClipboardIO {
     }
 
     public static void setSysClipboardText(String s) {
-        last = s;
+        lastHash = s.hashCode();
         isFromRemote = true;
         StringSelection ss = new StringSelection(s);
         sysClip.setContents(ss, ss);
