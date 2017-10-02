@@ -18,6 +18,7 @@ public class ClipboardIO {
         String n = getSysClipboardText();
         if (n.length() > 0 && lastHash != n.hashCode()){//have new
             lastHash = n.hashCode();
+            last = n;
             isFromRemote = false;
             System.out.println("Local Clipboard New: " + n);
         }
@@ -40,11 +41,7 @@ public class ClipboardIO {
     public static String getSysClipboardText() {
         Transferable clipTf = sysClip.getContents(null);
         if (clipTf != null && clipTf.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-
             try {
-                if (clipTf.isDataFlavorSupported(DataFlavor.selectionHtmlFlavor)){
-                    System.out.println(clipTf.getTransferData(DataFlavor.selectionHtmlFlavor).getClass());
-                }
                 return (String) clipTf.getTransferData(DataFlavor.stringFlavor);
             } catch (Exception e) {
                 e.printStackTrace();
