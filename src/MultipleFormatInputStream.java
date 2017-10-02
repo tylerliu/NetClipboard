@@ -94,6 +94,7 @@ public class MultipleFormatInputStream extends FilterInputStream {
         System.exit(0);
         } catch (IOException e) {
             e.printStackTrace();
+            System.exit(1);
             return null;
         }
         switch(type){

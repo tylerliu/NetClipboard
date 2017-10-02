@@ -122,10 +122,13 @@ public class TransferConnector{
     static void processInput(){
         String s;
         while (true){
-            s = (String)inputStream.readNext(null, false)[1];
-            System.out.println("Remote Clipboard New: " + s);
-            ClipboardIO.setSysClipboardText(s);
-
+            Object[] b = inputStream.readNext(null, false);
+            if (b == null) return;
+            if ((Integer)b[0] == 1) {
+                s = (String) b[1];
+                System.out.println("Remote Clipboard New: " + s);
+                ClipboardIO.setSysClipboardText(s);
+            }
             try {
                 Thread.sleep(50);
             } catch (InterruptedException e) {
