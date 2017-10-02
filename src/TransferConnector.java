@@ -11,8 +11,8 @@ public class TransferConnector{
 
     static final boolean isLoopBack = false;
     static final int connectionPort = 31415;
-    static DataInputStream inputStream;
-    static DataOutputStream outputStream;
+    static MultipleFormatInputStream inputStream;
+    static MultipleFormatOutputStream outputStream;
     static Socket socket;
     static ServerSocket serverSocket;
     static InetAddress localHost;
@@ -65,8 +65,8 @@ public class TransferConnector{
 
                 System.out.println("Opened client");
                 socket = client_socket;
-                inputStream = new DataInputStream(socket.getInputStream());
-                outputStream = new DataOutputStream(socket.getOutputStream());
+                inputStream = new MultipleFormatInputStream(socket.getInputStream());
+                outputStream = new MultipleFormatOutputStream(socket.getOutputStream());
         } catch (ConnectException c){
             if (!isConnOpen.get()) c.printStackTrace();
         } catch (IOException e) {
@@ -98,8 +98,8 @@ public class TransferConnector{
             }
             System.out.println("Opened server");
             socket = conn_socket;
-            inputStream = new DataInputStream(socket.getInputStream());
-            outputStream = new DataOutputStream(socket.getOutputStream());
+            inputStream = new MultipleFormatInputStream(socket.getInputStream());
+            outputStream = new MultipleFormatOutputStream(socket.getOutputStream());
         } catch (SocketException b) {
             if (!isConnOpen.get()) b.printStackTrace();
         } catch (IOException e) {
@@ -123,16 +123,9 @@ public class TransferConnector{
     static void processInput(){
         String s;
         while (true){
-            try {
-                s = inputStream.readUTF();
-                System.out.println("Remote Clipboard New: " + s);
-                ClipboardIO.setSysClipboardText(s);
-            } catch (EOFException e){
-                System.exit(0);
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.exit(1);
-            }
+            s = (String)inputStream.readNext(null, false)[1];
+            System.out.println("Remote Clipboard New: " + s);
+            ClipboardIO.setSysClipboardText(s);
 
             try {
                 Thread.sleep(50);
@@ -150,7 +143,7 @@ public class TransferConnector{
                 if (hash != ClipboardIO.getLastHash()) {
                     hash = ClipboardIO.getLastHash();
                     if (!ClipboardIO.isLastFromRemote())
-                        outputStream.writeUTF((String) ClipboardIO.getLast());
+                        outputStream.writeString((String) ClipboardIO.getLast());
                 }
             } catch (IOException e) {
                 e.printStackTrace();

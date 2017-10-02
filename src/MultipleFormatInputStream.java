@@ -1,7 +1,4 @@
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 
 /**
  * Created by TylerLiu on 2017/10/01.
@@ -90,9 +87,11 @@ public class MultipleFormatInputStream extends FilterInputStream {
      * @param close OutputStream if the object is file
      * @return [0] is the type, [1] is the data if applicable
      */
-    protected Object[] readNext(OutputStream out, boolean close){
+    protected Object[] readNext(OutputStream out, boolean close) {
         try {
             loadNext();
+        } catch (EOFException e){
+        System.exit(0);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
