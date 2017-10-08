@@ -1,4 +1,7 @@
-import java.io.*;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * a class output stream that can transfer multiple format of file
@@ -8,6 +11,7 @@ import java.io.*;
  * 0: continue
  * 1: String/SegmentedHTML
  * 2: ZipFile
+ * 3: HTML
  *
  * byte 1: indicate the number it is length is exceeding 0XFFFF
  * if yes, it will be joined with next one
@@ -53,6 +57,21 @@ public class MultipleFormatOutputStream extends FilterOutputStream {
         out.write(buf, 0, count);
         count = 0;
         type = 0;
+    }
+
+
+    private void copyStream(InputStream input) throws IOException {
+        assert count == 0;
+        while ((count = input.read(buf)) != -1)
+        {
+            if (count < buf.length) {
+                flushBuffer();
+                return;
+            }
+            flushBuffer();
+        }
+        count = 0;
+        flushBuffer();
     }
 
     /**
@@ -109,7 +128,7 @@ public class MultipleFormatOutputStream extends FilterOutputStream {
      * output bytes to be written out to the underlying output stream.
      *
      * @exception  IOException  if an I/O error occurs.
-     * @see        java.io.FilterOutputStream#out
+     * @see        FilterOutputStream#out
      */
     public synchronized void flush() throws IOException {
         if (count != 0) flushBuffer();
@@ -125,24 +144,36 @@ public class MultipleFormatOutputStream extends FilterOutputStream {
         flushBuffer();
     }
 
+    public synchronized void writeHTML(String s) throws IOException {
+        assert count == 0;
+        type = 3;
+        write(s.getBytes());
+        flushBuffer();
+    }
+
     public synchronized void writeFile(InputStream in, boolean close) throws IOException{
-        //TODO Finish this
         assert count == 0;
         type = 2;
 
         //read from input stream
+        copyStream(in);
 
-        count = in.read(buf);
+        if (close) in.close();
+    }
 
-        if (count == -1) count = 0;
+    public synchronized void writeFileHead(){
+        //TODO Finish this
+        assert count == 0;
+        type = 2;
+    }
 
-        if (count >= buf.length) {
+    public synchronized void writeFileEnd(){
+        try {
             flushBuffer();
-            writeFile(in, close);
-        } else {
-            flushBuffer();
-            if (close) in.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
+
 }
 

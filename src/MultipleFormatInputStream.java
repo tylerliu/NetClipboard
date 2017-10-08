@@ -1,4 +1,7 @@
-import java.io.*;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * Created by TylerLiu on 2017/10/01.
@@ -55,6 +58,27 @@ public class MultipleFormatInputStream extends FilterInputStream {
     }
 
     /**
+     * Used only when sure the next is HTML
+     */
+    protected String getHTML(){
+        byte ptype = type;
+        try {
+            loadNext();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (type != 3 && (type != 0 || ptype != 3)) return null;
+        if (cont == 0) return new String(buf, 0, length);
+        else return new String(buf, 0, buf.length) + getHTML();
+    }
+
+    private String tryHTML(){
+        if (type != 3) return null;
+        if (cont == 0) return new String(buf, 0, length);
+        else return new String(buf, 0, buf.length) + getHTML();
+    }
+
+    /**
      * Used only when sure the next is file
      */
     protected void readFile(OutputStream out, boolean close){
@@ -87,14 +111,11 @@ public class MultipleFormatInputStream extends FilterInputStream {
      * @param close OutputStream if the object is file
      * @return [0] is the type, [1] is the data if applicable
      */
-    protected Object[] readNext(OutputStream out, boolean close) {
+    protected Object[] readNext(OutputStream out, boolean close){
         try {
             loadNext();
-        } catch (EOFException e){
-        System.exit(0);
         } catch (IOException e) {
             e.printStackTrace();
-            System.exit(1);
             return null;
         }
         switch(type){
@@ -105,6 +126,8 @@ public class MultipleFormatInputStream extends FilterInputStream {
             case 2:
                 tryFile(out, close);
                 return new Object[]{2};
+            case 3:
+                return new Object[]{3, tryHTML()};
             default:
                 return null;
         }

@@ -1,4 +1,3 @@
-import java.io.IOException;
 
 public class Main {
 
@@ -8,6 +7,7 @@ public class Main {
                 System.out.println("Shutdown: closing ports");
                 TransferConnector.close();
             }));
+        ClipboardIO.getSysClipboardText();
         TransferConnector.connect();
         TransferConnector.DataTransferExecute();
         TransferConnector.close();

@@ -123,11 +123,19 @@ public class TransferConnector{
         String s;
         while (true){
             Object[] b = inputStream.readNext(null, false);
-            if (b == null) return;
-            if ((Integer)b[0] == 1) {
-                s = (String) b[1];
-                System.out.println("Remote Clipboard New: " + s);
-                ClipboardIO.setSysClipboardText(s);
+            if (b == null) System.exit(0);
+            switch (ClipboardIO.getContentType((Integer)b[0])){
+                case STRING:
+                    s = (String) b[1];
+                    System.out.println("Remote Clipboard New: " + s);
+                    ClipboardIO.setSysClipboardText(s);
+                    break;
+                case HTML:
+                    s = (String) b[1];
+                    System.out.println("Remote Clipboard New: " + s);
+                    ClipboardIO.setSysClipboardHTML(s);
+                case FILES:
+                default:
             }
             try {
                 Thread.sleep(50);
@@ -138,14 +146,19 @@ public class TransferConnector{
 
     }
     static void processOutput(){
-        int hash = ClipboardIO.getLastHash();
         while (true){
             try {
-                ClipboardIO.checknew();
-                if (hash != ClipboardIO.getLastHash()) {
-                    hash = ClipboardIO.getLastHash();
-                    if (!ClipboardIO.isLastFromRemote())
-                        outputStream.writeString((String) ClipboardIO.getLast());
+                if (ClipboardIO.checknew() && !ClipboardIO.isLastFromRemote()){
+                    switch (ClipboardIO.getLastType()){
+                        case STRING:
+                            outputStream.writeString((String) ClipboardIO.getLast());
+                            break;
+                        case HTML:
+                            outputStream.writeHTML((String) ClipboardIO.getLast());
+                            break;
+                        case FILES:
+                        default:
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
