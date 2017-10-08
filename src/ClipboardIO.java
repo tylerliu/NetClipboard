@@ -22,7 +22,7 @@ public class ClipboardIO {
      */
     public static boolean checknew(){
         String n = getSysClipboardHTML();
-        if (n.length() > 0 && (last != null || !last.equals(n))){//have new
+        if (n.length() > 0 && (last == null || !last.equals(n))){//have new
             lastType = ContentType.HTML;
             last = n;
             isFromRemote = false;
