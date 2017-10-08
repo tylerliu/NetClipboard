@@ -22,22 +22,41 @@ public class ClipboardIO {
      */
     public static boolean checknew(){
         String n = getSysClipboardHTML();
-        if (n.length() > 1 && (last == null || !last.equals(n))){//have new
+        if (isNew(ContentType.HTML, n)){//have new
             lastType = ContentType.HTML;
             last = n;
             isFromRemote = false;
             System.out.println("Local Clipboard New HTML: " + n);
             return true;
         }
+        if (isSame(ContentType.HTML, n))return false;
+
         n = getSysClipboardText();
-        if (n.length() > 0 && last != null && !last.equals(n)){//have new
+        if (isNew(ContentType.STRING, n)){//have new
             lastType = ContentType.STRING;
             last = n;
             isFromRemote = false;
             System.out.println("Local Clipboard New: " + n);
             return true;
         }
+        if (isSame(ContentType.STRING, n))return false;
         return false;
+    }
+
+    private static boolean isNew(ContentType type, Object data){
+        if (data == null) return false;
+        if (type == ContentType.STRING && ((String) data).length() == 0) return false;
+        if (type == ContentType.HTML && ((String) data).length() <= 1) return false;
+
+        if (type == lastType){
+            return last == null || !last.equals(data);
+        } else {
+            return true;
+        }
+    }
+
+    private static boolean isSame(ContentType type, Object data){
+        return type == lastType && data != null && last != null && last.equals(data);
     }
 
     public static ContentType getLastType() {
