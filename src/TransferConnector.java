@@ -131,9 +131,7 @@ public class TransferConnector{
                     ClipboardIO.setSysClipboardText(s);
                     break;
                 case HTML:
-                    s = (String) b[1];
-                    System.out.println("Remote Clipboard New: " + s);
-                    ClipboardIO.setSysClipboardHTML(s);
+                    break;
                 case FILES:
                 default:
             }
@@ -154,7 +152,6 @@ public class TransferConnector{
                             outputStream.writeString((String) ClipboardIO.getLast());
                             break;
                         case HTML:
-                            outputStream.writeHTML((String) ClipboardIO.getLast());
                             break;
                         case FILES:
                         default:
