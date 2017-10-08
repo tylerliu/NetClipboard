@@ -22,15 +22,15 @@ public class ClipboardIO {
      */
     public static boolean checknew(){
         String n = getSysClipboardHTML();
-        if (n.length() > 0 && !last.equals(n)){//have new
+        if (n.length() > 0 && last != null && !last.equals(n)){//have new
             lastType = ContentType.HTML;
             last = n;
             isFromRemote = false;
-            System.out.println("Local Clipboard New: " + n);
+            System.out.println("Local Clipboard New HTML: " + n);
             return true;
         }
         n = getSysClipboardText();
-        if (n.length() > 0 && !last.equals(n)){//have new
+        if (n.length() > 0 && last != null && !last.equals(n)){//have new
             lastType = ContentType.STRING;
             last = n;
             isFromRemote = false;
