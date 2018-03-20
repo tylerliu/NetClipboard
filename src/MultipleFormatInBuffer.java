@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -36,8 +37,9 @@ public class MultipleFormatInBuffer{
         inChannel.read(head);
         type = head.get(0);
         cont = head.get(1);
-        length = head.get(2);
-        length += head.get(3) << 8;
+        length = Byte.toUnsignedInt(head.get(2));
+
+        length += Byte.toUnsignedInt(head.get(3)) << 8;
         buf = ByteBuffer.allocate(length);
         inChannel.read(buf);
     }
@@ -59,6 +61,7 @@ public class MultipleFormatInBuffer{
 
     private String tryString(){
         if (type != 1) return null;
+        System.out.println("decoded: "+ StandardCharsets.UTF_8.decode(buf));
         return StandardCharsets.UTF_8.decode(buf).toString() + (cont != 0 ? getString() : "");
     }
 
