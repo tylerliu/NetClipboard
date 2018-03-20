@@ -56,6 +56,9 @@ public class TransferConnector{
                         System.out.println("Opened client");
                         serverSocketChannel.close();
                         serverSocketChannel = null;
+                        if (socketChannel.isConnectionPending()) {
+                            socketChannel.finishConnect();
+                        }
                         break wait_loop;
                     }
                     if (s == server_key) {

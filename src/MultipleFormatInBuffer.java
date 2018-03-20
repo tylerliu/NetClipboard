@@ -27,7 +27,6 @@ public class MultipleFormatInBuffer{
      *           this instance is to be created without an underlying stream.
      */
     public MultipleFormatInBuffer(SocketChannel in) {
-        buf = ByteBuffer.allocate(0x10000);
         inChannel = in;
     }
 
