@@ -4,6 +4,7 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.Clipboard;
+import java.io.File;
 
 /**
  * Created by TylerLiu on 2017/03/22.
@@ -97,4 +98,31 @@ public class ClipboardIO {
         StringSelection ss = new StringSelection(s);
         sysClip.setContents(ss, ss);
     }
+
+    /**
+     * 从剪切板获得文字。
+     */
+    public static List getSysClipboardFiles() {
+        Transferable clipTf = sysClip.getContents(null);
+        if (clipTf != null && clipTf.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+            try {
+                System.out.println(clipTf.getTransferData(DataFlavor.javaFileListFlavor).getClass());
+                return (List) clipTf.getTransferData(DataFlavor.javaFileListFlavor);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return null;
+    }
+
+    /*
+    public static void setSysClipboardText(List list) {
+        lastType = ContentType.FILES;
+        last = s;
+        isFromRemote = true;
+        StringSelection ss = new StringSelection(s);
+        sysClip.setContents(ss, ss);
+    }
+*/
 }
