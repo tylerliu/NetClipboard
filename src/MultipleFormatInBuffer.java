@@ -61,7 +61,7 @@ public class MultipleFormatInBuffer{
 
     private String tryString(){
         if (type != 1) return null;
-        System.out.println("decoded: "+ new String(buf.array()).c);
+        System.out.println("decoded: "+ new String(buf.array()));
         return StandardCharsets.UTF_8.decode(buf).toString() + (cont != 0 ? getString() : "");
     }
 
