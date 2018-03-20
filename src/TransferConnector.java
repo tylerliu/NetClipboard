@@ -41,8 +41,9 @@ public class TransferConnector{
             serverSocketChannel = ServerSocketChannel.open();
             serverSocketChannel.bind(new InetSocketAddress(connectionPort));
             serverSocketChannel.configureBlocking(false);
-            socketChannel = SocketChannel.open(new InetSocketAddress(getTarget(), connectionPort));
+            socketChannel = SocketChannel.open();
             socketChannel.configureBlocking(false);
+            socketChannel.connect(new InetSocketAddress(getTarget(), connectionPort));
 
             Selector selector = Selector.open();
             SelectionKey server_key = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
@@ -51,17 +52,20 @@ public class TransferConnector{
             wait_loop: while (true) {
                 selector.select();
                 for (SelectionKey s : selector.selectedKeys()) {
-                    if (s == server_key) {
-                        System.out.println("Opened server");
-                        socketChannel = serverSocketChannel.accept();
-                        break wait_loop;
-                    }
                     if (s == client_key) {
                         System.out.println("Opened client");
                         serverSocketChannel.close();
                         serverSocketChannel = null;
                         break wait_loop;
                     }
+                    if (s == server_key) {
+                        System.out.println("Opened server");
+                        socketChannel.close();
+                        socketChannel = serverSocketChannel.accept();
+                        socketChannel.configureBlocking(false);
+                        break wait_loop;
+                    }
+
                 }
             }
 
@@ -134,7 +138,7 @@ public class TransferConnector{
     static void close(){
         try {
             if (socketChannel != null)
-                socketChannel.configureBlocking(true);
+                //socketChannel.configureBlocking(true);
                 socketChannel.write(ByteBuffer.wrap(new byte[]{4, 0, 0, 0}));
                 socketChannel.close();
             if (serverSocketChannel != null)
