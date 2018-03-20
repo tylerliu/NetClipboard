@@ -10,7 +10,9 @@ import java.awt.datatransfer.Clipboard;
  */
 public class ClipboardIO {
 
-    public enum ContentType{STRING, HTML, FILES, END};
+    public enum ContentType{
+        STRING, HTML, FILES, END
+    }
     public static ContentType lastType;
     private static Object last;
     private static boolean isFromRemote;
@@ -62,6 +64,8 @@ public class ClipboardIO {
     }
 
     public static ContentType getContentType(int type){
+        return ContentType.values()[type - 1];
+        /*
         switch (type) {
             case 1:
                 return ContentType.STRING;
@@ -69,9 +73,12 @@ public class ClipboardIO {
                 return ContentType.FILES;
             case 3:
                 return ContentType.HTML;
+            case 4:
+                return ContentType.END;
             default:
                 return null;
         }
+        */
     }
 
     /**

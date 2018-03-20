@@ -11,8 +11,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class TransferConnector{
 
-    static final boolean isLoopBack = false;
-    static final int connectionPort = 31415;
+    private static final boolean isLoopBack = false;
+    private static final int connectionPort = 31415;
     static MultipleFormatInBuffer inBuffer;
     static MultipleFormatOutBuffer outBuffer;
     static SocketChannel socketChannel;
@@ -48,27 +48,26 @@ public class TransferConnector{
             SelectionKey server_key = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
             SelectionKey client_key = socketChannel.register(selector, SelectionKey.OP_CONNECT);
 
-            while (true) {
+            wait_loop: while (true) {
                 selector.select();
                 for (SelectionKey s : selector.selectedKeys()) {
                     if (s == server_key) {
                         System.out.println("Opened server");
                         socketChannel = serverSocketChannel.accept();
-                        inBuffer = new MultipleFormatInBuffer(socketChannel);
-                        outBuffer = new MultipleFormatOutBuffer(socketChannel);
-                        return;
+                        break wait_loop;
                     }
                     if (s == client_key) {
                         System.out.println("Opened client");
-                        inBuffer = new MultipleFormatInBuffer(socketChannel);
-                        outBuffer = new MultipleFormatOutBuffer(socketChannel);
                         serverSocketChannel.close();
                         serverSocketChannel = null;
-                        return;
+                        break wait_loop;
                     }
                 }
             }
 
+            inBuffer = new MultipleFormatInBuffer(socketChannel);
+            outBuffer = new MultipleFormatOutBuffer(socketChannel);
+            selector.close();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -87,14 +86,13 @@ public class TransferConnector{
                         if (s1.isReadable()) {
                             Object[] b = inBuffer.readNext(null, false);
                             if (b == null) System.exit(0);
-                            switch (ClipboardIO.getContentType((Integer) b[0])) {
+                            switch (ClipboardIO.getContentType((int) b[0])) {
                                 case STRING:
                                     String s = (String) b[1];
                                     System.out.println("Remote Clipboard New: " + s);
                                     ClipboardIO.setSysClipboardText(s);
                                     break;
                                 case HTML:
-                                    break;
                                 case FILES:
                                 default:
                             }
@@ -113,7 +111,6 @@ public class TransferConnector{
                                 outBuffer.writeString((String) ClipboardIO.getLast());
                                 break;
                             case HTML:
-                                break;
                             case FILES:
                                 break;
                             case END:
