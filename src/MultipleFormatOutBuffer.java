@@ -2,6 +2,9 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channel;
+import java.nio.channels.SocketChannel;
 
 /**
  * a class output stream that can transfer multiple format of file
@@ -12,6 +15,7 @@ import java.io.OutputStream;
  * 1: String/SegmentedHTML
  * 2: ZipFile
  * 3: HTML
+ * 4: END_SIGNAL
  *
  * byte 1: indicate the number it is length is exceeding 0XFFFF
  * if yes, it will be joined with next one
@@ -23,55 +27,26 @@ import java.io.OutputStream;
  *
  * Created by TylerLiu on 2017/10/01.
  */
-public class MultipleFormatOutputStream extends FilterOutputStream {
+public class MultipleFormatOutBuffer {
 
     /**
      * The internal buffer where data is stored.
      */
-    protected byte buf[];
-    /**
-     * The number of valid bytes in the buffer.
-     */
-    protected int count;
-    /**
-     * The format type of the buffer.
-     */
-    protected byte type;
+    private ByteBuffer buf;
+    private byte type;
+    private SocketChannel outChannel;
 
-    /**
-     * Creates an output stream filter built on top of the specified
-     * underlying output stream.
-     *
-     * @param out the underlying output stream to be assigned to
-     *            the field <tt>this.out</tt> for later use, or
-     *            <code>null</code> if this instance is to be
-     *            created without an underlying stream.
-     */
-    public MultipleFormatOutputStream(OutputStream out) {
-        super(out);
-        buf = new byte[0x10000];
+    public MultipleFormatOutBuffer(SocketChannel outChannel) {
+        buf = ByteBuffer.allocate(0x10000);
+        this.outChannel = outChannel;
     }
     /** Flush the internal buffer */
     private void flushBuffer() throws IOException {
-        out.write(new byte[]{type, (byte)(count >> 16), (byte)(count & 0XFF), (byte)((count >> 8) & 0XFF)});
-        out.write(buf, 0, count);
-        count = 0;
+        int count = buf.position();
+        outChannel.write(ByteBuffer.wrap(new byte[]{type, (byte)(count >> 16), (byte)(count & 0XFF), (byte)((count >> 8) & 0XFF)}));
+        outChannel.write(buf);
+        buf.clear();
         type = 0;
-    }
-
-
-    private void copyStream(InputStream input) throws IOException {
-        assert count == 0;
-        while ((count = input.read(buf)) != -1)
-        {
-            if (count < buf.length) {
-                flushBuffer();
-                return;
-            }
-            flushBuffer();
-        }
-        count = 0;
-        flushBuffer();
     }
 
     /**
@@ -81,10 +56,10 @@ public class MultipleFormatOutputStream extends FilterOutputStream {
      * @exception  IOException  if an I/O error occurs.
      */
     public synchronized void write(int b) throws IOException {
-        if (count >= buf.length) {
+        if (!buf.hasRemaining()) {
             flushBuffer();
         }
-        buf[count++] = (byte)b;
+        buf.put((byte)b);
     }
 
 
@@ -106,21 +81,24 @@ public class MultipleFormatOutputStream extends FilterOutputStream {
      * @exception  IOException  if an I/O error occurs.
      */
     public synchronized void write(byte b[], int off, int len) throws IOException {
-        if (count >= buf.length) {
+        if (!buf.hasRemaining()) {
             flushBuffer();
         }
 
-        if (len >= buf.length - count) {
-            System.arraycopy(b, off, buf, count, buf.length - count);
-            off += buf.length - count;
-            len -= buf.length - count;
-            count = buf.length;
+        if (len > buf.remaining()) {
+            int rem = buf.remaining();
+            buf.put(b, off, buf.remaining());
+            off += rem;
+            len -= rem;
             flushBuffer();
             write(b, off, len);
         } else {
-            System.arraycopy(b, off, buf, count, len);
-            count += len;
+            buf.put(b, off, len);
         }
+    }
+
+    public synchronized void write(byte b[]) throws IOException{
+        write(b, 0, b.length);
     }
 
     /**
@@ -131,28 +109,34 @@ public class MultipleFormatOutputStream extends FilterOutputStream {
      * @see        FilterOutputStream#out
      */
     public synchronized void flush() throws IOException {
-        if (count != 0) flushBuffer();
-        out.flush();
+        if (buf.position() != 0) flushBuffer();
     }
 
     //format specific operations
 
     public synchronized void writeString(String s) throws IOException {
-        assert count == 0;
+        assert buf.position() == 0;
         type = 1;
         write(s.getBytes());
         flushBuffer();
     }
 
     public synchronized void writeHTML(String s) throws IOException {
-        assert count == 0;
+        assert buf.position() == 0;
         type = 3;
         write(s.getBytes());
         flushBuffer();
     }
 
+    public synchronized void writeEND() throws IOException {
+        assert buf.position() == 0;
+        type = 4;
+        flushBuffer();
+    }
+
+    /*
     public synchronized void writeFile(InputStream in, boolean close) throws IOException{
-        assert count == 0;
+        assert buf.position() == 0;
         type = 2;
 
         //read from input stream
@@ -161,9 +145,10 @@ public class MultipleFormatOutputStream extends FilterOutputStream {
         if (close) in.close();
     }
 
+
     public synchronized void writeFileHead(){
         //TODO Finish this
-        assert count == 0;
+        assert buf.position() == 0;
         type = 2;
     }
 
@@ -174,6 +159,7 @@ public class MultipleFormatOutputStream extends FilterOutputStream {
             e.printStackTrace();
         }
     }
+    */
 
 }
 

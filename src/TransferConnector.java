@@ -1,6 +1,8 @@
 import java.io.*;
 import java.net.*;
+import java.nio.channels.*;
 import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -12,10 +14,9 @@ public class TransferConnector{
     static final int connectionPort = 31415;
     static MultipleFormatInputStream inputStream;
     static MultipleFormatOutputStream outputStream;
-    static Socket socket;
-    static ServerSocket serverSocket;
+    static SocketChannel socketChannel;
+    static ServerSocketChannel serverSocketChannel;
     static InetAddress localHost;
-    private static AtomicBoolean isConnOpen = new AtomicBoolean(false);
 
     static InetAddress getTarget(){
         if (isLoopBack) return InetAddress.getLoopbackAddress();
@@ -35,74 +36,38 @@ public class TransferConnector{
 
 
     static void connect(){
-        Thread serverThread = new Thread(TransferConnector::serverConn);
-        Thread clientThread = new Thread(TransferConnector::clientConn);
-        clientThread.start();
         try {
-            Thread.sleep(100);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        if (clientThread.isAlive())
-            serverThread.start();
-        try {
-            while (clientThread.isAlive() && serverThread.isAlive()) Thread.sleep(10);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        assert inputStream != null && outputStream != null;
-        System.out.println("Connected to " + getTarget().getHostAddress() + " at port " + connectionPort);
-    }
+            serverSocketChannel = ServerSocketChannel.open();
+            serverSocketChannel.bind(new InetSocketAddress(connectionPort));
+            serverSocketChannel.configureBlocking(false);
+            socketChannel = SocketChannel.open(new InetSocketAddress(getTarget(), connectionPort));
+            socketChannel.configureBlocking(false);
 
-    private static void clientConn(){
-        try {
-            Socket client_socket = new Socket(getTarget(), connectionPort);
-                if (!isConnOpen.compareAndSet(false, true)) {
-                    client_socket.close();
-                    return;
-                }
+            Selector selector = Selector.open();
+            SelectionKey server_key = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+            SelectionKey client_key = socketChannel.register(selector, SelectionKey.OP_CONNECT);
 
-                System.out.println("Opened client");
-                socket = client_socket;
-                inputStream = new MultipleFormatInputStream(socket.getInputStream());
-                outputStream = new MultipleFormatOutputStream(socket.getOutputStream());
-        } catch (ConnectException c){
-            if (!isConnOpen.get()) c.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private static void serverConn(){
-        try {
-            serverSocket = new ServerSocket(connectionPort);
-            serverSocket.setSoTimeout(500);
-            Socket conn_socket = null;
-            while (conn_socket == null){
-                try {
-                    conn_socket = serverSocket.accept();
-                } catch (SocketTimeoutException s) {
-                    if (isConnOpen.get()) {
-                        serverSocket.close();
-                        serverSocket = null;
+            while (true) {
+                selector.select();
+                for (SelectionKey s : selector.selectedKeys()) {
+                    if (s == server_key) {
+                        System.out.println("Opened server");
+                        socketChannel = serverSocketChannel.accept();
+                        return;
+                    }
+                    if (s == client_key) {
+                        System.out.println("Opened client");
+                        serverSocketChannel.close();
+                        serverSocketChannel = null;
                         return;
                     }
                 }
             }
-            if (!isConnOpen.compareAndSet(false, true)) {
-                conn_socket.close();
-                serverSocket.close();
-                serverSocket = null;
-                return;
-            }
-            System.out.println("Opened server");
-            socket = conn_socket;
-            inputStream = new MultipleFormatInputStream(socket.getInputStream());
-            outputStream = new MultipleFormatOutputStream(socket.getOutputStream());
-        } catch (SocketException b) {
-            if (!isConnOpen.get()) b.printStackTrace();
+
+
         } catch (IOException e) {
             e.printStackTrace();
+            System.exit(0);
         }
     }
 
@@ -173,10 +138,10 @@ public class TransferConnector{
 
     static void close(){
         try {
-            if (socket != null)
-                socket.close();
-            if (serverSocket != null)
-                serverSocket.close();
+            if (socketChannel != null)
+                socketChannel.close();
+            if (serverSocketChannel != null)
+                serverSocketChannel.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
