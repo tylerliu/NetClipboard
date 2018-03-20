@@ -78,6 +78,7 @@ public class TransferConnector{
     static void DataTransferExecute(){
         try {
             Selector selector = Selector.open();
+            socketChannel.configureBlocking(false);
             socketChannel.register(selector, SelectionKey.OP_READ);
 
             while (true) {
