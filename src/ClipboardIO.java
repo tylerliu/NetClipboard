@@ -10,7 +10,7 @@ import java.awt.datatransfer.Clipboard;
  */
 public class ClipboardIO {
 
-    public enum ContentType{STRING, HTML, FILES};
+    public enum ContentType{STRING, HTML, FILES, END};
     public static ContentType lastType;
     private static Object last;
     private static boolean isFromRemote;

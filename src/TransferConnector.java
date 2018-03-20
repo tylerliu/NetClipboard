@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.*;
+import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.Objects;
 import java.util.Set;
@@ -12,8 +13,8 @@ public class TransferConnector{
 
     static final boolean isLoopBack = false;
     static final int connectionPort = 31415;
-    static MultipleFormatInputStream inputStream;
-    static MultipleFormatOutputStream outputStream;
+    static MultipleFormatInBuffer inBuffer;
+    static MultipleFormatOutBuffer outBuffer;
     static SocketChannel socketChannel;
     static ServerSocketChannel serverSocketChannel;
     static InetAddress localHost;
@@ -53,10 +54,14 @@ public class TransferConnector{
                     if (s == server_key) {
                         System.out.println("Opened server");
                         socketChannel = serverSocketChannel.accept();
+                        inBuffer = new MultipleFormatInBuffer(socketChannel);
+                        outBuffer = new MultipleFormatOutBuffer(socketChannel);
                         return;
                     }
                     if (s == client_key) {
                         System.out.println("Opened client");
+                        inBuffer = new MultipleFormatInBuffer(socketChannel);
+                        outBuffer = new MultipleFormatOutBuffer(socketChannel);
                         serverSocketChannel.close();
                         serverSocketChannel = null;
                         return;
@@ -72,66 +77,58 @@ public class TransferConnector{
     }
 
     static void DataTransferExecute(){
-        Thread input = new Thread(TransferConnector::processInput);
-        Thread output = new Thread(TransferConnector::processOutput);
-        input.start();
-        output.start();
         try {
-            input.join();
-            output.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
+            Selector selector = Selector.open();
+            socketChannel.register(selector, SelectionKey.OP_READ);
 
-    static void processInput(){
-        String s;
-        while (true){
-            Object[] b = inputStream.readNext(null, false);
-            if (b == null) System.exit(0);
-            switch (ClipboardIO.getContentType((Integer)b[0])){
-                case STRING:
-                    s = (String) b[1];
-                    System.out.println("Remote Clipboard New: " + s);
-                    ClipboardIO.setSysClipboardText(s);
-                    break;
-                case HTML:
-                    break;
-                case FILES:
-                default:
-            }
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-    }
-    static void processOutput(){
-        while (true){
-            try {
-                if (ClipboardIO.checknew() && !ClipboardIO.isLastFromRemote()){
-                    switch (ClipboardIO.getLastType()){
-                        case STRING:
-                            outputStream.writeString((String) ClipboardIO.getLast());
-                            break;
-                        case HTML:
-                            break;
-                        case FILES:
-                        default:
+            while (true) {
+                if (selector.select(50) != 0)
+                    for (SelectionKey s1 : selector.selectedKeys()) {
+                        if (s1.isReadable()) {
+                            Object[] b = inBuffer.readNext(null, false);
+                            if (b == null) System.exit(0);
+                            switch (ClipboardIO.getContentType((Integer) b[0])) {
+                                case STRING:
+                                    String s = (String) b[1];
+                                    System.out.println("Remote Clipboard New: " + s);
+                                    ClipboardIO.setSysClipboardText(s);
+                                    break;
+                                case HTML:
+                                    break;
+                                case FILES:
+                                default:
+                            }
+                            return;
+                        }
+                        if (s1.isWritable()) {
+                            System.out.println("Opened client");
+                        }
                     }
+
+                //writing
+                try {
+                    if (ClipboardIO.checknew() && !ClipboardIO.isLastFromRemote()){
+                        switch (ClipboardIO.getLastType()){
+                            case STRING:
+                                outBuffer.writeString((String) ClipboardIO.getLast());
+                                break;
+                            case HTML:
+                                break;
+                            case FILES:
+                                break;
+                            case END:
+                                System.exit(0);
+                            default:
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    System.exit(1);
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-                System.exit(1);
             }
 
-            try {
-                Thread.sleep(50);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        } catch (IOException e){
+            e.printStackTrace();
         }
     }
 
@@ -139,6 +136,8 @@ public class TransferConnector{
     static void close(){
         try {
             if (socketChannel != null)
+                socketChannel.configureBlocking(true);
+                socketChannel.write(ByteBuffer.wrap(new byte[]{4, 0, 0, 0}));
                 socketChannel.close();
             if (serverSocketChannel != null)
                 serverSocketChannel.close();

@@ -2,16 +2,20 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
 
 /**
  * Created by TylerLiu on 2017/10/01.
  */
-public class MultipleFormatInputStream extends FilterInputStream {
+public class MultipleFormatInBuffer{
 
-    public byte[] buf;
+    public ByteBuffer buf;
     public byte type;
     public int length;
     public byte cont;
+    SocketChannel inChannel;
+
 
     /**
      * Creates a <code>FilterInputStream</code>
@@ -22,17 +26,20 @@ public class MultipleFormatInputStream extends FilterInputStream {
      * @param in the underlying input stream, or <code>null</code> if
      *           this instance is to be created without an underlying stream.
      */
-    public MultipleFormatInputStream(InputStream in) {
-        super(in);
-        buf = new byte[0x10000];
+    public MultipleFormatInBuffer(SocketChannel in) {
+        buf = ByteBuffer.allocate(0x10000);
+        inChannel = in;
     }
 
     private void loadNext() throws IOException {
-        type = (byte) read();
-        cont = (byte) read();
-        length = read();
-        length += read() << 8;
-        read(buf, 0, length);
+        ByteBuffer head = ByteBuffer.allocate(4);
+        inChannel.read(head);
+        type = head.get(0);
+        cont = head.get(1);
+        length = head.get(2);
+        length += head.get(3) << 8;
+        buf = ByteBuffer.allocate(length);
+        inChannel.read(buf);
     }
 
 
@@ -47,14 +54,14 @@ public class MultipleFormatInputStream extends FilterInputStream {
             e.printStackTrace();
         }
         if (type != 1 && (type != 0 || ptype != 1)) return null;
-        if (cont == 0) return new String(buf, 0, length);
-        else return new String(buf, 0, buf.length) + getString();
+        if (cont == 0) return buf.toString();
+        else return buf.toString() + getString();
     }
 
     private String tryString(){
         if (type != 1) return null;
-        if (cont == 0) return new String(buf, 0, length);
-        else return new String(buf, 0, buf.length) + getString();
+        if (cont == 0) return buf.toString();
+        else return buf.toString() + getString();
     }
 
     /**
@@ -68,19 +75,20 @@ public class MultipleFormatInputStream extends FilterInputStream {
             e.printStackTrace();
         }
         if (type != 3 && (type != 0 || ptype != 3)) return null;
-        if (cont == 0) return new String(buf, 0, length);
-        else return new String(buf, 0, buf.length) + getHTML();
+        if (cont == 0) return buf.toString();
+        else return buf.toString() + getHTML();
     }
 
     private String tryHTML(){
         if (type != 3) return null;
-        if (cont == 0) return new String(buf, 0, length);
-        else return new String(buf, 0, buf.length) + getHTML();
+        if (cont == 0) return buf.toString();
+        else return buf.toString() + getHTML();
     }
 
     /**
      * Used only when sure the next is file
      */
+    /*
     protected void readFile(OutputStream out, boolean close){
         byte ptype = type;
         try {
@@ -103,7 +111,7 @@ public class MultipleFormatInputStream extends FilterInputStream {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     /**
      *
@@ -124,18 +132,14 @@ public class MultipleFormatInputStream extends FilterInputStream {
             case 1:
                 return new Object[]{1, tryString()};
             case 2:
-                tryFile(out, close);
+                //tryFile(out, close);
                 return new Object[]{2};
             case 3:
                 return new Object[]{3, tryHTML()};
+            case 4:
+                return new Object[]{4};
             default:
                 return null;
         }
-    }
-
-    @Override
-    public void close() throws IOException {
-        super.close();
-        buf = null;
     }
 }
