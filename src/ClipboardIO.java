@@ -85,16 +85,12 @@ public class ClipboardIO {
      * 从剪切板获得文字。
      */
     public static String getSysClipboardText() {
-        Transferable clipTf = sysClip.getContents(null);
-        if (clipTf != null && clipTf.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-            try {
-                return (String) clipTf.getTransferData(DataFlavor.stringFlavor);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        try {
+            return (String) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
-
-        return "";
     }
 
     public static void setSysClipboardText(String s) {

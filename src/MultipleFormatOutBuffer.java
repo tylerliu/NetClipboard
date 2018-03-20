@@ -5,6 +5,8 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 /**
  * a class output stream that can transfer multiple format of file
@@ -117,14 +119,14 @@ public class MultipleFormatOutBuffer {
     public synchronized void writeString(String s) throws IOException {
         assert buf.position() == 0;
         type = 1;
-        write(s.getBytes());
+        write(s.getBytes(StandardCharsets.UTF_8));
         flushBuffer();
     }
 
     public synchronized void writeHTML(String s) throws IOException {
         assert buf.position() == 0;
         type = 3;
-        write(s.getBytes());
+        write(s.getBytes(StandardCharsets.UTF_8));
         flushBuffer();
     }
 

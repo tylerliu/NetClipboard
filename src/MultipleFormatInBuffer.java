@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
 
 /**
  * Created by TylerLiu on 2017/10/01.
@@ -53,14 +54,12 @@ public class MultipleFormatInBuffer{
             e.printStackTrace();
         }
         if (type != 1 && (type != 0 || ptype != 1)) return null;
-        if (cont == 0) return buf.toString();
-        else return buf.toString() + getString();
+        return StandardCharsets.UTF_8.decode(buf).toString() + (cont != 0 ? getString() : "");
     }
 
     private String tryString(){
         if (type != 1) return null;
-        if (cont == 0) return buf.toString();
-        else return buf.toString() + getString();
+        return StandardCharsets.UTF_8.decode(buf).toString() + (cont != 0 ? getString() : "");
     }
 
     /**
@@ -74,14 +73,12 @@ public class MultipleFormatInBuffer{
             e.printStackTrace();
         }
         if (type != 3 && (type != 0 || ptype != 3)) return null;
-        if (cont == 0) return buf.toString();
-        else return buf.toString() + getHTML();
+        return StandardCharsets.UTF_8.decode(buf).toString() + (cont != 0 ? getHTML() : "");
     }
 
     private String tryHTML(){
         if (type != 3) return null;
-        if (cont == 0) return buf.toString();
-        else return buf.toString() + getHTML();
+        return StandardCharsets.UTF_8.decode(buf).toString() + (cont != 0 ? getHTML() : "");
     }
 
     /**
