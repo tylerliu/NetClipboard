@@ -103,30 +103,19 @@ public class MultipleFormatOutBuffer {
         write(b, 0, b.length);
     }
 
-    /**
-     * Flushes this buffered output stream. This forces any buffered
-     * output bytes to be written out to the underlying output stream.
-     *
-     * @exception  IOException  if an I/O error occurs.
-     * @see        FilterOutputStream#out
-     */
-    public synchronized void flush() throws IOException {
-        if (buf.position() != 0) flushBuffer();
-    }
-
     //format specific operations
 
     public synchronized void writeString(String s) throws IOException {
         assert buf.position() == 0;
         type = 1;
-        write(s.getBytes(StandardCharsets.UTF_8));
+        write(s.getBytes());
         flushBuffer();
     }
 
     public synchronized void writeHTML(String s) throws IOException {
         assert buf.position() == 0;
         type = 3;
-        write(s.getBytes(StandardCharsets.UTF_8));
+        write(s.getBytes());
         flushBuffer();
     }
 

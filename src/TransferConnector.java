@@ -1,3 +1,4 @@
+import javax.sound.sampled.Clip;
 import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
@@ -116,6 +117,7 @@ public class TransferConnector{
                         switch (ClipboardIO.getLastType()){
                             case STRING:
                                 outBuffer.writeString((String) ClipboardIO.getLast());
+                                System.out.println("Sent:" + ClipboardIO.getLast());
                                 break;
                             case HTML:
                             case FILES:
