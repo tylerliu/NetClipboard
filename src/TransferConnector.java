@@ -104,7 +104,6 @@ public class TransferConnector{
                                 case FILES:
                                 default:
                             }
-                            return;
                         }
                         if (s1.isWritable()) {
                             System.out.println("Opened client");
@@ -141,8 +140,6 @@ public class TransferConnector{
     static void close(){
         try {
             if (socketChannel != null)
-                //socketChannel.configureBlocking(true);
-                socketChannel.write(ByteBuffer.wrap(new byte[]{4, 0, 0, 0}));
                 socketChannel.close();
             if (serverSocketChannel != null)
                 serverSocketChannel.close();
