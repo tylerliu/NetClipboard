@@ -22,7 +22,7 @@ public class ClipboardIO {
      * check for new things in the clipboard
      * @return true if change happens
      */
-    public static boolean checknew(){
+    public static boolean checkNew(){
 
         String n = getSysClipboardText();
         if (isNew(ContentType.STRING, n)){//have new

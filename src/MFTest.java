@@ -9,7 +9,8 @@ import java.nio.channels.WritableByteChannel;
  * Created by TylerLiu on 2018/03/20.
  */
 public class MFTest {
-    public static class ArrayChannel implements WritableByteChannel, ReadableByteChannel{
+    public static class ArrayChannel implements ReadableByteChannel{
+
 
         ByteBuffer buffer = ByteBuffer.allocate(0x10000);
         @Override
@@ -20,10 +21,8 @@ public class MFTest {
             return arr.length;
         }
 
-        @Override
-        public int write(ByteBuffer src) throws IOException {
-            buffer.put(src);
-            return 0;
+        public void putBuffer(ByteBuffer buf){
+            buffer = buf;
         }
 
         @Override
@@ -35,28 +34,15 @@ public class MFTest {
         public void close() throws IOException {
 
         }
-
-        public void toRead(){
-            buffer.limit(buffer.position());
-            buffer.rewind();
-            byte[] arr = new byte[buffer.limit()];
-            buffer.get(arr);
-            System.out.println("size: " + buffer.position());
-            for (byte b: arr){
-                System.out.println(b + " " );
-            }
-            System.out.println();
-            buffer.rewind();
-        }
     }
 
     public static void main(String[] args){
         try {
             ArrayChannel channel = new ArrayChannel();
-            MultipleFormatOutBuffer OutBuffer = new MultipleFormatOutBuffer(channel);
+            MultipleFormatOutBuffer OutBuffer = new MultipleFormatOutBuffer();
             OutBuffer.writeString("你好\n");
 
-            channel.toRead();
+            channel.putBuffer(OutBuffer.getOutput().poll());
 
             MultipleFormatInBuffer inBuffer = new MultipleFormatInBuffer(channel);
             System.out.println(inBuffer.getString());

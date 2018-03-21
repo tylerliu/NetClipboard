@@ -108,7 +108,7 @@ public class TransferConnector{
 
                             //check clipboard
                             try {
-                                if (ClipboardIO.checknew() && !ClipboardIO.isLastFromRemote()){
+                                if (ClipboardIO.checkNew() && !ClipboardIO.isLastFromRemote()){
                                     switch (ClipboardIO.getLastType()){
                                         case STRING:
                                             outBuffer.writeString((String) ClipboardIO.getLast());
