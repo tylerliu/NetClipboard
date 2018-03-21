@@ -40,7 +40,7 @@ public class MultipleFormatOutBuffer {
     private ByteBuffer buf;
     private byte type;
 
-    private Queue<ByteBuffer> output;
+    private ArrayDeque<ByteBuffer> output;
 
     public MultipleFormatOutBuffer() {
         buf = ByteBuffer.allocate(0x10000);
@@ -56,7 +56,9 @@ public class MultipleFormatOutBuffer {
         int count = buf.position();
         output.add(ByteBuffer.wrap(new byte[]{type, (byte)(count >> 16), (byte)(count & 0XFF), (byte)((count >> 8) & 0XFF)}));
         buf.flip();
-        output.add(buf);
+        byte[] store = new byte[count];
+        buf.get(store);
+        output.add(ByteBuffer.wrap(store));
         buf.clear();
         type = 0;
     }

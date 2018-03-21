@@ -4,6 +4,8 @@ import java.nio.channels.ByteChannel;
 import java.nio.channels.GatheringByteChannel;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.WritableByteChannel;
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 /**
  * Created by TylerLiu on 2018/03/20.
@@ -21,8 +23,11 @@ public class MFTest {
             return arr.length;
         }
 
-        public void putBuffer(ByteBuffer buf){
-            buffer = buf;
+        public void putBuffer(Queue<ByteBuffer> buf){
+            for (ByteBuffer b:buf) {
+                buffer.put(b.array());
+            }
+            buffer.flip();
         }
 
         @Override
@@ -42,7 +47,7 @@ public class MFTest {
             MultipleFormatOutBuffer OutBuffer = new MultipleFormatOutBuffer();
             OutBuffer.writeString("你好\n");
 
-            channel.putBuffer(OutBuffer.getOutput().poll());
+            channel.putBuffer(OutBuffer.getOutput());
 
             MultipleFormatInBuffer inBuffer = new MultipleFormatInBuffer(channel);
             System.out.println(inBuffer.getString());
