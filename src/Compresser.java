@@ -1,5 +1,4 @@
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -12,14 +11,14 @@ public class Compresser {
     public static void copyStream(InputStream input, OutputStream output) throws IOException {
         byte[] buffer = new byte[8192]; // Adjust if you want
         int bytesRead;
-        while ((bytesRead = input.read(buffer)) != -1)
-        {
+        while ((bytesRead = input.read(buffer)) != -1) {
             output.write(buffer, 0, bytesRead);
         }
     }
 
     /**
      * recursively compress a path
+     *
      * @param srcPathName
      * @param dest
      */
@@ -67,6 +66,7 @@ public class Compresser {
 
     /**
      * recursively compress a file or directory
+     *
      * @param file
      * @param out
      * @param basedir
@@ -85,20 +85,21 @@ public class Compresser {
      * compress a directory
      */
     private static void compressDirectory(File dir, ZipOutputStream out, String basedir) {
-            if (!dir.exists())
-                return;
+        if (!dir.exists())
+            return;
 
         //noinspection ConstantConditions
         for (File file : dir.listFiles()) {
             /* 递归 */
-                compress(file, out, basedir + dir.getName() + "/");
-            }
+            compress(file, out, basedir + dir.getName() + "/");
         }
+    }
 
     /**
      * compress a file.
-     * @param file file to compress
-     * @param out zip output stream
+     *
+     * @param file    file to compress
+     * @param out     zip output stream
      * @param basedir base directory of the file
      */
     private static void compressFile(File file, ZipOutputStream out, String basedir) {

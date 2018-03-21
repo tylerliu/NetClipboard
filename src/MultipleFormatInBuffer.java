@@ -1,18 +1,11 @@
-import java.io.FilterInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.SocketChannel;
-import java.nio.channels.WritableByteChannel;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 
 /**
  * Created by TylerLiu on 2017/10/01.
  */
-public class MultipleFormatInBuffer{
+public class MultipleFormatInBuffer {
 
     public ByteBuffer buf;
     public byte type;
@@ -50,7 +43,7 @@ public class MultipleFormatInBuffer{
     /**
      * Used only when sure the next is string
      */
-    protected String getString(){
+    protected String getString() {
         byte ptype = type;
         try {
             loadNext();
@@ -61,7 +54,7 @@ public class MultipleFormatInBuffer{
         return new String(buf.array()) + (cont != 0 ? getString() : "");
     }
 
-    private String tryString(){
+    private String tryString() {
         if (type != 1) return null;
         return new String(buf.array()) + (cont != 0 ? getString() : "");
     }
@@ -69,7 +62,7 @@ public class MultipleFormatInBuffer{
     /**
      * Used only when sure the next is HTML
      */
-    protected String getHTML(){
+    protected String getHTML() {
         byte ptype = type;
         try {
             loadNext();
@@ -80,7 +73,7 @@ public class MultipleFormatInBuffer{
         return new String(buf.array()) + (cont != 0 ? getHTML() : "");
     }
 
-    private String tryHTML(){
+    private String tryHTML() {
         if (type != 3) return null;
         return new String(buf.array()) + (cont != 0 ? getHTML() : "");
     }
@@ -114,17 +107,16 @@ public class MultipleFormatInBuffer{
     }*/
 
     /**
-     *
      * @return [0] is the type, [1] is the data if applicable
      */
-    protected Object[] readNext(){
+    protected Object[] readNext() {
         try {
             loadNext();
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
-        switch(type){
+        switch (type) {
             case 0:
                 return null;
             case 1:
