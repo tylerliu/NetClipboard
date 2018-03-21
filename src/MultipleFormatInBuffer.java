@@ -115,11 +115,9 @@ public class MultipleFormatInBuffer{
 
     /**
      *
-     * @param out OutputStream if the object is file
-     * @param close OutputStream if the object is file
      * @return [0] is the type, [1] is the data if applicable
      */
-    protected Object[] readNext(OutputStream out, boolean close){
+    protected Object[] readNext(){
         try {
             loadNext();
         } catch (IOException e) {

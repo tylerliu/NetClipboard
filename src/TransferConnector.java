@@ -88,52 +88,52 @@ public class TransferConnector{
             socketChannel.register(selector, SelectionKey.OP_WRITE);
 
             while (true) {
-                if (selector.select() != 0)
-                    for (SelectionKey s1 : selector.selectedKeys()) {
-                        if (s1.isReadable()) {
-                            Object[] b = inBuffer.readNext(null, false);
-                            if (b == null) System.exit(0);
-                            switch (ClipboardIO.getContentType((int) b[0])) {
+                selector.select();
+                for (SelectionKey s1 : selector.selectedKeys()) {
+                    if (s1.isReadable()) {
+                        Object[] b = inBuffer.readNext();
+                        if (b == null) System.exit(0);
+                        switch (ClipboardIO.getContentType((int) b[0])) {
+                            case STRING:
+                                String s = (String) b[1];
+                                System.out.println("Remote Clipboard New: " + s);
+                                ClipboardIO.setSysClipboardText(s);
+                                break;
+                            case HTML:
+                            case FILES:
+                            default:
+                        }
+                    }
+                    if (s1.isWritable()) {
+
+                        //check clipboard
+                        if (ClipboardIO.checkNew() && !ClipboardIO.isLastFromRemote()) {
+                            switch (ClipboardIO.getLastType()) {
                                 case STRING:
-                                    String s = (String) b[1];
-                                    System.out.println("Remote Clipboard New: " + s);
-                                    ClipboardIO.setSysClipboardText(s);
+                                    outBuffer.writeString((String) ClipboardIO.getLast());
                                     break;
                                 case HTML:
                                 case FILES:
+                                    break;
+                                case END:
+                                    System.exit(0);
                                 default:
                             }
                         }
-                        if (s1.isWritable()) {
 
-                            //check clipboard
-                            if (ClipboardIO.checkNew() && !ClipboardIO.isLastFromRemote()) {
-                                switch (ClipboardIO.getLastType()) {
-                                    case STRING:
-                                        outBuffer.writeString((String) ClipboardIO.getLast());
-                                        break;
-                                    case HTML:
-                                    case FILES:
-                                        break;
-                                    case END:
-                                        System.exit(0);
-                                    default:
-                                }
+                        //send
+                        try {
+                            while (!outBuffer.getOutput().isEmpty()) {
+                                socketChannel.write(outBuffer.getOutput().peek());
+                                if (!outBuffer.getOutput().peek().hasRemaining()) outBuffer.getOutput().poll();
                             }
-
-                            //send
-                            try{
-                                while (!outBuffer.getOutput().isEmpty()){
-                                    socketChannel.write(outBuffer.getOutput().peek());
-                                    if (!outBuffer.getOutput().peek().hasRemaining())outBuffer.getOutput().poll();
-                                }
-                            } catch (IOException e){
-                                e.printStackTrace();
-                                System.exit(1);
-                            }
-
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                            System.exit(1);
                         }
+
                     }
+                }
             }
 
         } catch (IOException e){
