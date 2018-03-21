@@ -53,15 +53,12 @@ public class MultipleFormatOutBuffer {
 
     /** Flush the internal buffer */
     private void flushBuffer() throws IOException {
-        ByteBuffer out = ByteBuffer.allocate(buf.position() + 4);
         int count = buf.position();
-        out.put(new byte[]{type, (byte)(count >> 16), (byte)(count & 0XFF), (byte)((count >> 8) & 0XFF)});
+        output.add(ByteBuffer.wrap(new byte[]{type, (byte)(count >> 16), (byte)(count & 0XFF), (byte)((count >> 8) & 0XFF)}));
         buf.flip();
-        out.put(buf);
+        output.add(buf);
         buf.clear();
         type = 0;
-        out.flip();
-        output.add(out);
     }
 
     /**
