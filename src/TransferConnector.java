@@ -51,6 +51,7 @@ public class TransferConnector{
             conn_loop: while (true) {
                 selector.select();
                 Iterator<SelectionKey> it = selector.selectedKeys().iterator();
+
                 while (it.hasNext()) {
                     SelectionKey s = it.next();
                     if (s == client_key) {
@@ -58,16 +59,15 @@ public class TransferConnector{
                         if (socketChannel.isConnectionPending()) {
                             socketChannel.finishConnect();
                         }
-                        it.remove();
+                        s.cancel();
                     }
                     if (s == server_key) {
                         System.out.println("Opened server");
                         serverChannel = serverSocketChannel.accept();
                         serverChannel.configureBlocking(false);
-                        it.remove();
+                        s.cancel();
                     }
-
-                    if (selector.keys().size() == 0) break conn_loop;
+                    if (selector.keys().size() == 1) break conn_loop;
                 }
             }
 
@@ -107,34 +107,32 @@ public class TransferConnector{
                         if (s1.isWritable()) {
 
                             //check clipboard
-                            try {
-                                if (ClipboardIO.checkNew() && !ClipboardIO.isLastFromRemote()){
-                                    switch (ClipboardIO.getLastType()){
-                                        case STRING:
-                                            outBuffer.writeString((String) ClipboardIO.getLast());
-                                            System.out.println("Sent:" + ClipboardIO.getLast());
-                                            break;
-                                        case HTML:
-                                        case FILES:
-                                            break;
-                                        case END:
-                                            System.exit(0);
-                                        default:
-                                    }
+                            if (ClipboardIO.checkNew() && !ClipboardIO.isLastFromRemote()) {
+                                switch (ClipboardIO.getLastType()) {
+                                    case STRING:
+                                        outBuffer.writeString((String) ClipboardIO.getLast());
+                                        System.out.println("Sent:" + ClipboardIO.getLast());
+                                        break;
+                                    case HTML:
+                                    case FILES:
+                                        break;
+                                    case END:
+                                        System.exit(0);
+                                    default:
                                 }
-                            } catch (IOException e) {
+                            }
+
+                            //send
+                            try{
+                                while (!outBuffer.getOutput().isEmpty() && !outBuffer.getOutput().peek().hasRemaining()){
+                                    socketChannel.write(outBuffer.getOutput().peek());
+                                    if (!outBuffer.getOutput().peek().hasRemaining())outBuffer.getOutput().poll();
+                                }
+                            } catch (IOException e){
                                 e.printStackTrace();
                                 System.exit(1);
                             }
 
-                            //send
-                            if (!outBuffer.getOutput().isEmpty()){
-                                socketChannel.write(outBuffer.getOutput().peek());
-                                while (!outBuffer.getOutput().peek().hasRemaining()){
-                                    outBuffer.getOutput().poll();
-                                    socketChannel.write(outBuffer.getOutput().peek());
-                                }
-                            }
                         }
                     }
             }
