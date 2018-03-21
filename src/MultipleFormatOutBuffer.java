@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channel;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -36,9 +37,9 @@ public class MultipleFormatOutBuffer {
      */
     private ByteBuffer buf;
     private byte type;
-    private SocketChannel outChannel;
+    private WritableByteChannel outChannel;
 
-    public MultipleFormatOutBuffer(SocketChannel outChannel) {
+    public MultipleFormatOutBuffer(WritableByteChannel outChannel) {
         buf = ByteBuffer.allocate(0x10000);
         this.outChannel = outChannel;
     }
@@ -46,6 +47,8 @@ public class MultipleFormatOutBuffer {
     private void flushBuffer() throws IOException {
         int count = buf.position();
         outChannel.write(ByteBuffer.wrap(new byte[]{type, (byte)(count >> 16), (byte)(count & 0XFF), (byte)((count >> 8) & 0XFF)}));
+        buf.limit(buf.position());
+        buf.rewind();
         outChannel.write(buf);
         buf.clear();
         type = 0;

@@ -3,7 +3,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 
@@ -16,7 +18,7 @@ public class MultipleFormatInBuffer{
     public byte type;
     public int length;
     public byte cont;
-    SocketChannel inChannel;
+    ReadableByteChannel inChannel;
 
 
     /**
@@ -28,7 +30,7 @@ public class MultipleFormatInBuffer{
      * @param in the underlying input stream, or <code>null</code> if
      *           this instance is to be created without an underlying stream.
      */
-    public MultipleFormatInBuffer(SocketChannel in) {
+    public MultipleFormatInBuffer(ReadableByteChannel in) {
         inChannel = in;
     }
 
@@ -56,13 +58,12 @@ public class MultipleFormatInBuffer{
             e.printStackTrace();
         }
         if (type != 1 && (type != 0 || ptype != 1)) return null;
-        return StandardCharsets.UTF_8.decode(buf).toString() + (cont != 0 ? getString() : "");
+        return new String(buf.array()) + (cont != 0 ? getString() : "");
     }
 
     private String tryString(){
         if (type != 1) return null;
-        System.out.println("decoded: "+ new String(buf.array()));
-        return StandardCharsets.UTF_8.decode(buf).toString() + (cont != 0 ? getString() : "");
+        return new String(buf.array()) + (cont != 0 ? getString() : "");
     }
 
     /**
@@ -76,12 +77,12 @@ public class MultipleFormatInBuffer{
             e.printStackTrace();
         }
         if (type != 3 && (type != 0 || ptype != 3)) return null;
-        return StandardCharsets.UTF_8.decode(buf).toString() + (cont != 0 ? getHTML() : "");
+        return new String(buf.array()) + (cont != 0 ? getHTML() : "");
     }
 
     private String tryHTML(){
         if (type != 3) return null;
-        return StandardCharsets.UTF_8.decode(buf).toString() + (cont != 0 ? getHTML() : "");
+        return new String(buf.array()) + (cont != 0 ? getHTML() : "");
     }
 
     /**
