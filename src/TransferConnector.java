@@ -48,7 +48,7 @@ public class TransferConnector{
             SelectionKey server_key = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
             SelectionKey client_key = socketChannel.register(selector, SelectionKey.OP_CONNECT);
 
-            wait_loop: while (true) {
+            conn_loop: while (true) {
                 selector.select();
                 Iterator<SelectionKey> it = selector.selectedKeys().iterator();
                 while (it.hasNext()) {
@@ -64,10 +64,10 @@ public class TransferConnector{
                         System.out.println("Opened server");
                         serverChannel = serverSocketChannel.accept();
                         serverChannel.configureBlocking(false);
-                        break wait_loop;
+                        it.remove();
                     }
 
-                    it.remove();
+                    if (selector.keys().size() == 0) break conn_loop;
                 }
             }
 
