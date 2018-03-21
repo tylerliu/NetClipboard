@@ -1,11 +1,8 @@
-import javax.sound.sampled.Clip;
 import java.io.*;
 import java.net.*;
-import java.nio.ByteBuffer;
 import java.nio.channels.*;
+import java.util.Iterator;
 import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Created by TylerLiu on 2017/08/28.
@@ -18,6 +15,7 @@ public class TransferConnector{
     static MultipleFormatOutBuffer outBuffer;
     static SocketChannel socketChannel;
     static ServerSocketChannel serverSocketChannel;
+    static SocketChannel serverChannel;
     static InetAddress localHost;
 
     static InetAddress getTarget(){
@@ -52,29 +50,29 @@ public class TransferConnector{
 
             wait_loop: while (true) {
                 selector.select();
-                for (SelectionKey s : selector.selectedKeys()) {
+                Iterator<SelectionKey> it = selector.selectedKeys().iterator();
+                while (it.hasNext()) {
+                    SelectionKey s = it.next();
                     if (s == client_key) {
-                        System.out.println("Opened client");
-                        serverSocketChannel.close();
-                        serverSocketChannel = null;
+                        System.out.println("Client Connected");
                         if (socketChannel.isConnectionPending()) {
                             socketChannel.finishConnect();
                         }
-                        break wait_loop;
+                        it.remove();
                     }
                     if (s == server_key) {
                         System.out.println("Opened server");
-                        socketChannel.close();
-                        socketChannel = serverSocketChannel.accept();
-                        socketChannel.configureBlocking(false);
+                        serverChannel = serverSocketChannel.accept();
+                        serverChannel.configureBlocking(false);
                         break wait_loop;
                     }
 
+                    it.remove();
                 }
             }
 
             inBuffer = new MultipleFormatInBuffer(socketChannel);
-            outBuffer = new MultipleFormatOutBuffer(socketChannel);
+            outBuffer = new MultipleFormatOutBuffer();
             selector.close();
 
         } catch (IOException e) {
@@ -86,11 +84,11 @@ public class TransferConnector{
     static void DataTransferExecute(){
         try {
             Selector selector = Selector.open();
-            socketChannel.configureBlocking(false);
-            socketChannel.register(selector, SelectionKey.OP_READ);
+            serverChannel.register(selector, SelectionKey.OP_READ);
+            socketChannel.register(selector, SelectionKey.OP_WRITE);
 
             while (true) {
-                if (selector.select(50) != 0)
+                if (selector.select() != 0)
                     for (SelectionKey s1 : selector.selectedKeys()) {
                         if (s1.isReadable()) {
                             Object[] b = inBuffer.readNext(null, false);
@@ -107,30 +105,38 @@ public class TransferConnector{
                             }
                         }
                         if (s1.isWritable()) {
-                            System.out.println("Opened client");
-                        }
-                    }
 
-                //writing
-                try {
-                    if (ClipboardIO.checknew() && !ClipboardIO.isLastFromRemote()){
-                        switch (ClipboardIO.getLastType()){
-                            case STRING:
-                                outBuffer.writeString((String) ClipboardIO.getLast());
-                                System.out.println("Sent:" + ClipboardIO.getLast());
-                                break;
-                            case HTML:
-                            case FILES:
-                                break;
-                            case END:
-                                System.exit(0);
-                            default:
+                            //check clipboard
+                            try {
+                                if (ClipboardIO.checknew() && !ClipboardIO.isLastFromRemote()){
+                                    switch (ClipboardIO.getLastType()){
+                                        case STRING:
+                                            outBuffer.writeString((String) ClipboardIO.getLast());
+                                            System.out.println("Sent:" + ClipboardIO.getLast());
+                                            break;
+                                        case HTML:
+                                        case FILES:
+                                            break;
+                                        case END:
+                                            System.exit(0);
+                                        default:
+                                    }
+                                }
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                System.exit(1);
+                            }
+
+                            //send
+                            if (!outBuffer.getOutput().isEmpty()){
+                                socketChannel.write(outBuffer.getOutput().peek());
+                                while (!outBuffer.getOutput().peek().hasRemaining()){
+                                    outBuffer.getOutput().poll();
+                                    socketChannel.write(outBuffer.getOutput().peek());
+                                }
+                            }
                         }
                     }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    System.exit(1);
-                }
             }
 
         } catch (IOException e){
@@ -143,6 +149,8 @@ public class TransferConnector{
         try {
             if (socketChannel != null)
                 socketChannel.close();
+            if (serverChannel != null)
+                serverChannel.close();
             if (serverSocketChannel != null)
                 serverSocketChannel.close();
         } catch (IOException e) {

@@ -8,6 +8,8 @@ import java.nio.channels.SocketChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
+import java.util.Queue;
 
 /**
  * a class output stream that can transfer multiple format of file
@@ -37,21 +39,29 @@ public class MultipleFormatOutBuffer {
      */
     private ByteBuffer buf;
     private byte type;
-    private WritableByteChannel outChannel;
 
-    public MultipleFormatOutBuffer(WritableByteChannel outChannel) {
+    private Queue<ByteBuffer> output;
+
+    public MultipleFormatOutBuffer() {
         buf = ByteBuffer.allocate(0x10000);
-        this.outChannel = outChannel;
+        output = new ArrayDeque<ByteBuffer>();
     }
+
+    public Queue<ByteBuffer> getOutput() {
+        return output;
+    }
+
     /** Flush the internal buffer */
     private void flushBuffer() throws IOException {
+        ByteBuffer out = ByteBuffer.allocate(buf.position() + 4);
         int count = buf.position();
-        outChannel.write(ByteBuffer.wrap(new byte[]{type, (byte)(count >> 16), (byte)(count & 0XFF), (byte)((count >> 8) & 0XFF)}));
-        buf.limit(buf.position());
-        buf.rewind();
-        outChannel.write(buf);
+        out.put(new byte[]{type, (byte)(count >> 16), (byte)(count & 0XFF), (byte)((count >> 8) & 0XFF)});
+        buf.flip();
+        out.put(buf);
         buf.clear();
         type = 0;
+        out.flip();
+        output.add(out);
     }
 
     /**
