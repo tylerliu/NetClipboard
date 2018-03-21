@@ -111,7 +111,6 @@ public class TransferConnector{
                                 switch (ClipboardIO.getLastType()) {
                                     case STRING:
                                         outBuffer.writeString((String) ClipboardIO.getLast());
-                                        System.out.println("Sent:" + ClipboardIO.getLast());
                                         break;
                                     case HTML:
                                     case FILES:
@@ -124,7 +123,7 @@ public class TransferConnector{
 
                             //send
                             try{
-                                while (!outBuffer.getOutput().isEmpty() && !outBuffer.getOutput().peek().hasRemaining()){
+                                while (!outBuffer.getOutput().isEmpty()){
                                     socketChannel.write(outBuffer.getOutput().peek());
                                     if (!outBuffer.getOutput().peek().hasRemaining())outBuffer.getOutput().poll();
                                 }
