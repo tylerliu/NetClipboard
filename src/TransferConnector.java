@@ -79,7 +79,7 @@ public class TransferConnector {
                 }
             }
 
-            inBuffer = new MultipleFormatInBuffer(socketChannel);
+            inBuffer = new MultipleFormatInBuffer();
             outBuffer = new MultipleFormatOutBuffer();
             selector.close();
 
@@ -99,17 +99,28 @@ public class TransferConnector {
                 selector.select();
                 for (SelectionKey s1 : selector.selectedKeys()) {
                     if (s1.isReadable()) {
-                        Object[] b = inBuffer.readNext();
-                        if (b == null) System.exit(0);
-                        switch (ClipboardIO.getContentType((int) b[0])) {
-                            case STRING:
-                                String s = (String) b[1];
-                                System.out.println("Remote Clipboard New: " + s);
-                                ClipboardIO.setSysClipboardText(s);
-                                break;
-                            case HTML:
-                            case FILES:
-                            default:
+                        //read
+
+                        serverChannel.read(inBuffer.getInput().peekLast());
+                        while (!inBuffer.getInput().peekLast().hasRemaining()) {
+                            inBuffer.requestNext();
+                            serverChannel.read(inBuffer.getInput().peekLast());
+                        }
+
+                        //set clipboard
+                        if (inBuffer.readyToRead()) {
+                            Object[] b = inBuffer.readNext();
+                            if (b == null) System.exit(0);
+                            switch (ClipboardIO.getContentType((int) b[0])) {
+                                case STRING:
+                                    String s = (String) b[1];
+                                    System.out.println("Remote Clipboard New: " + s);
+                                    ClipboardIO.setSysClipboardText(s);
+                                    break;
+                                case HTML:
+                                case FILES:
+                                default:
+                            }
                         }
                     }
                     if (s1.isWritable()) {

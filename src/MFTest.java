@@ -15,8 +15,14 @@ public class MFTest {
 
             channel.putBuffer(OutBuffer.getOutput());
 
-            MultipleFormatInBuffer inBuffer = new MultipleFormatInBuffer(channel);
-            System.out.println(inBuffer.getString());
+            MultipleFormatInBuffer inBuffer = new MultipleFormatInBuffer();
+            channel.read(inBuffer.getInput().peekLast());
+            while (!inBuffer.getInput().peekLast().hasRemaining()) {
+                inBuffer.requestNext();
+                channel.read(inBuffer.getInput().peekLast());
+            }
+
+            System.out.println(inBuffer.readyToRead() + " " + inBuffer.getString());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -31,7 +37,7 @@ public class MFTest {
 
         @Override
         public int read(ByteBuffer dst) throws IOException {
-            byte[] arr = new byte[dst.remaining()];
+            byte[] arr = new byte[Math.min(dst.remaining(), buffer.remaining())];
             buffer.get(arr);
             dst.put(arr);
             return arr.length;

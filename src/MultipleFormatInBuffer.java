@@ -1,42 +1,61 @@
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.ReadableByteChannel;
+import java.util.ArrayDeque;
 
 /**
  * Created by TylerLiu on 2017/10/01.
  */
 public class MultipleFormatInBuffer {
 
-    public ByteBuffer buf;
-    public byte type;
-    public int length;
-    public byte cont;
-    ReadableByteChannel inChannel;
+    private byte type;
+    private int length;
+    private byte cont;
+    private ArrayDeque<ByteBuffer> input;
+    private boolean isLastHead;
 
+    public MultipleFormatInBuffer() {
+        input = new ArrayDeque<>();
+        input.add(ByteBuffer.allocate(4));
+        isLastHead = true;
+    }
+
+    public ArrayDeque<ByteBuffer> getInput() {
+        return input;
+    }
 
     /**
-     * Creates a <code>FilterInputStream</code>
-     * by assigning the  argument <code>in</code>
-     * to the field <code>this.in</code> so as
-     * to remember it for later use.
-     *
-     * @param in the underlying input stream, or <code>null</code> if
-     *           this instance is to be created without an underlying stream.
+     * create next ByteBuffer to fill
      */
-    public MultipleFormatInBuffer(ReadableByteChannel in) {
-        inChannel = in;
+    public void requestNext() {
+        if (input.getLast().remaining() != 0) return;
+        input.getLast().flip();
+        if (isLastHead) {
+            length = (input.getLast().get(1) << 16) + (Byte.toUnsignedInt(input.getLast().get(2)) << 8) + (Byte.toUnsignedInt(input.getLast().get(3)));
+            input.add(ByteBuffer.allocate(length));
+        } else {
+            input.add(ByteBuffer.allocate(4));
+        }
+        isLastHead = !isLastHead;
+    }
+
+    /**
+     * @return input is ready for reading
+     */
+    public boolean readyToRead() {
+        if (!isLastHead || input.size() < 3) return false;
+        ByteBuffer hl = input.pollLast();
+        ByteBuffer il = input.pollLast();
+        boolean ready = input.peekLast().get(1) == 0;
+        input.add(il);
+        input.add(hl);
+        return ready;
     }
 
     private void loadNext() throws IOException {
-        ByteBuffer head = ByteBuffer.allocate(4);
-        inChannel.read(head);
+        ByteBuffer head = input.poll();
         type = head.get(0);
         cont = head.get(1);
-        length = Byte.toUnsignedInt(head.get(2));
-
-        length += Byte.toUnsignedInt(head.get(3)) << 8;
-        buf = ByteBuffer.allocate(length);
-        inChannel.read(buf);
+        length = (cont << 16) + (Byte.toUnsignedInt(head.get(2)) << 8) + (Byte.toUnsignedInt(head.get(3)));
     }
 
 
@@ -51,12 +70,12 @@ public class MultipleFormatInBuffer {
             e.printStackTrace();
         }
         if (type != 1 && (type != 0 || ptype != 1)) return null;
-        return new String(buf.array()) + (cont != 0 ? getString() : "");
+        return new String(input.poll().array()) + (cont != 0 ? getString() : "");
     }
 
     private String tryString() {
         if (type != 1) return null;
-        return new String(buf.array()) + (cont != 0 ? getString() : "");
+        return new String(input.poll().array()) + (cont != 0 ? getString() : "");
     }
 
     /**
@@ -70,12 +89,12 @@ public class MultipleFormatInBuffer {
             e.printStackTrace();
         }
         if (type != 3 && (type != 0 || ptype != 3)) return null;
-        return new String(buf.array()) + (cont != 0 ? getHTML() : "");
+        return new String(input.poll().array()) + (cont != 0 ? getHTML() : "");
     }
 
     private String tryHTML() {
         if (type != 3) return null;
-        return new String(buf.array()) + (cont != 0 ? getHTML() : "");
+        return new String(input.poll().array()) + (cont != 0 ? getHTML() : "");
     }
 
     /**
