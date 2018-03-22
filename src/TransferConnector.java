@@ -77,6 +77,11 @@ public class TransferConnector {
                     }
                     if (selector.keys().size() == 1) break conn_loop;
                 }
+
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException e){
+                }
             }
 
             inBuffer = new MultipleFormatInBuffer();
