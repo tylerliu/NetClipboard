@@ -1,45 +1,68 @@
-import java.io.FilterInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.util.ArrayDeque;
 
 /**
  * Created by TylerLiu on 2017/10/01.
  */
-public class MultipleFormatInputStream extends FilterInputStream {
+public class MultipleFormatInBuffer {
 
-    public byte[] buf;
-    public byte type;
-    public int length;
-    public byte cont;
+    private byte type;
+    private int length;
+    private byte cont;
+    private ArrayDeque<ByteBuffer> input;
+    private boolean isLastHead;
+
+    public MultipleFormatInBuffer() {
+        input = new ArrayDeque<>();
+        input.add(ByteBuffer.allocate(4));
+        isLastHead = true;
+    }
+
+    public ArrayDeque<ByteBuffer> getInput() {
+        return input;
+    }
 
     /**
-     * Creates a <code>FilterInputStream</code>
-     * by assigning the  argument <code>in</code>
-     * to the field <code>this.in</code> so as
-     * to remember it for later use.
-     *
-     * @param in the underlying input stream, or <code>null</code> if
-     *           this instance is to be created without an underlying stream.
+     * create next ByteBuffer to fill
      */
-    public MultipleFormatInputStream(InputStream in) {
-        super(in);
-        buf = new byte[0x10000];
+    public void requestNext() {
+        if (input.getLast().remaining() != 0) return;
+        input.getLast().flip();
+        if (isLastHead) {
+            length = (input.getLast().get(1) << 16) + (Byte.toUnsignedInt(input.getLast().get(2)) << 8) + (Byte.toUnsignedInt(input.getLast().get(3)));
+            input.add(ByteBuffer.allocate(length));
+        } else {
+            input.add(ByteBuffer.allocate(4));
+        }
+        isLastHead = !isLastHead;
+    }
+
+    /**
+     * @return input is ready for reading
+     */
+    public boolean readyToRead() {
+        if (!isLastHead || input.size() < 3) return false;
+        ByteBuffer hl = input.pollLast();
+        ByteBuffer il = input.pollLast();
+        boolean ready = input.peekLast().get(1) == 0;
+        input.add(il);
+        input.add(hl);
+        return ready;
     }
 
     private void loadNext() throws IOException {
-        type = (byte) read();
-        cont = (byte) read();
-        length = read();
-        length += read() << 8;
-        read(buf, 0, length);
+        ByteBuffer head = input.poll();
+        type = head.get(0);
+        cont = head.get(1);
+        length = (cont << 16) + (Byte.toUnsignedInt(head.get(2)) << 8) + (Byte.toUnsignedInt(head.get(3)));
     }
 
 
     /**
      * Used only when sure the next is string
      */
-    protected String getString(){
+    protected String getString() {
         byte ptype = type;
         try {
             loadNext();
@@ -47,20 +70,18 @@ public class MultipleFormatInputStream extends FilterInputStream {
             e.printStackTrace();
         }
         if (type != 1 && (type != 0 || ptype != 1)) return null;
-        if (cont == 0) return new String(buf, 0, length);
-        else return new String(buf, 0, buf.length) + getString();
+        return new String(input.poll().array()) + (cont != 0 ? getString() : "");
     }
 
-    private String tryString(){
+    private String tryString() {
         if (type != 1) return null;
-        if (cont == 0) return new String(buf, 0, length);
-        else return new String(buf, 0, buf.length) + getString();
+        return new String(input.poll().array()) + (cont != 0 ? getString() : "");
     }
 
     /**
      * Used only when sure the next is HTML
      */
-    protected String getHTML(){
+    protected String getHTML() {
         byte ptype = type;
         try {
             loadNext();
@@ -68,19 +89,18 @@ public class MultipleFormatInputStream extends FilterInputStream {
             e.printStackTrace();
         }
         if (type != 3 && (type != 0 || ptype != 3)) return null;
-        if (cont == 0) return new String(buf, 0, length);
-        else return new String(buf, 0, buf.length) + getHTML();
+        return new String(input.poll().array()) + (cont != 0 ? getHTML() : "");
     }
 
-    private String tryHTML(){
+    private String tryHTML() {
         if (type != 3) return null;
-        if (cont == 0) return new String(buf, 0, length);
-        else return new String(buf, 0, buf.length) + getHTML();
+        return new String(input.poll().array()) + (cont != 0 ? getHTML() : "");
     }
 
     /**
      * Used only when sure the next is file
      */
+    /*
     protected void readFile(OutputStream out, boolean close){
         byte ptype = type;
         try {
@@ -103,39 +123,32 @@ public class MultipleFormatInputStream extends FilterInputStream {
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
     /**
-     *
-     * @param out OutputStream if the object is file
-     * @param close OutputStream if the object is file
      * @return [0] is the type, [1] is the data if applicable
      */
-    protected Object[] readNext(OutputStream out, boolean close){
+    protected Object[] readNext() {
         try {
             loadNext();
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
-        switch(type){
+        switch (type) {
             case 0:
                 return null;
             case 1:
                 return new Object[]{1, tryString()};
             case 2:
-                tryFile(out, close);
+                //tryFile(out, close);
                 return new Object[]{2};
             case 3:
                 return new Object[]{3, tryHTML()};
+            case 4:
+                return new Object[]{4};
             default:
                 return null;
         }
-    }
-
-    @Override
-    public void close() throws IOException {
-        super.close();
-        buf = null;
     }
 }

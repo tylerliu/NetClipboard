@@ -1,53 +1,50 @@
-import javax.swing.text.html.HTML;
 import java.awt.*;
+import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
-import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.Clipboard;
-import java.io.File;
 
 /**
  * Created by TylerLiu on 2017/03/22.
  */
 public class ClipboardIO {
 
-    public enum ContentType{STRING, HTML, FILES};
     public static ContentType lastType;
+    static Clipboard sysClip = Toolkit.getDefaultToolkit().getSystemClipboard();
     private static Object last;
     private static boolean isFromRemote;
-    static Clipboard sysClip = Toolkit.getDefaultToolkit().getSystemClipboard();
 
     /**
      * check for new things in the clipboard
+     *
      * @return true if change happens
      */
-    public static boolean checknew(){
+    public static boolean checkNew() {
 
         String n = getSysClipboardText();
-        if (isNew(ContentType.STRING, n)){//have new
+        if (isNew(ContentType.STRING, n)) {//have new
             lastType = ContentType.STRING;
             last = n;
             isFromRemote = false;
             System.out.println("Local Clipboard New: " + n);
             return true;
         }
-        if (isSame(ContentType.STRING, n))return false;
+        if (isSame(ContentType.STRING, n)) return false;
         return false;
     }
 
-    private static boolean isNew(ContentType type, Object data){
+    private static boolean isNew(ContentType type, Object data) {
         if (data == null) return false;
         if (type == ContentType.STRING && ((String) data).length() == 0) return false;
         if (type == ContentType.HTML && ((String) data).length() <= 1) return false;
 
-        if (type == lastType){
+        if (type == lastType) {
             return last == null || !last.equals(data);
         } else {
             return true;
         }
     }
 
-    private static boolean isSame(ContentType type, Object data){
+    private static boolean isSame(ContentType type, Object data) {
         return type == lastType && data != null && last != null && last.equals(data);
     }
 
@@ -58,11 +55,14 @@ public class ClipboardIO {
     public static Object getLast() {
         return last;
     }
+
     public static boolean isLastFromRemote() {
         return isFromRemote;
     }
 
-    public static ContentType getContentType(int type){
+    public static ContentType getContentType(int type) {
+        return ContentType.values()[type - 1];
+        /*
         switch (type) {
             case 1:
                 return ContentType.STRING;
@@ -70,25 +70,24 @@ public class ClipboardIO {
                 return ContentType.FILES;
             case 3:
                 return ContentType.HTML;
+            case 4:
+                return ContentType.END;
             default:
                 return null;
         }
+        */
     }
 
     /**
      * 从剪切板获得文字。
      */
     public static String getSysClipboardText() {
-        Transferable clipTf = sysClip.getContents(null);
-        if (clipTf != null && clipTf.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-            try {
-                return (String) clipTf.getTransferData(DataFlavor.stringFlavor);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+        try {
+            return (String) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
-
-        return "";
     }
 
     public static void setSysClipboardText(String s) {
@@ -99,30 +98,7 @@ public class ClipboardIO {
         sysClip.setContents(ss, ss);
     }
 
-    /**
-     * 从剪切板获得文字。
-     */
-    public static List getSysClipboardFiles() {
-        Transferable clipTf = sysClip.getContents(null);
-        if (clipTf != null && clipTf.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-            try {
-                System.out.println(clipTf.getTransferData(DataFlavor.javaFileListFlavor).getClass());
-                return (List) clipTf.getTransferData(DataFlavor.javaFileListFlavor);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        return null;
+    public enum ContentType {
+        STRING, HTML, FILES, END
     }
-
-    /*
-    public static void setSysClipboardText(List list) {
-        lastType = ContentType.FILES;
-        last = s;
-        isFromRemote = true;
-        StringSelection ss = new StringSelection(s);
-        sysClip.setContents(ss, ss);
-    }
-*/
 }
