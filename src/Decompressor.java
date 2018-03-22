@@ -6,14 +6,14 @@ import java.util.zip.ZipInputStream;
 /**
  * Created by TylerLiu on 2017/10/07.
  */
-public class Decompressor {
+class Decompressor {
 
     public static void decompress(String zipPath, String base) throws IOException {
         decompress(new File(zipPath), new File(base));
     }
 
 
-    public static void decompress(File zipPath, File base) throws IOException {
+    private static void decompress(File zipPath, File base) throws IOException {
         ZipFile zipFile = new ZipFile(zipPath);   // 实例化ZipFile对象
         ZipInputStream zipInput = new ZipInputStream(new FileInputStream(zipPath));  // 实例化ZIpInputStream
 

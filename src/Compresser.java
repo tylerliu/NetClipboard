@@ -6,7 +6,7 @@ import java.util.zip.ZipOutputStream;
 /**
  * Created by TylerLiu on 2017/10/06.
  */
-public class Compresser {
+class Compresser {
 
     public static void copyStream(InputStream input, OutputStream output) throws IOException {
         byte[] buffer = new byte[8192]; // Adjust if you want
@@ -46,7 +46,7 @@ public class Compresser {
         }
     }
 
-    public static void compress(List<File> files, OutputStream dest) {
+    private static void compress(List<File> files, OutputStream dest) {
 
         ZipOutputStream out = new ZipOutputStream(dest);
         String basedir = "";

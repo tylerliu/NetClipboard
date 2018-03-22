@@ -5,7 +5,7 @@ import java.util.ArrayDeque;
 /**
  * Created by TylerLiu on 2017/10/01.
  */
-public class MultipleFormatInBuffer {
+class MultipleFormatInBuffer {
 
     private byte type;
     private int length;
@@ -62,14 +62,14 @@ public class MultipleFormatInBuffer {
     /**
      * Used only when sure the next is string
      */
-    protected String getString() {
-        byte ptype = type;
+    String getString() {
+        byte lastType = type;
         try {
             loadNext();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (type != 1 && (type != 0 || ptype != 1)) return null;
+        if (type != 1 && (type != 0 || lastType != 1)) return null;
         return new String(input.poll().array()) + (cont != 0 ? getString() : "");
     }
 
@@ -81,14 +81,14 @@ public class MultipleFormatInBuffer {
     /**
      * Used only when sure the next is HTML
      */
-    protected String getHTML() {
-        byte ptype = type;
+    private String getHTML() {
+        byte lastType = type;
         try {
             loadNext();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        if (type != 3 && (type != 0 || ptype != 3)) return null;
+        if (type != 3 && (type != 0 || lastType != 3)) return null;
         return new String(input.poll().array()) + (cont != 0 ? getHTML() : "");
     }
 
@@ -102,10 +102,10 @@ public class MultipleFormatInBuffer {
      */
     /*
     protected void readFile(OutputStream out, boolean close){
-        byte ptype = type;
+        byte lastType = type;
         try {
             loadNext();
-            if (type != 2 && (type != 0 || ptype != 2)) return;
+            if (type != 2 && (type != 0 || lastType != 2)) return;
             out.write(buf, 0, cont == 1 ? buf.length : length);
             if (cont == 1) readFile(out, close);
             else if (close) out.close();
@@ -128,7 +128,7 @@ public class MultipleFormatInBuffer {
     /**
      * @return [0] is the type, [1] is the data if applicable
      */
-    protected Object[] readNext() {
+    Object[] readNext() {
         try {
             loadNext();
         } catch (IOException e) {

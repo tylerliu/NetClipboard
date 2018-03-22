@@ -6,28 +6,27 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
-import java.util.Iterator;
 import java.util.Objects;
 
 /**
- * Created by TylerLiu on 2017/08/28.
+ * Handles the network connection for clipboard sharing
  */
-public class TransferConnector {
+class TransferConnector {
 
     private static final boolean isLoopBack = false;
     private static final int connectionPort = 31415;
-    static MultipleFormatInBuffer inBuffer;
-    static MultipleFormatOutBuffer outBuffer;
-    static SocketChannel socketChannel;
-    static ServerSocketChannel serverSocketChannel;
-    static SocketChannel serverChannel;
-    static InetAddress localHost;
+    private static MultipleFormatInBuffer inBuffer;
+    private static MultipleFormatOutBuffer outBuffer;
+    private static SocketChannel socketChannel;
+    private static ServerSocketChannel serverSocketChannel;
+    private static SocketChannel serverChannel;
+    private static boolean terminateInitiated;
 
-    static InetAddress getTarget() {
+    private static InetAddress getTarget() {
         if (isLoopBack) return InetAddress.getLoopbackAddress();
         else {
             try {
-                localHost = InetAddress.getLocalHost();
+                InetAddress localHost = InetAddress.getLocalHost();
                 if (Objects.equals(localHost.getHostAddress(), "192.168.1.3"))
                     return InetAddress.getByName("192.168.1.7");
                 if (Objects.equals(localHost.getHostAddress(), "192.168.1.7"))
@@ -58,10 +57,8 @@ public class TransferConnector {
             conn_loop:
             while (true) {
                 selector.select();
-                Iterator<SelectionKey> it = selector.selectedKeys().iterator();
 
-                while (it.hasNext()) {
-                    SelectionKey s = it.next();
+                for (SelectionKey s : selector.selectedKeys()) {
                     if (s == client_key) {
                         System.out.println("Client Connected");
                         if (socketChannel.isConnectionPending()) {
@@ -117,6 +114,9 @@ public class TransferConnector {
                                     System.out.println("Remote Clipboard New: " + s);
                                     ClipboardIO.setSysClipboardText(s);
                                     break;
+                                case END:
+                                    terminateInitiated = true;
+                                    return;
                                 case HTML:
                                 case FILES:
                                 default:
@@ -141,33 +141,43 @@ public class TransferConnector {
                         }
 
                         //send
-                        try {
-                            while (!outBuffer.getOutput().isEmpty()) {
-                                socketChannel.write(outBuffer.getOutput().peek());
-                                if (!outBuffer.getOutput().peek().hasRemaining()) outBuffer.getOutput().poll();
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            System.exit(1);
-                        }
 
+                        while (!outBuffer.getOutput().isEmpty()) {
+                            socketChannel.write(outBuffer.getOutput().peek());
+                            if (outBuffer.getOutput().peek().hasRemaining()) break;
+                            outBuffer.getOutput().poll();
+                        }
                     }
                 }
 
                 try {
                     Thread.sleep(10);
                 } catch (InterruptedException e){
+                    //do nothing
                 }
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            //do nothing
         }
     }
 
-
     static void close() {
         try {
+            if (!terminateInitiated) {
+                terminateInitiated = true;
+                outBuffer.writeEND();
+                while (!outBuffer.getOutput().isEmpty()) {
+                    socketChannel.write(outBuffer.getOutput().peek());
+                    if (!outBuffer.getOutput().peek().hasRemaining()) outBuffer.getOutput().poll();
+                }
+
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    //do nothing
+                }
+            }
             if (socketChannel != null)
                 socketChannel.close();
             if (serverChannel != null)

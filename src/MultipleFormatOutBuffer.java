@@ -24,7 +24,7 @@ import java.util.Queue;
  * <p>
  * Created by TylerLiu on 2017/10/01.
  */
-public class MultipleFormatOutBuffer {
+class MultipleFormatOutBuffer {
 
     /**
      * The internal buffer where data is stored.
@@ -36,7 +36,7 @@ public class MultipleFormatOutBuffer {
 
     public MultipleFormatOutBuffer() {
         buf = ByteBuffer.allocate(0x10000);
-        output = new ArrayDeque<ByteBuffer>();
+        output = new ArrayDeque<>();
     }
 
     public Queue<ByteBuffer> getOutput() {
@@ -87,7 +87,7 @@ public class MultipleFormatOutBuffer {
      * @param len the number of bytes to write.
      * @throws IOException if an I/O error occurs.
      */
-    public synchronized void write(byte b[], int off, int len) throws IOException {
+    private synchronized void write(byte b[], int off, int len) throws IOException {
         if (!buf.hasRemaining()) {
             flushBuffer();
         }
@@ -104,7 +104,7 @@ public class MultipleFormatOutBuffer {
         }
     }
 
-    public synchronized void write(byte b[]) throws IOException {
+    private synchronized void write(byte b[]) throws IOException {
         write(b, 0, b.length);
     }
 

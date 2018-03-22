@@ -8,8 +8,8 @@ import java.awt.datatransfer.StringSelection;
  */
 public class ClipboardIO {
 
-    public static ContentType lastType;
-    static Clipboard sysClip = Toolkit.getDefaultToolkit().getSystemClipboard();
+    private static ContentType lastType;
+    private static Clipboard sysClip = Toolkit.getDefaultToolkit().getSystemClipboard();
     private static Object last;
     private static boolean isFromRemote;
 
@@ -37,11 +37,7 @@ public class ClipboardIO {
         if (type == ContentType.STRING && ((String) data).length() == 0) return false;
         if (type == ContentType.HTML && ((String) data).length() <= 1) return false;
 
-        if (type == lastType) {
-            return last == null || !last.equals(data);
-        } else {
-            return true;
-        }
+        return type != lastType || last == null || !last.equals(data);
     }
 
     private static boolean isSame(ContentType type, Object data) {
