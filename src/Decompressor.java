@@ -20,15 +20,38 @@ class Decompressor {
         System.out.println(base.getAbsoluteFile());
         ZipEntry entry;
         while ((entry = zipInput.getNextEntry()) != null) { //run through
-            System.out.println("Decompressing file: " + entry.getName());
+
             File outFile = new File(base + File.separator + entry.getName());   // 定义输出的文件路径
+            System.out.println("Decompressing file: " + entry.getName());
+
+            //check if the file exist
+            if (outFile.exists()) {
+                //prepare new name
+                String suffix = "";
+                String stem = entry.getName();
+                if (entry.getName().lastIndexOf('.') > 0 && entry.getName().lastIndexOf('.') > suffix.indexOf(File.separatorChar)) {
+                    suffix = entry.getName().substring(entry.getName().lastIndexOf('.'));
+                    stem = entry.getName().substring(0, entry.getName().lastIndexOf('.'));
+                }
+
+                int index = 1;
+                File new_file = outFile;
+
+                while (new_file.exists()) {
+                    index++;
+                    new_file = new File(base + File.separator + stem + "_" + index + suffix);
+                }
+                outFile = new_file;
+                System.out.println("Decompressing file as: " + stem + "_" + index + suffix);
+            }
+
 
             if (!outFile.getParentFile().exists()) outFile.getParentFile().mkdirs(); //make sure directory exist
             if (!outFile.exists()) outFile.createNewFile(); //make sure file exist
 
             InputStream input = zipFile.getInputStream(entry);
             OutputStream out = new FileOutputStream(outFile);
-            Compresser.copyStream(input, out);
+            Compressor.copyStream(input, out);
             input.close();
             out.close();
         }

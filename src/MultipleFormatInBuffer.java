@@ -1,4 +1,3 @@
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
 
@@ -51,7 +50,7 @@ class MultipleFormatInBuffer {
         return ready;
     }
 
-    private void loadNext() throws IOException {
+    private void loadNext() {
         ByteBuffer head = input.poll();
         type = head.get(0);
         cont = head.get(1);
@@ -64,11 +63,7 @@ class MultipleFormatInBuffer {
      */
     String getString() {
         byte lastType = type;
-        try {
-            loadNext();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        loadNext();
         if (type != 1 && (type != 0 || lastType != 1)) return null;
         return new String(input.poll().array()) + (cont != 0 ? getString() : "");
     }
@@ -83,11 +78,7 @@ class MultipleFormatInBuffer {
      */
     private String getHTML() {
         byte lastType = type;
-        try {
-            loadNext();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        loadNext();
         if (type != 3 && (type != 0 || lastType != 3)) return null;
         return new String(input.poll().array()) + (cont != 0 ? getHTML() : "");
     }
@@ -129,12 +120,7 @@ class MultipleFormatInBuffer {
      * @return [0] is the type, [1] is the data if applicable
      */
     Object[] readNext() {
-        try {
-            loadNext();
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+        loadNext();
         switch (type) {
             case 0:
                 return null;

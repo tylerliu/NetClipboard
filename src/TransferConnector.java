@@ -22,7 +22,7 @@ class TransferConnector {
     private static SocketChannel serverChannel;
     private static boolean terminateInitiated;
 
-    private static InetAddress getTarget() {
+    public static InetAddress getTarget() {
         if (isLoopBack) return InetAddress.getLoopbackAddress();
         else {
             try {
@@ -48,32 +48,36 @@ class TransferConnector {
             serverSocketChannel.configureBlocking(false);
             socketChannel = SocketChannel.open();
             socketChannel.configureBlocking(false);
-            socketChannel.connect(new InetSocketAddress(getTarget(), connectionPort));
 
             Selector selector = Selector.open();
-            SelectionKey server_key = serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
-            SelectionKey client_key = socketChannel.register(selector, SelectionKey.OP_CONNECT);
+            serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
+            if (socketChannel.connect(new InetSocketAddress(getTarget(), connectionPort))) {
+                System.out.println("Client Connected");
+            } else {
+                socketChannel.register(selector, SelectionKey.OP_CONNECT);
+            }
 
-            conn_loop:
             while (true) {
                 selector.select();
 
                 for (SelectionKey s : selector.selectedKeys()) {
-                    if (s == client_key) {
+                    if (s.isConnectable()) {
                         System.out.println("Client Connected");
                         if (socketChannel.isConnectionPending()) {
                             socketChannel.finishConnect();
                         }
                         s.cancel();
+                        continue;
                     }
-                    if (s == server_key) {
+                    if (s.isAcceptable()) {
                         System.out.println("Opened server");
                         serverChannel = serverSocketChannel.accept();
                         serverChannel.configureBlocking(false);
                         s.cancel();
                     }
-                    if (selector.keys().size() == 1) break conn_loop;
                 }
+
+                if (selector.keys().size() == 1) break;
             }
 
             inBuffer = new MultipleFormatInBuffer();
@@ -92,8 +96,26 @@ class TransferConnector {
             serverChannel.register(selector, SelectionKey.OP_READ);
             socketChannel.register(selector, SelectionKey.OP_WRITE);
 
+
             while (true) {
-                selector.select();
+                selector.select(25);
+
+                //check clipboard
+                if (ClipboardIO.checkNew() && !ClipboardIO.isLastFromRemote()) {
+                    switch (ClipboardIO.getLastType()) {
+                        case STRING:
+                            outBuffer.writeString((String) ClipboardIO.getLast());
+                            break;
+                        case HTML:
+                        case FILES:
+                            break;
+                        case END:
+                            return;
+                        default:
+                    }
+                    socketChannel.register(selector, SelectionKey.OP_WRITE);
+                }
+
                 for (SelectionKey s1 : selector.selectedKeys()) {
                     if (s1.isReadable()) {
                         //read
@@ -124,36 +146,14 @@ class TransferConnector {
                         }
                     }
                     if (s1.isWritable()) {
-
-                        //check clipboard
-                        if (ClipboardIO.checkNew() && !ClipboardIO.isLastFromRemote()) {
-                            switch (ClipboardIO.getLastType()) {
-                                case STRING:
-                                    outBuffer.writeString((String) ClipboardIO.getLast());
-                                    break;
-                                case HTML:
-                                case FILES:
-                                    break;
-                                case END:
-                                    System.exit(0);
-                                default:
-                            }
-                        }
-
                         //send
-
                         while (!outBuffer.getOutput().isEmpty()) {
                             socketChannel.write(outBuffer.getOutput().peek());
                             if (outBuffer.getOutput().peek().hasRemaining()) break;
                             outBuffer.getOutput().poll();
                         }
+                        s1.cancel();
                     }
-                }
-
-                try {
-                    Thread.sleep(10);
-                } catch (InterruptedException e){
-                    //do nothing
                 }
             }
 

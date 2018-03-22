@@ -46,7 +46,7 @@ class MultipleFormatOutBuffer {
     /**
      * Flush the internal buffer
      */
-    private void flushBuffer() throws IOException {
+    private void flushBuffer() {
         int count = buf.position();
         output.add(ByteBuffer.wrap(new byte[]{type, (byte) (count >> 16), (byte) ((count >> 8) & 0XFF), (byte) (count & 0XFF)}));
         buf.flip();
