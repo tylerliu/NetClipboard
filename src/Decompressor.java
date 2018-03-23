@@ -1,4 +1,6 @@
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -13,15 +15,16 @@ class Decompressor {
     }
 
 
-    private static void decompress(File zipPath, File base) throws IOException {
-        ZipFile zipFile = new ZipFile(zipPath);   // 实例化ZipFile对象
-        ZipInputStream zipInput = new ZipInputStream(new FileInputStream(zipPath));  // 实例化ZIpInputStream
+    public static List<File> decompress(File zipPath, File base) throws IOException {
+        List<File> files = new ArrayList<>();
+        ZipFile zipFile = new ZipFile(zipPath);   // instantiate ZipFile
+        ZipInputStream zipInput = new ZipInputStream(new FileInputStream(zipPath));  // instantiate ZipInputStream
 
         System.out.println(base.getAbsoluteFile());
         ZipEntry entry;
-        while ((entry = zipInput.getNextEntry()) != null) { //run through
+        while ((entry = zipInput.getNextEntry()) != null) { //iterating through
 
-            File outFile = new File(base + File.separator + entry.getName());   // 定义输出的文件路径
+            File outFile = new File(base + File.separator + entry.getName());   //Define Output Path
             System.out.println("Decompressing file: " + entry.getName());
 
             //check if the file exist
@@ -45,6 +48,7 @@ class Decompressor {
                 System.out.println("Decompressing file as: " + stem + "_" + index + suffix);
             }
 
+            files.add(outFile);
 
             if (!outFile.getParentFile().exists()) outFile.getParentFile().mkdirs(); //make sure directory exist
             if (!outFile.exists()) outFile.createNewFile(); //make sure file exist
@@ -55,5 +59,7 @@ class Decompressor {
             input.close();
             out.close();
         }
+
+        return files;
     }
 }

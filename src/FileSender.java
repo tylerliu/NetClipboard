@@ -16,6 +16,7 @@ public class FileSender implements Runnable {
     private OutputStream sendOutputStream;
     private InputStream inputStream;
 
+    //TODO Cancellation?
     private FileSender(int port) {
         listenPort = port;
     }
@@ -62,17 +63,6 @@ public class FileSender implements Runnable {
 
     public static Thread sendFileList(List<File> files) {
         return sendFileList(files, DEFAULT_PORT);
-    }
-
-    public static void main(String[] args) {
-        try {
-            List<File> files = new ArrayList<>();
-            files.add(new File("src"));
-            sendFileList(files).join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
     }
 
     private boolean openConnection() {

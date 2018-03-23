@@ -12,6 +12,7 @@ public class FileReceiver implements Runnable {
     private InputStream recvInputStream;
     private OutputStream outputStream;
 
+    //TODO Cancellation?
     private FileReceiver(int port) {
         listenPort = port;
     }
@@ -20,8 +21,17 @@ public class FileReceiver implements Runnable {
         this(DEFAULT_PORT);
     }
 
+    public static Runnable receiveStreamRun(OutputStream outputStream, int port){
+        return new FileReceiver(port).setOutputStream(outputStream);
+    }
+
+    public static Runnable receiveStreamRun(OutputStream outputStream) {
+        return receiveStreamRun(outputStream, DEFAULT_PORT);
+    }
+
+
     public static Thread receiveStream(OutputStream outputStream, int port) {
-        FileReceiver receiver = new FileReceiver(port).setOutputStream(outputStream);
+        Runnable receiver = receiveStreamRun(outputStream, port);
         Thread thread = new Thread(receiver, "receiver");
         thread.start();
         return thread;
@@ -29,6 +39,20 @@ public class FileReceiver implements Runnable {
 
     public static Thread receiveStream(OutputStream outputStream) {
         return receiveStream(outputStream, DEFAULT_PORT);
+    }
+
+    public static Runnable recriveFileRun(File dstFile, int port) {
+        try {
+            return receiveStreamRun(new FileOutputStream(dstFile), port);
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found! " + dstFile.getAbsolutePath());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Runnable receiveFileRun(File dstFile) {
+        return recriveFileRun(dstFile, DEFAULT_PORT);
     }
 
     public static Thread receiveFile(File dstFile, int port) {
@@ -43,19 +67,6 @@ public class FileReceiver implements Runnable {
 
     public static Thread receiveFile(File dstFile) {
         return receiveFile(dstFile, DEFAULT_PORT);
-    }
-
-    public static void main(String[] args) {
-        File dst = new File("src.zip");
-        try {
-            dst.createNewFile();
-            receiveFile(dst).join();
-            Decompressor.decompress("src.zip", "src_2");
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     private boolean openConnection() {

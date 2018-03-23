@@ -1,7 +1,9 @@
+import java.util.List;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
+import java.io.File;
 
 /**
  * Created by TylerLiu on 2017/03/22.
@@ -58,24 +60,18 @@ public class ClipboardIO {
 
     public static ContentType getContentType(int type) {
         return ContentType.values()[type - 1];
-        /*
-        switch (type) {
-            case 1:
-                return ContentType.STRING;
-            case 2:
-                return ContentType.FILES;
-            case 3:
-                return ContentType.HTML;
-            case 4:
-                return ContentType.END;
-            default:
-                return null;
-        }
-        */
+    }
+
+    //TODO support Image?
+    public static ContentType getSysClipboardFlavor() {
+        //if (sysClip.isDataFlavorAvailable(DataFlavor.imageFlavor)) return ContentType.IMAGE;
+        if (sysClip.isDataFlavorAvailable(DataFlavor.javaFileListFlavor)) return ContentType.FILES;
+        if (sysClip.isDataFlavorAvailable(DataFlavor.stringFlavor)) return ContentType.STRING;
+        return null;
     }
 
     /**
-     * 从剪切板获得文字。
+     * Get Text from Clipboard
      */
     public static String getSysClipboardText() {
         try {
@@ -92,6 +88,23 @@ public class ClipboardIO {
         isFromRemote = true;
         StringSelection ss = new StringSelection(s);
         sysClip.setContents(ss, ss);
+    }
+
+    public static List<File> getSysClipboardFiles(){
+        try {
+            return (List<File>) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.javaFileListFlavor);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static void setSysCLipboardFiles(List<File> files) {
+        lastType = ContentType.FILES;
+        last = files;
+        isFromRemote = true;
+        FileTransfer.FileTransferable fileTransferable = new FileTransfer.FileTransferable(files);
+        sysClip.setContents(fileTransferable, fileTransferable);
     }
 
     public enum ContentType {
