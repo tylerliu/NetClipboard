@@ -24,6 +24,7 @@ class TransferConnector {
 
     public static InetAddress getTarget() {
         if (isLoopBack) return InetAddress.getLoopbackAddress();
+        // TODO BroadCasting maybe?
         else {
             try {
                 InetAddress localHost = InetAddress.getLocalHost();
