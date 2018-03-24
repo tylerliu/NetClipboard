@@ -111,9 +111,9 @@ public class FileReceiver implements Runnable {
             Compressor.copyStream(recvInputStream, outputStream);
         } catch (IOException e) {
             if (isCancelled) {
-                System.out.println("File receive cancelled");
+                System.out.println("File receive cancelled with error " + e);
             }
-            e.printStackTrace();
+            else e.printStackTrace();
         }
         closeConnection();
     }
