@@ -75,7 +75,9 @@ public class FileTransfer {
 
     public synchronized static void cancelReceive() {
         isCancelled = true;
-        if (isReceiving()) receiver.cancel();
+        if (isReceiving() && receiver != null) {
+            receiver.cancel();
+        }
         System.out.println("File receive cancelled");
     }
 

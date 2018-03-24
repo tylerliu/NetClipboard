@@ -109,9 +109,9 @@ public class FileSender implements Runnable {
 
     private void closeConnection() {
         try {
-            sendOutputStream.close();
-            sendSocket.close();
-            sendServer.close();
+            if (sendOutputStream != null) sendOutputStream.close();
+            if (sendSocket != null) sendSocket.close();
+            if (sendServer != null) sendServer.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -92,8 +92,8 @@ public class FileReceiver implements Runnable {
 
     private void closeConnection() {
         try {
-            recvInputStream.close();
-            recvSocket.close();
+            if (recvInputStream != null) recvInputStream.close();
+            if (recvSocket != null)recvSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

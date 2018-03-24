@@ -15,6 +15,7 @@ public class ClipboardIO {
     private static String lastString;
     private static List<File> lastFiles;
     private static boolean isFromRemote;
+    javafx.scene.input.Clipboard clipboard = javafx.scene.input.Clipboard.getSystemClipboard();
 
     /**
      * check for new things in the clipboard
@@ -22,7 +23,6 @@ public class ClipboardIO {
      * @return true if change happens
      */
     public static boolean checkNew() {
-
         ContentType type = getSysClipboardFlavor();
 
         switch (type) {
