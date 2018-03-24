@@ -24,6 +24,7 @@ public class FileTransfer {
         if (isReceiving()) cancelReceive();
         isReceiveScheduled = true;
         isFilesUsed = true;
+        isCancelled = false;
         executor.submit(FileTransfer::receiveFilesWorker);
     }
 
@@ -74,6 +75,7 @@ public class FileTransfer {
     }
 
     public synchronized static void cancelReceive() {
+        if (isCancelled) return;
         isCancelled = true;
         if (isReceiving() && receiver != null) {
             receiver.cancel();
