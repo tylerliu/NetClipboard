@@ -70,7 +70,9 @@ public class FileSender implements Runnable {
     }
 
     public static void terminate() {
-        lastSender.cancel();
+        if (lastSender != null) {
+            lastSender.cancel();
+        }
         executor.shutdown();
     }
 
