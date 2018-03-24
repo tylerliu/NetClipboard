@@ -87,7 +87,6 @@ class Compressor {
     private static void compressDirectory(File dir, ZipOutputStream out, String basedir) {
         if (!dir.exists())
             return;
-
         //noinspection ConstantConditions
         for (File file : dir.listFiles()) {
             /* 递归 */

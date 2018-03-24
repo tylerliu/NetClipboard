@@ -27,35 +27,20 @@ class Decompressor {
         ZipEntry entry;
         while ((entry = zipInput.getNextEntry()) != null) { //iterating through
 
-            //make list
-            File folder = new File(base + File.separator + entry.getName().substring(0, entry.getName().indexOf('/')));
-            if (!files.contains(folder)) files.add(folder);
+            String entryName = entry.getName();
 
-            File outFile = new File(base + File.separator + entry.getName());   //Define Output Path
-            System.out.println("Decompressing file: " + entry.getName());
+            System.out.println("Decompressing file: " + entryName);
 
-            //check if the file exist
-            if (outFile.exists()) {
-                //prepare new name
-                String suffix = "";
-                String stem = entry.getName();
-                if (entry.getName().lastIndexOf('.') > 0 && entry.getName().lastIndexOf('.') > suffix.indexOf(File.separatorChar)) {
-                    suffix = entry.getName().substring(entry.getName().lastIndexOf('.'));
-                    stem = entry.getName().substring(0, entry.getName().lastIndexOf('.'));
-                }
+            File outFile = getUnconflictedFileName(base.toString(), entryName); //Define Output Path
 
-                int index = 1;
-                File new_file = outFile;
-
-                while (new_file.exists()) {
-                    index++;
-                    new_file = new File(base + File.separator + stem + "_" + index + suffix);
-                }
-                outFile = new_file;
-                System.out.println("Decompressing file as: " + stem + "_" + index + suffix);
-            }
-
+            //make List
             allFiles.add(outFile);
+            if (entryName.indexOf('/') == -1) {
+                files.add(outFile);
+            } else { //in a folder
+                File folder = new File(base + File.separator + entryName.substring(0, entryName.indexOf('/')));
+                if (!files.contains(folder)) files.add(folder);
+            }
 
             if (!outFile.getParentFile().exists()) outFile.getParentFile().mkdirs(); //make sure directory exist
             if (!outFile.exists()) outFile.createNewFile(); //make sure file exist
@@ -68,5 +53,32 @@ class Decompressor {
         }
 
         return files;
+    }
+
+    private static File getUnconflictedFileName(String base, String entry){
+        File outFile = new File(base + File.separator + entry);   //Define Output Path
+        
+        //check if the file exist
+        if (outFile.exists()) {
+            //prepare new name
+            String suffix = "";
+            String stem = entry;
+            if (entry.lastIndexOf('.') > 0 && entry.lastIndexOf('.') > suffix.indexOf('/')) {
+                suffix = entry.substring(entry.lastIndexOf('.'));
+                stem = entry.substring(0, entry.lastIndexOf('.'));
+            }
+
+            int index = 1;
+            File new_file = outFile;
+
+            while (new_file.exists()) {
+                index++;
+                new_file = new File(base + File.separator + stem + "_" + index + suffix);
+            }
+            outFile = new_file;
+            System.out.println("Decompressing file as: " + stem + "_" + index + suffix);
+        }
+
+        return outFile;
     }
 }
