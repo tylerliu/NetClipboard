@@ -108,7 +108,9 @@ class TransferConnector {
                     if (FileTransfer.isReceiving()) { //file Transferring
                         FileTransfer.cancelReceive();
                     }
-                    FileSender.lastSender.cancel();
+                    if (FileSender.lastSender != null) {
+                        FileSender.lastSender.cancel();
+                    }
                     switch (ClipboardIO.getLastType()) {
                         case STRING:
                             outBuffer.writeString(ClipboardIO.getLastString());
@@ -151,7 +153,9 @@ class TransferConnector {
                             if (FileTransfer.isReceiving()) {
                                 FileTransfer.cancelReceive();
                             }
-                            FileSender.lastSender.cancel();
+                            if (FileSender.lastSender != null) {
+                                FileSender.lastSender.cancel();
+                            }
                             switch (ClipboardIO.getContentType((int) b[0])) {
                                 case STRING:
                                     String s = (String) b[1];
