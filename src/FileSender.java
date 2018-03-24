@@ -126,7 +126,7 @@ public class FileSender implements Runnable {
             if (isCancelled) {
                 System.out.println("File send cancelled");
             }
-            e.printStackTrace();
+            else e.printStackTrace();
         }
         closeConnection();
         System.out.println("File send done");
