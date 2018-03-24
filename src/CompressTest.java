@@ -6,6 +6,6 @@ import java.io.IOException;
 public class CompressTest {
     public static void main(String[] args) throws IOException {
         Compressor.compress("./src", "src.zip");
-        Decompressor.decompress("./src.zip", "./src_2");
+        System.out.println(Decompressor.decompress("./src.zip", "./src_2"));
     }
 }

@@ -1,9 +1,9 @@
-import java.util.List;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.io.File;
+import java.util.List;
 
 /**
  * Created by TylerLiu on 2017/03/22.
@@ -12,7 +12,8 @@ public class ClipboardIO {
 
     private static ContentType lastType;
     private static Clipboard sysClip = Toolkit.getDefaultToolkit().getSystemClipboard();
-    private static Object last;
+    private static String lastString;
+    private static List<File> lastFiles;
     private static boolean isFromRemote;
 
     /**
@@ -22,36 +23,52 @@ public class ClipboardIO {
      */
     public static boolean checkNew() {
 
-        String n = getSysClipboardText();
-        if (isNew(ContentType.STRING, n)) {//have new
-            lastType = ContentType.STRING;
-            last = n;
-            isFromRemote = false;
-            System.out.println("Local Clipboard New: " + n);
-            return true;
+        ContentType type = getSysClipboardFlavor();
+
+        switch (type) {
+            case FILES:
+                List<File> files = getSysClipboardFiles();
+                if (isNewFiles(files)) {
+                    lastType = ContentType.FILES;
+                    lastFiles = files;
+                    isFromRemote = false;
+                    System.out.println("Local Clipboard New: " + files);
+                    return true;
+                }
+                break;
+            case STRING:
+                String n = getSysClipboardText();
+                if (isNewString(n)) {//have new
+                    lastType = ContentType.STRING;
+                    lastString = n;
+                    isFromRemote = false;
+                    System.out.println("Local Clipboard New: " + n);
+                    return true;
+                }
+                break;
+            default:
         }
-        if (isSame(ContentType.STRING, n)) return false;
         return false;
     }
 
-    private static boolean isNew(ContentType type, Object data) {
-        if (data == null) return false;
-        if (type == ContentType.STRING && ((String) data).length() == 0) return false;
-        if (type == ContentType.HTML && ((String) data).length() <= 1) return false;
-
-        return type != lastType || last == null || !last.equals(data);
+    private static boolean isNewString(String data) {
+        return data != null && (ContentType.STRING != lastType || lastString == null || !lastString.equals(data));
     }
 
-    private static boolean isSame(ContentType type, Object data) {
-        return type == lastType && data != null && last != null && last.equals(data);
+    private static boolean isNewFiles(List<File> data) {
+        return data != null && (ContentType.FILES != lastType || lastFiles == null || !lastFiles.equals(data));
     }
 
     public static ContentType getLastType() {
         return lastType;
     }
 
-    public static Object getLast() {
-        return last;
+    public static String getLastString() {
+        return lastString;
+    }
+
+    public static List<File> getLastFiles() {
+        return lastFiles;
     }
 
     public static boolean isLastFromRemote() {
@@ -84,13 +101,13 @@ public class ClipboardIO {
 
     public static void setSysClipboardText(String s) {
         lastType = ContentType.STRING;
-        last = s;
+        lastString = s;
         isFromRemote = true;
         StringSelection ss = new StringSelection(s);
         sysClip.setContents(ss, ss);
     }
 
-    public static List<File> getSysClipboardFiles(){
+    public static List<File> getSysClipboardFiles() {
         try {
             return (List<File>) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.javaFileListFlavor);
         } catch (Exception e) {
@@ -101,7 +118,7 @@ public class ClipboardIO {
 
     public static void setSysCLipboardFiles(List<File> files) {
         lastType = ContentType.FILES;
-        last = files;
+        lastFiles = files;
         isFromRemote = true;
         FileTransfer.FileTransferable fileTransferable = new FileTransfer.FileTransferable(files);
         sysClip.setContents(fileTransferable, fileTransferable);

@@ -1,20 +1,24 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by TylerLiu on 2018/03/22.
  */
 public class FileSender implements Runnable {
 
+    public static FileSender lastSender;
     private static int DEFAULT_PORT = 61803;
+    private static ExecutorService executor = Executors.newSingleThreadExecutor();
     private int listenPort;
     private ServerSocket sendServer;
     private Socket sendSocket;
     private OutputStream sendOutputStream;
     private InputStream inputStream;
+    private boolean isCancelled;
 
     //TODO Cancellation?
     private FileSender(int port) {
@@ -25,18 +29,18 @@ public class FileSender implements Runnable {
         this(DEFAULT_PORT);
     }
 
-    public static Thread sendStream(InputStream inputStream, int port) {
+    public static ExecutorService sendStream(InputStream inputStream, int port) {
         FileSender sender = new FileSender(port).setInputStream(inputStream);
-        Thread thread = new Thread(sender, "Sender");
-        thread.start();
-        return thread;
+        executor.submit(sender);
+        lastSender = sender;
+        return executor;
     }
 
-    public static Thread sendStream(InputStream inputStream) {
+    public static ExecutorService sendStream(InputStream inputStream) {
         return sendStream(inputStream, DEFAULT_PORT);
     }
 
-    public static Thread sendFile(File file, int port) {
+    public static ExecutorService sendFile(File file, int port) {
         try {
             return sendStream(new FileInputStream(file), port);
         } catch (FileNotFoundException e) {
@@ -46,23 +50,28 @@ public class FileSender implements Runnable {
         return null;
     }
 
-    public static Thread sendFile(File file) {
+    public static ExecutorService sendFile(File file) {
         return sendFile(file, DEFAULT_PORT);
     }
 
-    public static Thread sendFileList(List<File> files, int port) {
+    public static ExecutorService sendFileList(List<File> files, int port) {
         FileSender sender = new FileSender(port);
-        Thread thread = new Thread(() -> {
+        executor.submit(() -> {
             if (!sender.openConnection()) return;
             Compressor.compress(files, sender.getSendOutputStream());
             sender.closeConnection();
         }, "Compressed Sender");
-        thread.start();
-        return thread;
+        lastSender = sender;
+        return executor;
     }
 
-    public static Thread sendFileList(List<File> files) {
+    public static ExecutorService sendFileList(List<File> files) {
         return sendFileList(files, DEFAULT_PORT);
+    }
+
+    public static void terminate() {
+        lastSender.cancel();
+        executor.shutdown();
     }
 
     private boolean openConnection() {
@@ -91,6 +100,11 @@ public class FileSender implements Runnable {
         return this;
     }
 
+    public synchronized void cancel() {
+        isCancelled = true;
+        closeConnection();
+    }
+
     private void closeConnection() {
         try {
             sendOutputStream.close();
@@ -107,6 +121,9 @@ public class FileSender implements Runnable {
         try {
             Compressor.copyStream(inputStream, sendOutputStream);
         } catch (IOException e) {
+            if (isCancelled) {
+                System.out.println("File receive cancelled");
+            }
             e.printStackTrace();
         }
         closeConnection();

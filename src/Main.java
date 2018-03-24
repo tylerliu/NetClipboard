@@ -5,6 +5,7 @@ public class Main {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Shutdown: closing ports");
             TransferConnector.close();
+            FileTransfer.terminate();
         }));
         ClipboardIO.getSysClipboardText();
         TransferConnector.connect();

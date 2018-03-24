@@ -89,34 +89,6 @@ class MultipleFormatInBuffer {
     }
 
     /**
-     * Used only when sure the next is file
-     */
-    /*
-    protected void readFile(OutputStream out, boolean close){
-        byte lastType = type;
-        try {
-            loadNext();
-            if (type != 2 && (type != 0 || lastType != 2)) return;
-            out.write(buf, 0, cont == 1 ? buf.length : length);
-            if (cont == 1) readFile(out, close);
-            else if (close) out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void tryFile(OutputStream out, boolean close){
-        try {
-            if (type != 2) return;
-            out.write(buf, 0, cont == 1 ? buf.length : length);
-            if (cont == 1) readFile(out, close);
-            else if (close) out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }*/
-
-    /**
      * @return [0] is the type, [1] is the data if applicable
      */
     Object[] readNext() {
@@ -127,11 +99,12 @@ class MultipleFormatInBuffer {
             case 1:
                 return new Object[]{1, tryString()};
             case 2:
-                //tryFile(out, close);
+                input.poll();
                 return new Object[]{2};
             case 3:
                 return new Object[]{3, tryHTML()};
             case 4:
+                input.poll();
                 return new Object[]{4};
             default:
                 return null;

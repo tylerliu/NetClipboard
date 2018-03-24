@@ -11,6 +11,7 @@ public class FileReceiver implements Runnable {
     private Socket recvSocket;
     private InputStream recvInputStream;
     private OutputStream outputStream;
+    private boolean isCancelled;
 
     //TODO Cancellation?
     private FileReceiver(int port) {
@@ -21,17 +22,17 @@ public class FileReceiver implements Runnable {
         this(DEFAULT_PORT);
     }
 
-    public static Runnable receiveStreamRun(OutputStream outputStream, int port){
+    public static FileReceiver receiveStreamRun(OutputStream outputStream, int port) {
         return new FileReceiver(port).setOutputStream(outputStream);
     }
 
-    public static Runnable receiveStreamRun(OutputStream outputStream) {
+    public static FileReceiver receiveStreamRun(OutputStream outputStream) {
         return receiveStreamRun(outputStream, DEFAULT_PORT);
     }
 
 
     public static Thread receiveStream(OutputStream outputStream, int port) {
-        Runnable receiver = receiveStreamRun(outputStream, port);
+        FileReceiver receiver = receiveStreamRun(outputStream, port);
         Thread thread = new Thread(receiver, "receiver");
         thread.start();
         return thread;
@@ -41,7 +42,7 @@ public class FileReceiver implements Runnable {
         return receiveStream(outputStream, DEFAULT_PORT);
     }
 
-    public static Runnable recriveFileRun(File dstFile, int port) {
+    public static FileReceiver recriveFileRun(File dstFile, int port) {
         try {
             return receiveStreamRun(new FileOutputStream(dstFile), port);
         } catch (FileNotFoundException e) {
@@ -51,7 +52,7 @@ public class FileReceiver implements Runnable {
         return null;
     }
 
-    public static Runnable receiveFileRun(File dstFile) {
+    public static FileReceiver receiveFileRun(File dstFile) {
         return recriveFileRun(dstFile, DEFAULT_PORT);
     }
 
@@ -98,12 +99,20 @@ public class FileReceiver implements Runnable {
         }
     }
 
+    public synchronized void cancel() {
+        isCancelled = true;
+        closeConnection();
+    }
+
     @Override
     public void run() {
         if (!openConnection()) return;
         try {
             Compressor.copyStream(recvInputStream, outputStream);
         } catch (IOException e) {
+            if (isCancelled) {
+                System.out.println("File receive cancelled");
+            }
             e.printStackTrace();
         }
         closeConnection();

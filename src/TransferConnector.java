@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -6,6 +7,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -24,7 +26,7 @@ class TransferConnector {
 
     public static InetAddress getTarget() {
         if (isLoopBack) return InetAddress.getLoopbackAddress();
-        // TODO BroadCasting maybe?
+            // TODO BroadCasting maybe?
         else {
             try {
                 InetAddress localHost = InetAddress.getLocalHost();
@@ -102,19 +104,34 @@ class TransferConnector {
                 selector.select(25);
 
                 //check clipboard
-                if (ClipboardIO.checkNew() && !ClipboardIO.isLastFromRemote()) {
+                if (ClipboardIO.checkNew()) {
+                    if (FileTransfer.isReceiving()) { //file Transferring
+                        FileTransfer.cancelReceive();
+                    }
+                    FileSender.lastSender.cancel();
                     switch (ClipboardIO.getLastType()) {
                         case STRING:
-                            outBuffer.writeString((String) ClipboardIO.getLast());
+                            outBuffer.writeString(ClipboardIO.getLastString());
                             break;
                         case HTML:
                         case FILES:
+                            //TODO run with random port?
+                            outBuffer.writeFiles();
+                            //TODO Fix another send file opened
+                            FileSender.sendFileList(ClipboardIO.getLastFiles());
                             break;
                         case END:
                             return;
                         default:
                     }
                     socketChannel.register(selector, SelectionKey.OP_WRITE);
+                }
+
+                //set clipboard if file receiving finished
+                if (FileTransfer.isNewlyReceived()) {
+                    List<File> files = FileTransfer.getFiles();
+                    System.out.println("Remote Clipboard New: " + files);
+                    ClipboardIO.setSysCLipboardFiles(files);
                 }
 
                 for (SelectionKey s1 : selector.selectedKeys()) {
@@ -131,6 +148,10 @@ class TransferConnector {
                         if (inBuffer.readyToRead()) {
                             Object[] b = inBuffer.readNext();
                             if (b == null) System.exit(0);
+                            if (FileTransfer.isReceiving()) {
+                                FileTransfer.cancelReceive();
+                            }
+                            FileSender.lastSender.cancel();
                             switch (ClipboardIO.getContentType((int) b[0])) {
                                 case STRING:
                                     String s = (String) b[1];
@@ -142,10 +163,13 @@ class TransferConnector {
                                     return;
                                 case HTML:
                                 case FILES:
+                                    FileTransfer.receiveFiles();
                                 default:
                             }
                         }
+
                     }
+
                     if (s1.isWritable()) {
                         //send
                         while (!outBuffer.getOutput().isEmpty()) {

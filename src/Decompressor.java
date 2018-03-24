@@ -10,12 +10,15 @@ import java.util.zip.ZipInputStream;
  */
 class Decompressor {
 
-    public static void decompress(String zipPath, String base) throws IOException {
-        decompress(new File(zipPath), new File(base));
+    public static List<File> allFiles;
+
+    public static List<File> decompress(String zipPath, String base) throws IOException {
+        return decompress(new File(zipPath), new File(base));
     }
 
 
     public static List<File> decompress(File zipPath, File base) throws IOException {
+        allFiles = new ArrayList<>();
         List<File> files = new ArrayList<>();
         ZipFile zipFile = new ZipFile(zipPath);   // instantiate ZipFile
         ZipInputStream zipInput = new ZipInputStream(new FileInputStream(zipPath));  // instantiate ZipInputStream
@@ -23,6 +26,10 @@ class Decompressor {
         System.out.println(base.getAbsoluteFile());
         ZipEntry entry;
         while ((entry = zipInput.getNextEntry()) != null) { //iterating through
+
+            //make list
+            File folder = new File(base + File.separator + entry.getName().substring(0, entry.getName().indexOf('/')));
+            if (!files.contains(folder)) files.add(folder);
 
             File outFile = new File(base + File.separator + entry.getName());   //Define Output Path
             System.out.println("Decompressing file: " + entry.getName());
@@ -48,7 +55,7 @@ class Decompressor {
                 System.out.println("Decompressing file as: " + stem + "_" + index + suffix);
             }
 
-            files.add(outFile);
+            allFiles.add(outFile);
 
             if (!outFile.getParentFile().exists()) outFile.getParentFile().mkdirs(); //make sure directory exist
             if (!outFile.exists()) outFile.createNewFile(); //make sure file exist
