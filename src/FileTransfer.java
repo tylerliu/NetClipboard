@@ -67,6 +67,7 @@ public class FileTransfer {
             dstFolder = newDstFolder;
             dstZipFile.delete();
             dstZipFile = null;
+            System.out.println("File receive done");
         } catch (IOException e) {
             e.printStackTrace();
         }

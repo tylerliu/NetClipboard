@@ -122,10 +122,11 @@ public class FileSender implements Runnable {
             Compressor.copyStream(inputStream, sendOutputStream);
         } catch (IOException e) {
             if (isCancelled) {
-                System.out.println("File receive cancelled");
+                System.out.println("File send cancelled");
             }
             e.printStackTrace();
         }
         closeConnection();
+        System.out.println("File send done");
     }
 }
