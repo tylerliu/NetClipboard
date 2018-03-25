@@ -8,6 +8,7 @@ import java.util.concurrent.Executors;
 
 /**
  * Class for receiving files
+ * TODO clean up files
  */
 public class FileTransfer {
 
