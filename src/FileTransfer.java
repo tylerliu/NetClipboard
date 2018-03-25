@@ -20,9 +20,11 @@ public class FileTransfer {
     private static boolean isReceiveScheduled;
     private static boolean isFilesUsed = true;
     private static boolean isFinished;
+    private static boolean isLastRetrival = false;
 
     public synchronized static void receiveFiles() {
-        if (isTransfering()) cancelTransfer();
+        if (isTransferring()) cancelTransfer();
+        isLastRetrival = true;
         isReceiveScheduled = true;
         isFilesUsed = true;
         isCancelled = false;
@@ -79,8 +81,9 @@ public class FileTransfer {
     }
 
     public synchronized static void sendFiles(List<File> sendFiles) {
-        if (isTransfering()) cancelTransfer();
+        if (isTransferring()) cancelTransfer();
         files = sendFiles;
+        isLastRetrival = false;
         isReceiveScheduled = true;
         isFilesUsed = true;
         isCancelled = false;
@@ -98,7 +101,7 @@ public class FileTransfer {
     public synchronized static void cancelTransfer() {
         if (isCancelled) return;
         isCancelled = true;
-        if (isTransfering() && transferConnector != null) {
+        if (isTransferring() && transferConnector != null) {
             transferConnector.cancel();
         }
         System.out.println("File receive cancelled");
@@ -112,7 +115,7 @@ public class FileTransfer {
         return isFinished && !isFilesUsed;
     }
 
-    public synchronized static boolean isTransfering() {
+    public synchronized static boolean isTransferring() {
         return !isFinished && isReceiveScheduled;
     }
 
@@ -122,8 +125,16 @@ public class FileTransfer {
     }
 
     public synchronized static void terminate() {
-        if (isTransfering()) cancelTransfer();
+        if (isTransferring()) cancelTransfer();
         executor.shutdown();
+    }
+
+    public synchronized static boolean deleteFolder(){
+        if (!isLastRetrival || dstFolder == null) return false;
+        System.out.println("Delete Folder: " + dstFolder);
+        boolean result = dstFolder.delete();
+        dstFolder = null;
+        return result;
     }
 
     //TODO add String flavor?
