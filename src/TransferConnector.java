@@ -117,7 +117,7 @@ class TransferConnector {
                             //TODO run with random port?
                             outBuffer.writeFiles();
                             //TODO Fix another send file opened
-                            FileSender.sendFileList(ClipboardIO.getLastFiles());
+                            FileTransfer.sendFiles(ClipboardIO.getLastFiles());
                             break;
                         case END:
                             return;
