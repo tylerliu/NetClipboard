@@ -6,7 +6,6 @@ public class Main {
             System.out.println("Shutdown: closing ports");
             TransferConnector.close();
             FileTransfer.terminate();
-            FileSender.terminate();
         }));
         ClipboardIO.getSysClipboardText();
         TransferConnector.connect();

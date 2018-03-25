@@ -2,17 +2,13 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 /**
  * Created by TylerLiu on 2018/03/22.
  */
-public class FileSender implements Runnable {
+public class FileSender implements Runnable, Cancelable {
 
-    public static FileSender lastSender;
     private static int DEFAULT_PORT = 61803;
-    private static ExecutorService executor = Executors.newSingleThreadExecutor();
     private int listenPort;
     private ServerSocket sendServer;
     private Socket sendSocket;
@@ -29,18 +25,39 @@ public class FileSender implements Runnable {
         this(DEFAULT_PORT);
     }
 
-    public static ExecutorService sendStream(InputStream inputStream, int port) {
-        FileSender sender = new FileSender(port).setInputStream(inputStream);
-        executor.submit(sender);
-        lastSender = sender;
-        return executor;
+    public static FileSender sendStreamRun(InputStream inputStream, int port) {
+        return new FileSender(port).setInputStream(inputStream);
     }
 
-    public static ExecutorService sendStream(InputStream inputStream) {
+    public static FileSender sendStreamRun(InputStream inputStream) {
+        return sendStreamRun(inputStream, DEFAULT_PORT);
+    }
+
+    public static Thread sendStream(InputStream inputStream, int port) {
+        Thread thread = new Thread(sendStream(inputStream, port), "Sender");
+        thread.start();
+        return thread;
+    }
+
+    public static Thread sendStream(InputStream inputStream) {
         return sendStream(inputStream, DEFAULT_PORT);
     }
 
-    public static ExecutorService sendFile(File file, int port) {
+    public static FileSender sendFileRun(File file, int port) {
+        try {
+            return sendStreamRun(new FileInputStream(file), port);
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found! " + file.getAbsolutePath());
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static FileSender sendFileRun(File file) {
+        return sendFileRun(file, DEFAULT_PORT);
+    }
+
+    public static Thread sendFile(File file, int port) {
         try {
             return sendStream(new FileInputStream(file), port);
         } catch (FileNotFoundException e) {
@@ -50,30 +67,28 @@ public class FileSender implements Runnable {
         return null;
     }
 
-    public static ExecutorService sendFile(File file) {
+    public static Thread sendFile(File file) {
         return sendFile(file, DEFAULT_PORT);
     }
 
-    public static ExecutorService sendFileList(List<File> files, int port) {
+
+    public static FileSender sendFileListObj(int port) {
+        return new FileSender(port);
+    }
+
+    public static FileSender sendFileListObj() {
+        return new FileSender();
+    }
+
+    public static Thread sendFileList(List<File> files, int port) {
         FileSender sender = new FileSender(port);
-        executor.submit(() -> {
-            if (!sender.openConnection()) return;
-            Compressor.compress(files, sender.getSendOutputStream());
-            sender.closeConnection();
-        }, "Compressed Sender");
-        lastSender = sender;
-        return executor;
+        Thread thread = new Thread(() -> sender.runCompressed(files), "Compressed Sender");
+        thread.start();
+        return thread;
     }
 
-    public static ExecutorService sendFileList(List<File> files) {
+    public static Thread sendFileList(List<File> files) {
         return sendFileList(files, DEFAULT_PORT);
-    }
-
-    public static void terminate() {
-        if (lastSender != null) {
-            lastSender.cancel();
-        }
-        executor.shutdown();
     }
 
     private boolean openConnection() {
@@ -102,6 +117,7 @@ public class FileSender implements Runnable {
         return this;
     }
 
+    @Override
     public synchronized void cancel() {
         isCancelled = true;
         closeConnection();
@@ -125,8 +141,18 @@ public class FileSender implements Runnable {
         } catch (IOException e) {
             if (isCancelled) {
                 System.out.println("File send cancel with error" + e);
-            }
-            else e.printStackTrace();
+            } else e.printStackTrace();
+        }
+        closeConnection();
+        System.out.println("File send done");
+    }
+
+    public void runCompressed(List<File> files) {
+        if (!openConnection()) return;
+        Compressor.compress(files, getSendOutputStream());
+        if (isCancelled) {
+            System.out.println("File send cancel with error");
+            return;
         }
         closeConnection();
         System.out.println("File send done");

@@ -55,9 +55,9 @@ class Decompressor {
         return files;
     }
 
-    private static File getUnconflictedFileName(String base, String entry){
+    private static File getUnconflictedFileName(String base, String entry) {
         File outFile = new File(base + File.separator + entry);   //Define Output Path
-        
+
         //check if the file exist
         if (outFile.exists()) {
             //prepare new name

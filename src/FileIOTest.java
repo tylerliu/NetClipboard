@@ -2,7 +2,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
 
 /**
  * Created by TylerLiu on 2018/03/23.
@@ -30,10 +29,8 @@ public class FileIOTest {
     public static void send() {
         List<File> files = new ArrayList<>();
         files.add(new File("src"));
-        FileSender.sendFileList(files);
-        FileSender.terminate();
         try {
-            Thread.sleep(10000);
+            FileSender.sendFileList(files).join();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

@@ -16,15 +16,17 @@ public class FileTransfer {
     private static List<File> files = null;
     private static boolean isCancelled;
     private static ExecutorService executor = Executors.newSingleThreadExecutor();
-    private static FileReceiver receiver;
+    private static Cancelable transferConnector;
     private static boolean isReceiveScheduled;
     private static boolean isFilesUsed = true;
+    private static boolean isFinished;
 
     public synchronized static void receiveFiles() {
-        if (isReceiving()) cancelReceive();
+        if (isTransfering()) cancelTransfer();
         isReceiveScheduled = true;
         isFilesUsed = true;
         isCancelled = false;
+        isFinished = false;
         executor.submit(FileTransfer::receiveFilesWorker);
     }
 
@@ -44,9 +46,10 @@ public class FileTransfer {
                 return;
             }
 
-            receiver = FileReceiver.receiveFileRun(dstZipFile);
+            FileReceiver receiver = FileReceiver.receiveFileRun(dstZipFile);
+            transferConnector = receiver;
             receiver.run();
-            receiver = null;
+            transferConnector = null;
 
             File newDstFolder = Files.createTempDirectory("NetClipboard").toFile();
             newDstFolder.deleteOnExit();
@@ -61,6 +64,7 @@ public class FileTransfer {
 
             files = Decompressor.decompress(dstZipFile, newDstFolder);
             isFilesUsed = false;
+            isFinished = true;
 
             if (dstFolder != null && dstFolder.exists()) {
                 dstFolder.delete();
@@ -74,29 +78,42 @@ public class FileTransfer {
         }
     }
 
-    public synchronized static void cancelReceive() {
+    public synchronized static void sendFiles(List<File> sendFiles) {
+        if (isTransfering()) cancelTransfer();
+        files = sendFiles;
+        isReceiveScheduled = true;
+        isFilesUsed = true;
+        isCancelled = false;
+        isFinished = false;
+        executor.submit(FileTransfer::sendFilesWorker);
+    }
+
+    public static void sendFilesWorker() {
+        FileSender sender = FileSender.sendFileListObj();
+        transferConnector = sender;
+        sender.runCompressed(files);
+        isFinished = true;
+    }
+
+    public synchronized static void cancelTransfer() {
         if (isCancelled) return;
         isCancelled = true;
-        if (isReceiving() && receiver != null) {
-            receiver.cancel();
+        if (isTransfering() && transferConnector != null) {
+            transferConnector.cancel();
         }
         System.out.println("File receive cancelled");
     }
 
-    private synchronized static boolean isFilesReady() {
-        return files != null;
-    }
-
-    public synchronized static boolean isReceiveFinished() {
-        return files != null;
+    public synchronized static boolean isTransferFinished() {
+        return isFinished;
     }
 
     public synchronized static boolean isNewlyReceived() {
-        return isReceiveFinished() && !isFilesUsed;
+        return isFinished && !isFilesUsed;
     }
 
-    public synchronized static boolean isReceiving() {
-        return !isFilesReady() && isReceiveScheduled;
+    public synchronized static boolean isTransfering() {
+        return !isFinished && isReceiveScheduled;
     }
 
     public synchronized static List<File> getFiles() {
@@ -105,7 +122,7 @@ public class FileTransfer {
     }
 
     public synchronized static void terminate() {
-        if (isReceiving()) cancelReceive();
+        if (isTransfering()) cancelTransfer();
         executor.shutdown();
     }
 

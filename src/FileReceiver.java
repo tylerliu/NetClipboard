@@ -4,7 +4,7 @@ import java.net.Socket;
 /**
  * Created by TylerLiu on 2018/03/22.
  */
-public class FileReceiver implements Runnable {
+public class FileReceiver implements Runnable, Cancelable {
 
     private static int DEFAULT_PORT = 61803;
     private int listenPort;
@@ -93,12 +93,13 @@ public class FileReceiver implements Runnable {
     private void closeConnection() {
         try {
             if (recvInputStream != null) recvInputStream.close();
-            if (recvSocket != null)recvSocket.close();
+            if (recvSocket != null) recvSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    @Override
     public synchronized void cancel() {
         isCancelled = true;
         closeConnection();
@@ -112,8 +113,7 @@ public class FileReceiver implements Runnable {
         } catch (IOException e) {
             if (isCancelled) {
                 System.out.println("File receive cancelled with error " + e);
-            }
-            else e.printStackTrace();
+            } else e.printStackTrace();
         }
         closeConnection();
     }
