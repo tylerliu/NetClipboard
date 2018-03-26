@@ -1,6 +1,5 @@
 import FileChooser.NativeJFileChooser;
 import javax.swing.JFileChooser;
-
 import zip.RenameDecompressor;
 import java.io.File;
 import java.io.IOException;
