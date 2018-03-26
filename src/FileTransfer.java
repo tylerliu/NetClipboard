@@ -80,7 +80,7 @@ public class FileTransfer {
 
     public synchronized static void terminate() {
         executor.shutdown();
-        while(executor.isTerminated()){
+        while(!executor.isTerminated()){
             System.out.println("Wait for transferring...");
             try {
                 Thread.sleep(200);
