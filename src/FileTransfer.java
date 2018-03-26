@@ -41,7 +41,7 @@ public class FileTransfer {
                 System.out.println("Saving to: " + lastSavedDirectory.getAbsolutePath());
             } else {
                 System.out.println("Cancelled Pasting.");
-                FileReceiver.cancelConnection();
+                FileReceiver.cancelConnection(port);
                 PortAllocator.free(port);
                 return;
             }
