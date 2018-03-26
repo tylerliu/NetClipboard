@@ -52,6 +52,8 @@ class Decompressor {
             out.close();
         }
 
+        zipInput.close();
+        zipFile.close();
         return files;
     }
 

@@ -42,6 +42,7 @@ public class FileTransfer {
             } else {
                 System.out.println("Cancelled Pasting.");
                 FileReceiver.cancelConnection();
+                PortAllocator.free(port);
                 return;
             }
 
@@ -82,7 +83,7 @@ public class FileTransfer {
         while(!executor.isTerminated()){
             System.out.println("Wait for transferring...");
             try {
-                Thread.sleep(200);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
