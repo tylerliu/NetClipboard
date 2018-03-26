@@ -11,7 +11,7 @@ import java.util.zip.ZipInputStream;
  * A decompressor that replace files when there are conflicts
  * Created by TylerLiu on 2017/10/07.
  */
-public class ReplaceDecompressor{
+public class ReplaceDecompressor {
 
     private static List<File> allFiles;
 

@@ -1,7 +1,5 @@
 package zip;
 
-import zip.Compressor;
-
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -13,7 +11,7 @@ import java.util.zip.ZipInputStream;
  * A decompressor that combines folders when there are conflicts
  * Created by TylerLiu on 2017/10/07.
  */
-public class CombineDecompressor{
+public class CombineDecompressor {
 
     private static List<File> allFiles;
 
@@ -70,25 +68,26 @@ public class CombineDecompressor{
         File outFile = new File(base + File.separator + entry);
 
         //check if the file exist
-        if (outFile.exists()) {
-            //prepare new name
-            String suffix = "";
-            String stem = entry;
-            if (entry.lastIndexOf('.') > 0 && entry.lastIndexOf('.') > suffix.indexOf('/')) {
-                suffix = entry.substring(entry.lastIndexOf('.'));
-                stem = entry.substring(0, entry.lastIndexOf('.'));
-            }
-
-            int index = 1;
-            File new_file = outFile;
-
-            while (new_file.exists()) {
-                index++;
-                new_file = new File(base + File.separator + stem + "_" + index + suffix);
-            }
-            outFile = new_file;
-            System.out.println("Decompressing file as: " + stem + "_" + index + suffix);
+        if (!outFile.exists()) {
+            return outFile;
         }
+
+        //prepare new name
+        String suffix = "";
+        String stem = entry;
+        if (entry.lastIndexOf('.') > 0 && entry.lastIndexOf('.') > suffix.indexOf('/')) {
+            suffix = entry.substring(entry.lastIndexOf('.'));
+            stem = entry.substring(0, entry.lastIndexOf('.'));
+        }
+
+        int index = 1;
+        File new_file = outFile;
+
+        while (new_file.exists()) {
+            index++;
+            new_file = new File(base + File.separator + stem + "_" + index + suffix);
+        }
+        outFile = new_file;
 
         return outFile;
     }

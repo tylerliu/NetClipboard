@@ -13,7 +13,7 @@ import java.util.zip.ZipInputStream;
  * A decompressor that rename folders when there are conflicts
  * Created by TylerLiu on 2017/10/07.
  */
-public class RenameDecompressor{
+public class RenameDecompressor {
 
     private static List<File> allFiles;
     private static Map<String, String> rootFolder = new HashMap<>();
@@ -68,28 +68,27 @@ public class RenameDecompressor{
         File outFile = new File(base + File.separator + entry);
 
         //check if the file exist
-        if (outFile.exists()) {
-            //prepare new name
-            String suffix = "";
-            String stem = entry;
-            if (entry.lastIndexOf('.') > 0) {
-                suffix = entry.substring(entry.lastIndexOf('.'));
-                stem = entry.substring(0, entry.lastIndexOf('.'));
-            }
-
-            int index = 1;
-            File new_file = outFile;
-
-            while (new_file.exists()) {
-                index++;
-                new_file = new File(base + File.separator + stem + "_" + index + suffix);
-            }
-
-            return stem + "_" + index + suffix;
+        if (!outFile.exists()) {
+            return entry;
         }
 
-        rootPaths.add(outFile);
-        return entry;
+        //prepare new name
+        String suffix = "";
+        String stem = entry;
+        if (entry.lastIndexOf('.') > 0) {
+            suffix = entry.substring(entry.lastIndexOf('.'));
+            stem = entry.substring(0, entry.lastIndexOf('.'));
+        }
+
+        int index = 1;
+        File new_file = outFile;
+
+        while (new_file.exists()) {
+            index++;
+            new_file = new File(base + File.separator + stem + "_" + index + suffix);
+        }
+
+        return stem + "_" + index + suffix;
     }
 
     private static File getUnconflictedFileName(String base, String entry) {
