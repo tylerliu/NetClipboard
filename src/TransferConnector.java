@@ -189,7 +189,7 @@ class TransferConnector {
 
     static void close() {
         try {
-            if (!terminateInitiated) {
+            if (!terminateInitiated && socketChannel != null) {
                 terminateInitiated = true;
                 outBuffer.writeEND();
                 while (!outBuffer.getOutput().isEmpty()) {

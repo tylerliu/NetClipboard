@@ -10,6 +10,10 @@ import java.util.zip.ZipInputStream;
  */
 class Decompressor {
 
+    private enum ConflictStrategy{REPLACE, COMBINE_FOLDER, RENAME_FOLDER}
+
+    private static ConflictStrategy strategy = ConflictStrategy.REPLACE;
+
     public static List<File> allFiles;
 
     public static List<File> decompress(String zipPath, String base) throws IOException {
@@ -52,12 +56,17 @@ class Decompressor {
             out.close();
         }
 
+        zipFile.close();
+        zipInput.close();
         return files;
     }
 
     private static File getUnconflictedFileName(String base, String entry) {
         File outFile = new File(base + File.separator + entry);   //Define Output Path
 
+        if (strategy == ConflictStrategy.REPLACE) return outFile;
+
+        //strategy is RENAME_FOLDER
         //check if the file exist
         if (outFile.exists()) {
             //prepare new name
@@ -80,5 +89,6 @@ class Decompressor {
         }
 
         return outFile;
+
     }
 }
