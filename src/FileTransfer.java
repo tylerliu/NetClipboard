@@ -26,8 +26,8 @@ public class FileTransfer {
 
             //choose destination
             NativeJFileChooser chooser = new NativeJFileChooser();
-            chooser.setDialogTitle("Paste Files...");
             chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            chooser.setDialogTitle("Paste Files...");
             //TODO track default directory
             if (lastSavedDirectory == null) {
                 lastSavedDirectory = new File(System.getProperty("user.dir"));
