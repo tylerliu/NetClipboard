@@ -7,7 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Class for receiving files
+ * Class for transferring files
  * TODO clean up files
  */
 public class FileTransfer {
@@ -27,7 +27,7 @@ public class FileTransfer {
             //choose destination
             //TODO track default directory
             if (lastSavedDirectory == null) {
-                lastSavedDirectory = new File(System.getProperty("user.dir"));
+                lastSavedDirectory = new File(System.getProperty("user.home"));
             }
             NativeJFileChooser chooser = new NativeJFileChooser(lastSavedDirectory);
             chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
