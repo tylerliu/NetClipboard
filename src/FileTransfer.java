@@ -25,14 +25,13 @@ public class FileTransfer {
             File toDir;
 
             //choose destination
-            NativeJFileChooser chooser = new NativeJFileChooser();
-            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            chooser.setDialogTitle("Paste Files...");
             //TODO track default directory
             if (lastSavedDirectory == null) {
                 lastSavedDirectory = new File(System.getProperty("user.dir"));
             }
-            chooser.setCurrentDirectory(lastSavedDirectory);
+            NativeJFileChooser chooser = new NativeJFileChooser(lastSavedDirectory);
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            chooser.setDialogTitle("Paste Files...");
 
             int chooseResult = chooser.showDialog(null, "Paste");
             if (chooseResult == JFileChooser.APPROVE_OPTION) {
