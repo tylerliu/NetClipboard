@@ -23,7 +23,7 @@ public class ClipboardIO {
      */
     public static boolean checkNew() {
         ContentType type = getSysClipboardFlavor();
-
+        if (type == null) return false;
         switch (type) {
             case FILES:
                 List<File> files = getSysClipboardFiles();
@@ -80,13 +80,9 @@ public class ClipboardIO {
 
     //TODO support Image?
     public static ContentType getSysClipboardFlavor() {
-        try {
-            //if (sysClip.isDataFlavorAvailable(DataFlavor.imageFlavor)) return ContentType.IMAGE;
-            if (sysClip.isDataFlavorAvailable(DataFlavor.javaFileListFlavor)) return ContentType.FILES;
-            if (sysClip.isDataFlavorAvailable(DataFlavor.stringFlavor)) return ContentType.STRING;
-        } catch (IllegalStateException e){
-            e.printStackTrace();
-        }
+        //if (sysClip.isDataFlavorAvailable(DataFlavor.imageFlavor)) return ContentType.IMAGE;
+        if (sysClip.isDataFlavorAvailable(DataFlavor.javaFileListFlavor)) return ContentType.FILES;
+        if (sysClip.isDataFlavorAvailable(DataFlavor.stringFlavor)) return ContentType.STRING;
         return null;
     }
 
