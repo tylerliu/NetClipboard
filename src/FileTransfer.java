@@ -45,16 +45,16 @@ public class FileTransfer {
                 return;
             }
 
-            System.out.println("File receiving on port: " + port);
-
             File dstZipFile = File.createTempFile("NetClipboard", ".zip");
             dstZipFile.deleteOnExit();
             System.out.println("Receive Zip: " + dstZipFile.getAbsolutePath());
 
-            PortAllocator.free(port);
+            System.out.println("File receiving on port: " + port);
 
             FileReceiver receiver = FileReceiver.receiveFileRun(dstZipFile, port);
             receiver.run();
+
+            PortAllocator.free(port);
 
             Decompressor.decompress(dstZipFile, toDir);
 
