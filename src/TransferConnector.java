@@ -24,6 +24,7 @@ class TransferConnector {
 
     public static InetAddress getTarget() {
         if (isLoopBack) return InetAddress.getLoopbackAddress();
+            // TODO BroadCasting maybe?
         else {
             try {
                 InetAddress localHost = InetAddress.getLocalHost();
@@ -101,13 +102,17 @@ class TransferConnector {
                 selector.select(25);
 
                 //check clipboard
-                if (ClipboardIO.checkNew() && !ClipboardIO.isLastFromRemote()) {
+                if (ClipboardIO.checkNew()) {
                     switch (ClipboardIO.getLastType()) {
                         case STRING:
-                            outBuffer.writeString((String) ClipboardIO.getLast());
+                            outBuffer.writeString(ClipboardIO.getLastString());
                             break;
                         case HTML:
                         case FILES:
+                            //TODO run with random port?
+                            outBuffer.writeFiles();
+                            //TODO Fix another send file opened
+                            FileTransfer.sendFiles(ClipboardIO.getLastFiles());
                             break;
                         case END:
                             return;
@@ -141,10 +146,14 @@ class TransferConnector {
                                     return;
                                 case HTML:
                                 case FILES:
+                                    FileTransfer.receiveFiles();
+                                    ClipboardIO.unsetSysClipboard();
                                 default:
                             }
                         }
+
                     }
+
                     if (s1.isWritable()) {
                         //send
                         while (!outBuffer.getOutput().isEmpty()) {
@@ -164,7 +173,7 @@ class TransferConnector {
 
     static void close() {
         try {
-            if (!terminateInitiated) {
+            if (!terminateInitiated && socketChannel != null) {
                 terminateInitiated = true;
                 outBuffer.writeEND();
                 while (!outBuffer.getOutput().isEmpty()) {

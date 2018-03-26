@@ -73,14 +73,7 @@ class MultipleFormatOutBuffer {
 
     /**
      * Writes <code>len</code> bytes from the specified byte array
-     * starting at offset <code>off</code> to this buffered output stream.
-     * <p>
-     * <p> Ordinarily this method stores bytes from the given array into this
-     * stream's buffer, flushing the buffer to the underlying output stream as
-     * needed.  If the requested length is at least as large as this stream's
-     * buffer, however, then this method will flush the buffer and write the
-     * bytes directly to the underlying output stream.  Thus redundant
-     * <code>BufferedOutputStream</code>s will not copy data unnecessarily.
+     * starting at offset <code>off</code> to this buffer.
      *
      * @param b   the data.
      * @param off the start offset in the data.
@@ -130,32 +123,11 @@ class MultipleFormatOutBuffer {
         flushBuffer();
     }
 
-    /*
-    public synchronized void writeFile(InputStream in, boolean close) throws IOException{
+    public synchronized void writeFiles() throws IOException {
         assert buf.position() == 0;
         type = 2;
-
-        //read from input stream
-        copyStream(in);
-
-        if (close) in.close();
+        flushBuffer();
     }
-
-
-    public synchronized void writeFileHead(){
-        //TODO Finish this
-        assert buf.position() == 0;
-        type = 2;
-    }
-
-    public synchronized void writeFileEnd(){
-        try {
-            flushBuffer();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    */
 
 }
 
