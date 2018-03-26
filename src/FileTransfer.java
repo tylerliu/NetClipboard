@@ -1,5 +1,5 @@
 import FileChooser.NativeJFileChooser;
-import javax.swing.*;
+import javax.swing.JFileChooser;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
