@@ -115,12 +115,11 @@ public class ClipboardIO {
         }
     }
 
-    public static void setSysCLipboardFiles(List<File> files) {
-        lastType = ContentType.FILES;
-        lastFiles = files;
+    public static void unsetSysClipboard(){
+        lastString = "";
         isFromRemote = true;
-        FileTransfer.FileTransferable fileTransferable = new FileTransfer.FileTransferable(files);
-        sysClip.setContents(fileTransferable, fileTransferable);
+        StringSelection ss = new StringSelection("");
+        sysClip.setContents(ss, ss);
     }
 
     public enum ContentType {
