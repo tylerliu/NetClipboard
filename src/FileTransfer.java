@@ -21,11 +21,12 @@ public class FileTransfer {
 
     private static void receiveFilesWorker() {
         try {
+            int port = PortAllocator.alloc();
             File toDir;
 
             //choose destination
             NativeJFileChooser chooser = new NativeJFileChooser();
-            chooser.setDialogTitle("Paste File...");
+            chooser.setDialogTitle("Paste Files...");
             chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             //TODO track default directory
             if (lastSavedDirectory == null) {
@@ -44,8 +45,6 @@ public class FileTransfer {
                 return;
             }
 
-
-            int port = PortAllocator.alloc();
             System.out.println("File receiving on port: " + port);
 
             File dstZipFile = File.createTempFile("NetClipboard", ".zip");

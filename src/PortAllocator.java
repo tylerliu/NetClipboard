@@ -33,6 +33,7 @@ public class PortAllocator {
         if (!allocated.contains(port)) return false;
         allocated.remove(Integer.valueOf(port));
         freed.add(port);
+        System.out.println("Freed: " + port);
         return true;
     }
 
@@ -46,6 +47,7 @@ public class PortAllocator {
         int port = nextFree;
         allocated.add(port);
         nextFree ++;
+        System.out.println("Allocated: " + port);
         return port;
     }
 }
