@@ -1,5 +1,7 @@
 import FileChooser.NativeJFileChooser;
-import javax.swing.*;
+import javax.swing.JFileChooser;
+
+import zip.RenameDecompressor;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -56,7 +58,7 @@ public class FileTransfer {
 
             PortAllocator.free(port);
 
-            Decompressor.decompress(dstZipFile, toDir);
+            RenameDecompressor.decompress(dstZipFile, toDir);
 
             if (!dstZipFile.delete()) System.out.println("Zip file not deleted: " + dstZipFile);
             System.out.println("File receive done");

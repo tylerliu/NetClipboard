@@ -1,3 +1,5 @@
+package zip;
+
 import java.io.*;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -6,7 +8,7 @@ import java.util.zip.ZipOutputStream;
 /**
  * Created by TylerLiu on 2017/10/06.
  */
-class Compressor {
+public class Compressor {
 
     public static void copyStream(InputStream input, OutputStream output) throws IOException {
         byte[] buffer = new byte[8192];
