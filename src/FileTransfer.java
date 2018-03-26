@@ -1,3 +1,5 @@
+import zip.ReplaceDecompressor;
+
 import java.awt.datatransfer.*;
 import java.io.File;
 import java.io.IOException;
@@ -65,7 +67,7 @@ public class FileTransfer {
                 return;
             }
 
-            files = Decompressor.decompress(dstZipFile, newDstFolder);
+            files = ReplaceDecompressor.decompress(dstZipFile, newDstFolder);
             isFilesUsed = false;
             isFinished = true;
 

@@ -1,20 +1,23 @@
+package zip;
+
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 /**
+ * A decompressor that rename folders when there are conflicts
  * Created by TylerLiu on 2017/10/07.
  */
-class Decompressor {
+public class RenameDecompressor{
 
-    private enum ConflictStrategy{REPLACE, COMBINE_FOLDER, RENAME_FOLDER}
-
-    private static ConflictStrategy strategy = ConflictStrategy.REPLACE;
-
-    public static List<File> allFiles;
+    private static List<File> allFiles;
+    private static Map<String, String> rootFolder = new HashMap<>();
+    private static List<File> rootPaths; //both files and folders
 
     public static List<File> decompress(String zipPath, String base) throws IOException {
         return decompress(new File(zipPath), new File(base));
@@ -22,8 +25,9 @@ class Decompressor {
 
 
     public static List<File> decompress(File zipPath, File base) throws IOException {
+        rootFolder.clear();
+        rootPaths = new ArrayList<>();
         allFiles = new ArrayList<>();
-        List<File> files = new ArrayList<>();
         ZipFile zipFile = new ZipFile(zipPath);   // instantiate ZipFile
         ZipInputStream zipInput = new ZipInputStream(new FileInputStream(zipPath));  // instantiate ZipInputStream
 
@@ -39,12 +43,6 @@ class Decompressor {
 
             //make List
             allFiles.add(outFile);
-            if (entryName.indexOf('/') == -1) {
-                files.add(outFile);
-            } else { //in a folder
-                File folder = new File(base + File.separator + entryName.substring(0, entryName.indexOf('/')));
-                if (!files.contains(folder)) files.add(folder);
-            }
 
             if (!outFile.getParentFile().exists()) outFile.getParentFile().mkdirs(); //make sure directory exist
             if (!outFile.exists()) outFile.createNewFile(); //make sure file exist
@@ -58,21 +56,23 @@ class Decompressor {
 
         zipFile.close();
         zipInput.close();
-        return files;
+        return rootPaths;
     }
 
-    private static File getUnconflictedFileName(String base, String entry) {
-        File outFile = new File(base + File.separator + entry);   //Define Output Path
+    public static List<File> getAllFiles() {
+        return allFiles;
+    }
 
-        if (strategy == ConflictStrategy.REPLACE) return outFile;
+    private static String getRootName(String base, String entry) {
 
-        //strategy is RENAME_FOLDER
+        File outFile = new File(base + File.separator + entry);
+
         //check if the file exist
         if (outFile.exists()) {
             //prepare new name
             String suffix = "";
             String stem = entry;
-            if (entry.lastIndexOf('.') > 0 && entry.lastIndexOf('.') > suffix.indexOf('/')) {
+            if (entry.lastIndexOf('.') > 0) {
                 suffix = entry.substring(entry.lastIndexOf('.'));
                 stem = entry.substring(0, entry.lastIndexOf('.'));
             }
@@ -84,11 +84,28 @@ class Decompressor {
                 index++;
                 new_file = new File(base + File.separator + stem + "_" + index + suffix);
             }
-            outFile = new_file;
-            System.out.println("Decompressing file as: " + stem + "_" + index + suffix);
+
+            return stem + "_" + index + suffix;
         }
 
-        return outFile;
+        rootPaths.add(outFile);
+        return entry;
+    }
 
+    private static File getUnconflictedFileName(String base, String entry) {
+        if (entry.indexOf('/') == -1) { //file itself
+            File file = new File(base + File.separator + getRootName(base, entry));
+            rootPaths.add(file);
+            return file;
+        }
+
+        String stemFolder = entry.substring(0, entry.indexOf('/'));
+
+        if (!rootFolder.containsKey(stemFolder)) {
+            rootFolder.put(stemFolder, getRootName(base, stemFolder));
+            rootPaths.add(new File(base + File.separator + rootFolder.get(stemFolder)));
+        }
+
+        return new File(base + File.separator + rootFolder.get(stemFolder) + entry.substring(entry.indexOf('/')));
     }
 }

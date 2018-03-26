@@ -1,3 +1,5 @@
+package zip;
+
 import java.io.IOException;
 
 /**
@@ -5,7 +7,7 @@ import java.io.IOException;
  */
 public class CompressTest {
     public static void main(String[] args) throws IOException {
-        Compressor.compress("./src", "src.zip");
-        System.out.println(Decompressor.decompress("./src.zip", "./src_2"));
+        Compressor.compress("./NetworkClipboard.iml", "src.zip");
+        System.out.println(RenameDecompressor.decompress("./src.zip", "./src_2"));
     }
 }
