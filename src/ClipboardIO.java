@@ -85,7 +85,9 @@ public class ClipboardIO {
             if (sysClip.isDataFlavorAvailable(DataFlavor.javaFileListFlavor)) return ContentType.FILES;
             if (sysClip.isDataFlavorAvailable(DataFlavor.stringFlavor)) return ContentType.STRING;
         } catch (IllegalStateException e){
-            e.printStackTrace();
+            if (!e.getMessage().contains("cannot open system clipboard")) {
+                e.printStackTrace();
+            }
         }
         return null;
     }
