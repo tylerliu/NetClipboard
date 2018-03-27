@@ -44,25 +44,25 @@ public class FileReceiver implements Runnable, Cancelable {
         return receiveStream(outputStream, DEFAULT_PORT);
     }
 
-    public static FileReceiver receiveFileRun(File dstFile, int port) {
+    public static FileReceiver recriveFileRun(File dstFile, int port) {
         try {
-            if (!dstFile.exists()) dstFile.createNewFile();
             return receiveStreamRun(new FileOutputStream(dstFile), port);
-        } catch (IOException e) {
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found! " + dstFile.getAbsolutePath());
             e.printStackTrace();
         }
         return null;
     }
 
     public static FileReceiver receiveFileRun(File dstFile) {
-        return receiveFileRun(dstFile, DEFAULT_PORT);
+        return recriveFileRun(dstFile, DEFAULT_PORT);
     }
 
     public static Thread receiveFile(File dstFile, int port) {
         try {
-            if (!dstFile.exists()) dstFile.createNewFile();
             return receiveStream(new FileOutputStream(dstFile), port);
-        } catch (IOException e) {
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found! " + dstFile.getAbsolutePath());
             e.printStackTrace();
         }
         return null;
@@ -70,16 +70,6 @@ public class FileReceiver implements Runnable, Cancelable {
 
     public static Thread receiveFile(File dstFile) {
         return receiveFile(dstFile, DEFAULT_PORT);
-    }
-
-    public static void cancelConnection(int port) {
-        FileReceiver receiver = new FileReceiver(port);
-        receiver.openConnection();
-        receiver.closeConnection();
-    }
-
-    public static void cancelConnection() {
-        cancelConnection(DEFAULT_PORT);
     }
 
     private boolean openConnection() {

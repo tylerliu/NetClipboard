@@ -23,7 +23,7 @@ public class ClipboardIO {
      */
     public static boolean checkNew() {
         ContentType type = getSysClipboardFlavor();
-        if (type == null) return false;
+
         switch (type) {
             case FILES:
                 List<File> files = getSysClipboardFiles();
@@ -80,15 +80,9 @@ public class ClipboardIO {
 
     //TODO support Image?
     public static ContentType getSysClipboardFlavor() {
-        try {
-            //if (sysClip.isDataFlavorAvailable(DataFlavor.imageFlavor)) return ContentType.IMAGE;
-            if (sysClip.isDataFlavorAvailable(DataFlavor.javaFileListFlavor)) return ContentType.FILES;
-            if (sysClip.isDataFlavorAvailable(DataFlavor.stringFlavor)) return ContentType.STRING;
-        } catch (IllegalStateException e){
-            if (!e.getMessage().contains("cannot open system clipboard")) {
-                e.printStackTrace();
-            }
-        }
+        //if (sysClip.isDataFlavorAvailable(DataFlavor.imageFlavor)) return ContentType.IMAGE;
+        if (sysClip.isDataFlavorAvailable(DataFlavor.javaFileListFlavor)) return ContentType.FILES;
+        if (sysClip.isDataFlavorAvailable(DataFlavor.stringFlavor)) return ContentType.STRING;
         return null;
     }
 
@@ -121,11 +115,12 @@ public class ClipboardIO {
         }
     }
 
-    public static void unsetSysClipboard(){
-        lastString = "";
+    public static void setSysCLipboardFiles(List<File> files) {
+        lastType = ContentType.FILES;
+        lastFiles = files;
         isFromRemote = true;
-        StringSelection ss = new StringSelection("");
-        sysClip.setContents(ss, ss);
+        FileTransfer.FileTransferable fileTransferable = new FileTransfer.FileTransferable(files);
+        sysClip.setContents(fileTransferable, fileTransferable);
     }
 
     public enum ContentType {
