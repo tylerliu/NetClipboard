@@ -54,8 +54,8 @@ public class RenameDecompressor {
             out.close();
         }
 
-        zipInput.close();
         zipFile.close();
+        zipInput.close();
         return rootPaths;
     }
 

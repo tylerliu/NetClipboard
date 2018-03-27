@@ -54,8 +54,9 @@ public class CombineDecompressor {
             input.close();
             out.close();
         }
-        zipInput.close();
+
         zipFile.close();
+        zipInput.close();
         return files;
     }
 

@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -6,6 +7,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -103,6 +105,10 @@ class TransferConnector {
 
                 //check clipboard
                 if (ClipboardIO.checkNew()) {
+                    if (FileTransfer.isTransferring()) { //file Transferring
+                        FileTransfer.cancelTransfer();
+                    }
+                    FileTransfer.deleteFolder();
                     switch (ClipboardIO.getLastType()) {
                         case STRING:
                             outBuffer.writeString(ClipboardIO.getLastString());
@@ -121,6 +127,13 @@ class TransferConnector {
                     socketChannel.register(selector, SelectionKey.OP_WRITE);
                 }
 
+                //set clipboard if file receiving finished
+                if (FileTransfer.isNewlyReceived()) {
+                    List<File> files = FileTransfer.getFiles();
+                    System.out.println("Remote Clipboard New: " + files);
+                    ClipboardIO.setSysCLipboardFiles(files);
+                }
+
                 for (SelectionKey s1 : selector.selectedKeys()) {
                     if (s1.isReadable()) {
                         //read
@@ -135,6 +148,10 @@ class TransferConnector {
                         if (inBuffer.readyToRead()) {
                             Object[] b = inBuffer.readNext();
                             if (b == null) System.exit(0);
+                            if (FileTransfer.isTransferring()) {
+                                FileTransfer.cancelTransfer();
+                            }
+                            FileTransfer.deleteFolder();
                             switch (ClipboardIO.getContentType((int) b[0])) {
                                 case STRING:
                                     String s = (String) b[1];
@@ -147,7 +164,6 @@ class TransferConnector {
                                 case HTML:
                                 case FILES:
                                     FileTransfer.receiveFiles();
-                                    ClipboardIO.unsetSysClipboard();
                                 default:
                             }
                         }
