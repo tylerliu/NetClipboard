@@ -1,5 +1,7 @@
 package zip;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.*;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -9,14 +11,6 @@ import java.util.zip.ZipOutputStream;
  * Created by TylerLiu on 2017/10/06.
  */
 public class Compressor {
-
-    public static void copyStream(InputStream input, OutputStream output) throws IOException {
-        byte[] buffer = new byte[8192];
-        int bytesRead;
-        while ((bytesRead = input.read(buffer)) != -1) {
-            output.write(buffer, 0, bytesRead);
-        }
-    }
 
     /**
      * recursively compress a path
@@ -106,7 +100,7 @@ public class Compressor {
             FileInputStream is = new FileInputStream(file);
             ZipEntry entry = new ZipEntry(basedir + file.getName());
             out.putNextEntry(entry);
-            copyStream(is, out);
+            IOUtils.copy(is, out);
             is.close();
         } catch (Exception e) {
             throw new RuntimeException(e);

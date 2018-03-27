@@ -1,5 +1,7 @@
 package zip;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,7 +52,7 @@ public class CombineDecompressor {
 
             InputStream input = zipFile.getInputStream(entry);
             OutputStream out = new FileOutputStream(outFile);
-            Compressor.copyStream(input, out);
+            IOUtils.copy(input, out);
             input.close();
             out.close();
         }

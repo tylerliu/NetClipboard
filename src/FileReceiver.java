@@ -1,3 +1,4 @@
+import org.apache.commons.io.IOUtils;
 import zip.Compressor;
 
 import java.io.*;
@@ -121,7 +122,7 @@ public class FileReceiver implements Runnable, Cancelable {
     public void run() {
         if (!openConnection()) return;
         try {
-            Compressor.copyStream(recvInputStream, outputStream);
+            IOUtils.copy(recvInputStream, outputStream);
         } catch (IOException e) {
             if (isCancelled) {
                 System.out.println("File receive cancelled with error " + e);

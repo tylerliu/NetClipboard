@@ -1,5 +1,7 @@
 import FileChooser.NativeJFileChooser;
 import javax.swing.JFileChooser;
+
+import org.apache.commons.io.FileDeleteStrategy;
 import zip.RenameDecompressor;
 import java.io.File;
 import java.io.IOException;
@@ -59,7 +61,8 @@ public class FileTransfer {
 
             RenameDecompressor.decompress(dstZipFile, toDir);
 
-            if (!dstZipFile.delete()) System.out.println("Zip file not deleted: " + dstZipFile);
+            FileDeleteStrategy.FORCE.delete(dstZipFile);
+
             System.out.println("File receive done");
         } catch (IOException e) {
             e.printStackTrace();

@@ -1,3 +1,4 @@
+import org.apache.commons.io.IOUtils;
 import zip.Compressor;
 
 import java.io.*;
@@ -139,7 +140,7 @@ public class FileSender implements Runnable, Cancelable {
     public void run() {
         if (!openConnection()) return;
         try {
-            Compressor.copyStream(inputStream, sendOutputStream);
+            IOUtils.copy(inputStream, sendOutputStream);
         } catch (IOException e) {
             if (isCancelled) {
                 System.out.println("File send cancel with error" + e);
