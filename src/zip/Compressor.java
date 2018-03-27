@@ -102,6 +102,7 @@ public class Compressor {
             out.putNextEntry(entry);
             IOUtils.copy(is, out);
             is.close();
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

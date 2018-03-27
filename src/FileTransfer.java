@@ -61,6 +61,12 @@ public class FileTransfer {
 
             RenameDecompressor.decompress(dstZipFile, toDir);
 
+            System.gc();
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
             FileDeleteStrategy.FORCE.delete(dstZipFile);
 
             System.out.println("File receive done");
