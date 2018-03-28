@@ -1,3 +1,7 @@
+package net;
+
+import main.ClipboardIO;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -8,10 +12,12 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Objects;
 
+import static main.ClipboardIO.ContentType.*;
+
 /**
  * Handles the network connection for clipboard sharing
  */
-class TransferConnector {
+public class TransferConnector {
 
     private static final boolean isLoopBack = false;
     private static final int connectionPort = 31415;
@@ -42,7 +48,7 @@ class TransferConnector {
     }
 
 
-    static void connect() {
+    public static void connect() {
         try {
             serverSocketChannel = ServerSocketChannel.open();
             serverSocketChannel.bind(new InetSocketAddress(connectionPort));
@@ -91,7 +97,7 @@ class TransferConnector {
         }
     }
 
-    static void DataTransferExecute() {
+    public static void DataTransferExecute() {
         try {
             Selector selector = Selector.open();
             serverChannel.register(selector, SelectionKey.OP_READ);
@@ -171,9 +177,9 @@ class TransferConnector {
         }
     }
 
-    static void close() {
+    public static void close() {
         try {
-            if (!terminateInitiated && socketChannel != null) {
+            if (!terminateInitiated && socketChannel != null && socketChannel.isConnected()) {
                 terminateInitiated = true;
                 outBuffer.writeEND();
                 while (!outBuffer.getOutput().isEmpty()) {

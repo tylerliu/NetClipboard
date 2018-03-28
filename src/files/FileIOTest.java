@@ -1,4 +1,6 @@
-import zip.RenameDecompressor;
+package files;
+
+import files.zip.RenameDecompressor;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,11 +18,11 @@ public class FileIOTest {
     }
 
     public static void receive() {
-        File dst = new File("src.zip");
+        File dst = new File("src.files.zip");
         try {
             dst.createNewFile();
             FileReceiver.receiveFile(dst).join();
-            RenameDecompressor.decompress("src.zip", "src_2");
+            RenameDecompressor.decompress("src.files.zip", "src_2");
         } catch (IOException e) {
             e.printStackTrace();
         } catch (InterruptedException e) {

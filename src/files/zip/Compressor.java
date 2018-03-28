@@ -1,4 +1,4 @@
-package zip;
+package files.zip;
 
 import org.apache.commons.io.IOUtils;
 
@@ -89,7 +89,7 @@ public class Compressor {
      * compress a file.
      *
      * @param file    file to compress
-     * @param out     zip output stream
+     * @param out     files.zip output stream
      * @param basedir base directory of the file
      */
     private static void compressFile(File file, ZipOutputStream out, String basedir) {

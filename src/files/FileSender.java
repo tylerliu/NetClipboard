@@ -1,5 +1,8 @@
+package files;
+
+import net.TransferConnector;
 import org.apache.commons.io.IOUtils;
-import zip.Compressor;
+import files.zip.Compressor;
 
 import java.io.*;
 import java.net.ServerSocket;

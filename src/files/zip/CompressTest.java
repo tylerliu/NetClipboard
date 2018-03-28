@@ -1,4 +1,4 @@
-package zip;
+package files.zip;
 
 import java.io.IOException;
 
@@ -7,7 +7,7 @@ import java.io.IOException;
  */
 public class CompressTest {
     public static void main(String[] args) throws IOException {
-        Compressor.compress("./src", "src.zip");
-        System.out.println(CombineDecompressor.decompress("./src.zip", "./src_2"));
+        Compressor.compress("./src", "src.files.zip");
+        System.out.println(CombineDecompressor.decompress("./src.files.zip", "./src_2"));
     }
 }

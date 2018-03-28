@@ -1,4 +1,4 @@
-package zip;
+package files.zip;
 
 import org.apache.commons.io.IOUtils;
 
@@ -10,10 +10,10 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 /**
- * A decompressor that replace files when there are conflicts
+ * A decompressor that combines folders when there are conflicts
  * Created by TylerLiu on 2017/10/07.
  */
-public class ReplaceDecompressor {
+public class CombineDecompressor {
 
     private static List<File> allFiles;
 
@@ -36,7 +36,7 @@ public class ReplaceDecompressor {
 
             System.out.println("Decompressing file: " + entryName);
 
-            File outFile = new File(base + File.separator + entry); //Define Output Path
+            File outFile = getUnconflictedFileName(base.toString(), entryName); //Define Output Path
 
             //make List
             allFiles.add(outFile);
@@ -56,7 +56,6 @@ public class ReplaceDecompressor {
             input.close();
             out.close();
         }
-
         zipInput.close();
         zipFile.close();
         return files;
@@ -64,5 +63,33 @@ public class ReplaceDecompressor {
 
     public static List<File> getAllFiles() {
         return allFiles;
+    }
+
+    private static File getUnconflictedFileName(String base, String entry) {
+        File outFile = new File(base + File.separator + entry);
+
+        //check if the file exist
+        if (!outFile.exists()) {
+            return outFile;
+        }
+
+        //prepare new name
+        String suffix = "";
+        String stem = entry;
+        if (entry.lastIndexOf('.') > 0 && entry.lastIndexOf('.') > suffix.indexOf('/')) {
+            suffix = entry.substring(entry.lastIndexOf('.'));
+            stem = entry.substring(0, entry.lastIndexOf('.'));
+        }
+
+        int index = 1;
+        File new_file = outFile;
+
+        while (new_file.exists()) {
+            index++;
+            new_file = new File(base + File.separator + stem + "_" + index + suffix);
+        }
+        outFile = new_file;
+
+        return outFile;
     }
 }

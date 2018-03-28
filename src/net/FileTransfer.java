@@ -1,8 +1,12 @@
-import FileChooser.NativeJFileChooser;
+package net;
+
+import filechooser.NativeJFileChooser;
 import javax.swing.JFileChooser;
 
+import files.FileReceiver;
+import files.FileSender;
 import org.apache.commons.io.FileDeleteStrategy;
-import zip.RenameDecompressor;
+import files.zip.RenameDecompressor;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -48,7 +52,7 @@ public class FileTransfer {
                 return;
             }
 
-            File dstZipFile = File.createTempFile("NetClipboard", ".zip");
+            File dstZipFile = File.createTempFile("NetClipboard", ".files.zip");
             dstZipFile.deleteOnExit();
             System.out.println("Receive Zip: " + dstZipFile.getAbsolutePath());
 

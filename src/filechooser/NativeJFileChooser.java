@@ -23,14 +23,13 @@
  * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-package FileChooser;
+package filechooser;
 
 import java.awt.Component;
 import java.awt.HeadlessException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import javafx.application.Platform;
@@ -38,7 +37,6 @@ import javafx.embed.swing.JFXPanel;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javax.swing.JFileChooser;
-import static javax.swing.JFileChooser.DIRECTORIES_ONLY;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.filechooser.FileSystemView;
@@ -120,23 +118,19 @@ public class NativeJFileChooser extends JFileChooser {
         }
 
         final CountDownLatch latch = new CountDownLatch(1);
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
+        Platform.runLater(() -> {
 //                parent.setEnabled(false);
-                if (isDirectorySelectionEnabled()) {
-                    currentFile = directoryChooser.showDialog(null);
+            if (isDirectorySelectionEnabled()) {
+                currentFile = directoryChooser.showDialog(null);
+            } else {
+                if (isMultiSelectionEnabled()) {
+                    currentFiles = fileChooser.showOpenMultipleDialog(null);
                 } else {
-                    if (isMultiSelectionEnabled()) {
-                        currentFiles = fileChooser.showOpenMultipleDialog(null);
-                    } else {
-                        currentFile = fileChooser.showOpenDialog(null);
-                    }
+                    currentFile = fileChooser.showOpenDialog(null);
                 }
-                latch.countDown();
-//                parent.setEnabled(true);
             }
-
+            latch.countDown();
+//                parent.setEnabled(true);
         });
         try {
             latch.await();
@@ -168,19 +162,15 @@ public class NativeJFileChooser extends JFileChooser {
 
         final CountDownLatch latch = new CountDownLatch(1);
 
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
+        Platform.runLater(() -> {
 //                parent.setEnabled(false);
-                if (isDirectorySelectionEnabled()) {
-                    currentFile = directoryChooser.showDialog(null);
-                } else {
-                    currentFile = fileChooser.showSaveDialog(null);
-                }
-                latch.countDown();
-//                parent.setEnabled(true);
+            if (isDirectorySelectionEnabled()) {
+                currentFile = directoryChooser.showDialog(null);
+            } else {
+                currentFile = fileChooser.showSaveDialog(null);
             }
-
+            latch.countDown();
+//                parent.setEnabled(true);
         });
         try {
             latch.await();
@@ -343,14 +333,8 @@ public class NativeJFileChooser extends JFileChooser {
                 fileChooser.getExtensionFilters()
                         .add(new FileChooser.ExtensionFilter("All files", "*.*"));
             } else {
-                for (Iterator<FileChooser.ExtensionFilter> it
-                     = fileChooser.getExtensionFilters().iterator(); it.hasNext();) {
-                    FileChooser.ExtensionFilter filter = it.next();
-                    if (filter.getExtensions().size() == 1
-                            && filter.getExtensions().contains("*.*")) {
-                        it.remove();
-                    }
-                }
+                fileChooser.getExtensionFilters().removeIf(filter -> filter.getExtensions().size() == 1
+                        && filter.getExtensions().contains("*.*"));
             }
         }
     }

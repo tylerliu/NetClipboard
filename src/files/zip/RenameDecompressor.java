@@ -1,4 +1,4 @@
-package zip;
+package files.zip;
 
 import org.apache.commons.io.IOUtils;
 
