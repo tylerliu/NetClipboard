@@ -2,6 +2,10 @@ package files;
 
 import files.archiver.tar.TarExtractor;
 import net.TransferConnector;
+import org.apache.commons.compress.compressors.lz4.BlockLZ4CompressorInputStream;
+import org.apache.commons.compress.compressors.lz4.FramedLZ4CompressorInputStream;
+import org.apache.commons.compress.compressors.snappy.FramedSnappyCompressorInputStream;
+import org.apache.commons.compress.compressors.zstandard.ZstdCompressorInputStream;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
@@ -157,6 +161,7 @@ public class FileReceiver implements Runnable, Cancelable {
     public void runTared(File base) {
         if (!openConnection()) return;
         try {
+            recvInputStream = new FramedSnappyCompressorInputStream(recvInputStream);
             TarExtractor.decompress(recvInputStream, base);
         } catch (IOException e) {
             if (isCancelled) {
