@@ -1,4 +1,4 @@
-package files.zip;
+package files.archiver.zip;
 
 import org.apache.commons.io.IOUtils;
 
@@ -10,7 +10,7 @@ import java.util.zip.ZipOutputStream;
 /**
  * Created by TylerLiu on 2017/10/06.
  */
-public class Compressor {
+public class ZipCompressor {
 
     /**
      * recursively compress a path
@@ -89,7 +89,7 @@ public class Compressor {
      * compress a file.
      *
      * @param file    file to compress
-     * @param out     files.zip output stream
+     * @param out     files.archiver.zip output stream
      * @param basedir base directory of the file
      */
     private static void compressFile(File file, ZipOutputStream out, String basedir) {

@@ -5,10 +5,8 @@ import javax.swing.JFileChooser;
 
 import files.FileReceiver;
 import files.FileSender;
-import org.apache.commons.io.FileDeleteStrategy;
-import files.zip.RenameDecompressor;
+
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -27,51 +25,35 @@ public class FileTransfer {
     }
 
     private static void receiveFilesWorker() {
-        try {
-            int port = PortAllocator.alloc();
-            File toDir;
+        int port = PortAllocator.alloc();
+        File toDir;
 
-            //choose destination
-            //TODO track default directory
-            if (lastSavedDirectory == null) {
-                lastSavedDirectory = new File(System.getProperty("user.home"));
-            }
-            NativeJFileChooser chooser = new NativeJFileChooser(lastSavedDirectory);
-            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            chooser.setDialogTitle("Paste Files...");
-
-            int chooseResult = chooser.showDialog(null, "Paste");
-            if (chooseResult == JFileChooser.APPROVE_OPTION) {
-                toDir = chooser.getSelectedFile();
-                lastSavedDirectory = toDir;
-                System.out.println("Saving to: " + lastSavedDirectory.getAbsolutePath());
-            } else {
-                System.out.println("Cancelled Pasting.");
-                FileReceiver.cancelConnection(port);
-                PortAllocator.free(port);
-                return;
-            }
-
-            File dstZipFile = File.createTempFile("NetClipboard", ".files.zip");
-            dstZipFile.deleteOnExit();
-            System.out.println("Receive Zip: " + dstZipFile.getAbsolutePath());
-
-            System.out.println("File receiving on port: " + port);
-
-            FileReceiver receiver = FileReceiver.receiveFileRun(dstZipFile, port);
-            receiver.run();
-
-            PortAllocator.free(port);
-
-            RenameDecompressor.decompress(dstZipFile, toDir);
-
-            System.gc();
-            FileDeleteStrategy.FORCE.delete(dstZipFile);
-
-            System.out.println("File receive done");
-        } catch (IOException e) {
-            e.printStackTrace();
+        //choose destination
+        //TODO track default directory
+        if (lastSavedDirectory == null) {
+            lastSavedDirectory = new File(System.getProperty("user.home"));
         }
+        NativeJFileChooser chooser = new NativeJFileChooser(lastSavedDirectory);
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setDialogTitle("Paste Files...");
+
+        int chooseResult = chooser.showDialog(null, "Paste");
+        if (chooseResult == JFileChooser.APPROVE_OPTION) {
+            toDir = chooser.getSelectedFile();
+            lastSavedDirectory = toDir;
+            System.out.println("Saving to: " + lastSavedDirectory.getAbsolutePath());
+        } else {
+            System.out.println("Cancelled Pasting.");
+            FileReceiver.cancelConnection(port);
+            PortAllocator.free(port);
+            return;
+        }
+
+        System.out.println("File receiving on port: " + port);
+        FileReceiver receiver = FileReceiver.receiveTarObj(port);
+        receiver.runTared(toDir);
+        PortAllocator.free(port);
+        System.out.println("File receive done");
     }
 
     public synchronized static void sendFiles(List<File> sendFiles) {
@@ -82,7 +64,7 @@ public class FileTransfer {
         int port = PortAllocator.alloc();
         System.out.println("File sending on port: " + port);
         FileSender sender = FileSender.sendFileListObj(port);
-        sender.runCompressed(sendFiles);
+        sender.runTared(sendFiles);
         PortAllocator.free(port);
     }
 

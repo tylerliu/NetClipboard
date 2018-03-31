@@ -12,8 +12,6 @@ import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.Objects;
 
-import static main.ClipboardIO.ContentType.*;
-
 /**
  * Handles the network connection for clipboard sharing
  */

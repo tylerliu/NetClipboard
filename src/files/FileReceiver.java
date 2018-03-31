@@ -1,5 +1,6 @@
 package files;
 
+import files.archiver.tar.TarExtractor;
 import net.TransferConnector;
 import org.apache.commons.io.IOUtils;
 
@@ -75,6 +76,26 @@ public class FileReceiver implements Runnable, Cancelable {
         return receiveFile(dstFile, DEFAULT_PORT);
     }
 
+    public static FileReceiver receiveTarObj(int port) {
+        return new FileReceiver(port);
+    }
+
+    public static FileReceiver receiveTarObj() {
+        return new FileReceiver();
+    }
+
+
+    public static Thread receiveTar(File base, int port) {
+        FileReceiver receiver = new FileReceiver(port);
+        Thread thread = new Thread(() -> receiver.runTared(base), "Untar receiver");
+        thread.start();
+        return thread;
+    }
+
+    public static Thread receiveTar(File base) {
+        return receiveTar(base, DEFAULT_PORT);
+    }
+
     public static void cancelConnection(int port) {
         FileReceiver receiver = new FileReceiver(port);
         receiver.openConnection();
@@ -125,6 +146,18 @@ public class FileReceiver implements Runnable, Cancelable {
         if (!openConnection()) return;
         try {
             IOUtils.copy(recvInputStream, outputStream);
+        } catch (IOException e) {
+            if (isCancelled) {
+                System.out.println("File receive cancelled with error " + e);
+            } else e.printStackTrace();
+        }
+        closeConnection();
+    }
+
+    public void runTared(File base) {
+        if (!openConnection()) return;
+        try {
+            TarExtractor.decompress(recvInputStream, base);
         } catch (IOException e) {
             if (isCancelled) {
                 System.out.println("File receive cancelled with error " + e);
