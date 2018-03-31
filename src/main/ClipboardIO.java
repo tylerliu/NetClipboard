@@ -1,6 +1,6 @@
 package main;
 
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
@@ -86,7 +86,7 @@ public class ClipboardIO {
             //if (sysClip.isDataFlavorAvailable(DataFlavor.imageFlavor)) return ContentType.IMAGE;
             if (sysClip.isDataFlavorAvailable(DataFlavor.javaFileListFlavor)) return ContentType.FILES;
             if (sysClip.isDataFlavorAvailable(DataFlavor.stringFlavor)) return ContentType.STRING;
-        } catch (IllegalStateException e){
+        } catch (IllegalStateException e) {
             if (!e.getMessage().contains("cannot open system clipboard")) {
                 e.printStackTrace();
             }
@@ -123,7 +123,7 @@ public class ClipboardIO {
         }
     }
 
-    public static void unsetSysClipboard(){
+    public static void unsetSysClipboard() {
         lastString = "";
         isFromRemote = true;
         StringSelection ss = new StringSelection("");

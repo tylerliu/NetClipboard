@@ -8,16 +8,44 @@ import java.util.Map;
 
 public class NamingUtil {
 
-    public enum RenameStrategy {REPLACE, RENAME_ROOT, COMBINE_FOLDER}
-
-    private RenameStrategy strategy;
-
     private static Map<String, String> rootFolder = new HashMap<>();
     private static List<File> rootPaths; //both files and folders
-
+    private RenameStrategy strategy;
     public NamingUtil(RenameStrategy strategy) {
         this.strategy = strategy;
         rootPaths = new ArrayList<>();
+    }
+
+    private static File ReplaceGetName(String base, String entry) {
+        return new File(base + File.separator + entry);
+    }
+
+    private static File CombineGetName(String base, String entry) {
+        File outFile = new File(base + File.separator + entry);
+
+        //check if the file exist
+        if (!outFile.exists()) {
+            return outFile;
+        }
+
+        //prepare new name
+        String suffix = "";
+        String stem = entry;
+        if (entry.lastIndexOf('.') > 0 && entry.lastIndexOf('.') > suffix.indexOf('/')) {
+            suffix = entry.substring(entry.lastIndexOf('.'));
+            stem = entry.substring(0, entry.lastIndexOf('.'));
+        }
+
+        int index = 1;
+        File new_file = outFile;
+
+        while (new_file.exists()) {
+            index++;
+            new_file = new File(base + File.separator + stem + "_" + index + suffix);
+        }
+        outFile = new_file;
+
+        return outFile;
     }
 
     public File getUnconflictFileName(String base, String entry) {
@@ -96,35 +124,5 @@ public class NamingUtil {
         return new File(base + File.separator + rootFolder.get(stemFolder) + entry.substring(entry.indexOf('/')));
     }
 
-    private static File ReplaceGetName(String base, String entry) {
-        return new File(base + File.separator + entry);
-    }
-
-    private static File CombineGetName(String base, String entry) {
-        File outFile = new File(base + File.separator + entry);
-
-        //check if the file exist
-        if (!outFile.exists()) {
-            return outFile;
-        }
-
-        //prepare new name
-        String suffix = "";
-        String stem = entry;
-        if (entry.lastIndexOf('.') > 0 && entry.lastIndexOf('.') > suffix.indexOf('/')) {
-            suffix = entry.substring(entry.lastIndexOf('.'));
-            stem = entry.substring(0, entry.lastIndexOf('.'));
-        }
-
-        int index = 1;
-        File new_file = outFile;
-
-        while (new_file.exists()) {
-            index++;
-            new_file = new File(base + File.separator + stem + "_" + index + suffix);
-        }
-        outFile = new_file;
-
-        return outFile;
-    }
+    public enum RenameStrategy {REPLACE, RENAME_ROOT, COMBINE_FOLDER}
 }

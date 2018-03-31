@@ -25,21 +25,21 @@
  */
 package filechooser;
 
-import java.awt.Component;
-import java.awt.HeadlessException;
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
+import javafx.stage.DirectoryChooser;
+import javafx.stage.FileChooser;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.filechooser.FileSystemView;
+import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
-import javafx.stage.DirectoryChooser;
-import javafx.stage.FileChooser;
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
-import javax.swing.filechooser.FileSystemView;
 
 /**
  * This is a drop-in replacement for Swing's file chooser. Instead of displaying
@@ -63,10 +63,6 @@ import javax.swing.filechooser.FileSystemView;
 public class NativeJFileChooser extends JFileChooser {
 
     public static final boolean FX_AVAILABLE;
-    private List<File> currentFiles;
-    private FileChooser fileChooser;
-    private File currentFile;
-    private DirectoryChooser directoryChooser;
 
     static {
         boolean isFx;
@@ -81,6 +77,11 @@ public class NativeJFileChooser extends JFileChooser {
 
         FX_AVAILABLE = isFx;
     }
+
+    private List<File> currentFiles;
+    private FileChooser fileChooser;
+    private File currentFile;
+    private DirectoryChooser directoryChooser;
 
     public NativeJFileChooser() {
         initFxFileChooser(null);
@@ -205,14 +206,6 @@ public class NativeJFileChooser extends JFileChooser {
     }
 
     @Override
-    public File getSelectedFile() {
-        if (!FX_AVAILABLE) {
-            return super.getSelectedFile();
-        }
-        return currentFile;
-    }
-
-    @Override
     public void setSelectedFiles(File[] selectedFiles) {
         if (!FX_AVAILABLE) {
             super.setSelectedFiles(selectedFiles);
@@ -224,6 +217,14 @@ public class NativeJFileChooser extends JFileChooser {
             setSelectedFile(selectedFiles[0]);
             currentFiles = new ArrayList<>(Arrays.asList(selectedFiles));
         }
+    }
+
+    @Override
+    public File getSelectedFile() {
+        if (!FX_AVAILABLE) {
+            return super.getSelectedFile();
+        }
+        return currentFile;
     }
 
     @Override
@@ -269,6 +270,14 @@ public class NativeJFileChooser extends JFileChooser {
     }
 
     @Override
+    public String getDialogTitle() {
+        if (!FX_AVAILABLE) {
+            return super.getDialogTitle();
+        }
+        return fileChooser.getTitle();
+    }
+
+    @Override
     public void setDialogTitle(String dialogTitle) {
         if (!FX_AVAILABLE) {
             super.setDialogTitle(dialogTitle);
@@ -278,14 +287,6 @@ public class NativeJFileChooser extends JFileChooser {
         if (directoryChooser != null) {
             directoryChooser.setTitle(dialogTitle);
         }
-    }
-
-    @Override
-    public String getDialogTitle() {
-        if (!FX_AVAILABLE) {
-            return super.getDialogTitle();
-        }
-        return fileChooser.getTitle();
     }
 
     @Override

@@ -5,13 +5,12 @@ import files.archiver.NamingUtil.RenameStrategy;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
-import static files.archiver.NamingUtil.RenameStrategy.*;
+import static files.archiver.NamingUtil.RenameStrategy.RENAME_ROOT;
 
 /**
  * A decompressor that replace files when there are conflicts
@@ -44,7 +43,7 @@ public class ZipExtractor {
 
             System.out.println("Decompressing file: " + entryName);
 
-            File outFile = namingUtil.getUnconflictFileName(base.toString() , entryName); //Define Output Path
+            File outFile = namingUtil.getUnconflictFileName(base.toString(), entryName); //Define Output Path
 
             if (!outFile.getParentFile().exists()) outFile.getParentFile().mkdirs(); //make sure directory exist
             if (!outFile.exists()) outFile.createNewFile(); //make sure file exist

@@ -1,6 +1,5 @@
 package main;
 
-import main.ClipboardIO;
 import net.FileTransfer;
 import net.TransferConnector;
 

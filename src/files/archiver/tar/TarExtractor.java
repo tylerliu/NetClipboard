@@ -7,7 +7,6 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.IOUtils;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.List;
 
 import static files.archiver.NamingUtil.RenameStrategy.RENAME_ROOT;
@@ -42,7 +41,7 @@ public class TarExtractor {
 
     public static List<File> decompress(InputStream tarIn, File base, RenameStrategy strategy) throws IOException {
         NamingUtil util = new NamingUtil(strategy);
-        TarArchiveInputStream tarInput = new TarArchiveInputStream(tarIn,"UTF8"); // instantiate TarInputStream
+        TarArchiveInputStream tarInput = new TarArchiveInputStream(tarIn, "UTF8"); // instantiate TarInputStream
         TarArchiveEntry entry;
         while ((entry = tarInput.getNextTarEntry()) != null) { //iterating through
 
