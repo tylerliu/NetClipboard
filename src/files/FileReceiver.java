@@ -1,7 +1,13 @@
-import zip.Compressor;
+package files;
+
+import files.archiver.tar.TarExtractor;
+import net.TransferConnector;
+import org.apache.commons.compress.compressors.snappy.FramedSnappyCompressorInputStream;
+import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.net.Socket;
+import java.util.List;
 
 /**
  * Created by TylerLiu on 2018/03/22.
@@ -72,6 +78,26 @@ public class FileReceiver implements Runnable, Cancelable {
         return receiveFile(dstFile, DEFAULT_PORT);
     }
 
+    public static FileReceiver receiveTarObj(int port) {
+        return new FileReceiver(port);
+    }
+
+    public static FileReceiver receiveTarObj() {
+        return new FileReceiver();
+    }
+
+
+    public static Thread receiveTar(File base, int port) {
+        FileReceiver receiver = new FileReceiver(port);
+        Thread thread = new Thread(() -> receiver.runTared(base), "Untar receiver");
+        thread.start();
+        return thread;
+    }
+
+    public static Thread receiveTar(File base) {
+        return receiveTar(base, DEFAULT_PORT);
+    }
+
     private boolean openConnection() {
         try {
             recvSocket = new Socket(TransferConnector.getTarget(), listenPort);
@@ -111,12 +137,27 @@ public class FileReceiver implements Runnable, Cancelable {
     public void run() {
         if (!openConnection()) return;
         try {
-            Compressor.copyStream(recvInputStream, outputStream);
+            IOUtils.copy(recvInputStream, outputStream);
         } catch (IOException e) {
             if (isCancelled) {
                 System.out.println("File receive cancelled with error " + e);
             } else e.printStackTrace();
         }
         closeConnection();
+    }
+
+    public List<File> runTared(File base) {
+        List<File> files = null;
+        if (!openConnection()) return null;
+        try {
+            recvInputStream = new FramedSnappyCompressorInputStream(recvInputStream);
+            files = TarExtractor.decompress(recvInputStream, base);
+        } catch (IOException e) {
+            if (isCancelled) {
+                System.out.println("File receive cancelled with error " + e);
+            } else e.printStackTrace();
+        }
+        closeConnection();
+        return files;
     }
 }

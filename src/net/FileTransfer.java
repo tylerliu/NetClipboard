@@ -1,4 +1,9 @@
-import zip.CombineDecompressor;
+package net;
+
+import files.Cancelable;
+import files.FileReceiver;
+import files.FileSender;
+
 import java.awt.datatransfer.*;
 import java.io.File;
 import java.io.IOException;
@@ -13,7 +18,6 @@ import java.util.concurrent.Executors;
  */
 public class FileTransfer {
 
-    private static File dstZipFile;
     private static File dstFolder;
     private static List<File> files = null;
     private static boolean isCancelled;
@@ -37,36 +41,21 @@ public class FileTransfer {
     private static void receiveFilesWorker() {
         try {
             files = null;
-            if (dstZipFile != null && dstZipFile.exists()) {
-                dstZipFile.delete();
-            }
-            dstZipFile = File.createTempFile("NetClipboard", ".zip");
-            dstZipFile.deleteOnExit();
-            System.out.println("Receive Zip: " + dstZipFile.getAbsolutePath());
-
-            if (isCancelled) {
-                dstZipFile.delete();
-                dstZipFile = null;
-                return;
-            }
-
-            FileReceiver receiver = FileReceiver.receiveFileRun(dstZipFile);
-            transferConnector = receiver;
-            receiver.run();
-            transferConnector = null;
 
             File newDstFolder = Files.createTempDirectory("NetClipboard").toFile();
             newDstFolder.deleteOnExit();
             System.out.println("Receive Folder: " + newDstFolder.getAbsolutePath());
 
+            FileReceiver receiver = FileReceiver.receiveTarObj();
+            transferConnector = receiver;
+            files = receiver.runTared(newDstFolder);
+            transferConnector = null;
+
             if (isCancelled) {
                 newDstFolder.delete();
-                dstZipFile.delete();
-                dstZipFile = null;
                 return;
             }
 
-            files = CombineDecompressor.decompress(dstZipFile, newDstFolder);
             isFilesUsed = false;
             isFinished = true;
 
@@ -74,8 +63,6 @@ public class FileTransfer {
                 dstFolder.delete();
             }
             dstFolder = newDstFolder;
-            dstZipFile.delete();
-            dstZipFile = null;
             System.out.println("File receive done");
         } catch (IOException e) {
             e.printStackTrace();
@@ -96,7 +83,7 @@ public class FileTransfer {
     public static void sendFilesWorker() {
         FileSender sender = FileSender.sendFileListObj();
         transferConnector = sender;
-        sender.runCompressed(files);
+        sender.runTared(files);
         isFinished = true;
     }
 

@@ -1,4 +1,8 @@
-import java.awt.Toolkit;
+package main;
+
+import net.FileTransfer;
+
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
@@ -80,9 +84,15 @@ public class ClipboardIO {
 
     //TODO support Image?
     public static ContentType getSysClipboardFlavor() {
-        //if (sysClip.isDataFlavorAvailable(DataFlavor.imageFlavor)) return ContentType.IMAGE;
-        if (sysClip.isDataFlavorAvailable(DataFlavor.javaFileListFlavor)) return ContentType.FILES;
-        if (sysClip.isDataFlavorAvailable(DataFlavor.stringFlavor)) return ContentType.STRING;
+        try {
+            //if (sysClip.isDataFlavorAvailable(DataFlavor.imageFlavor)) return ContentType.IMAGE;
+            if (sysClip.isDataFlavorAvailable(DataFlavor.javaFileListFlavor)) return ContentType.FILES;
+            if (sysClip.isDataFlavorAvailable(DataFlavor.stringFlavor)) return ContentType.STRING;
+        } catch (IllegalStateException e) {
+            if (!e.getMessage().contains("cannot open system clipboard")) {
+                e.printStackTrace();
+            }
+        }
         return null;
     }
 

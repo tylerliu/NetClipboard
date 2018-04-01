@@ -1,4 +1,6 @@
-package zip;
+package files.archiver.zip;
+
+import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.util.List;
@@ -8,15 +10,7 @@ import java.util.zip.ZipOutputStream;
 /**
  * Created by TylerLiu on 2017/10/06.
  */
-public class Compressor {
-
-    public static void copyStream(InputStream input, OutputStream output) throws IOException {
-        byte[] buffer = new byte[8192]; // Adjust if you want
-        int bytesRead;
-        while ((bytesRead = input.read(buffer)) != -1) {
-            output.write(buffer, 0, bytesRead);
-        }
-    }
+public class ZipCompressor {
 
     /**
      * recursively compress a path
@@ -27,7 +21,7 @@ public class Compressor {
     public static void compress(String srcPathName, String dest) {
         File file = new File(srcPathName);
         if (!file.exists())
-            throw new RuntimeException(srcPathName + "不存在！");
+            throw new RuntimeException(srcPathName + " does not exist!");
         try {
             FileOutputStream fileOutputStream = new FileOutputStream(new File(dest));
             ZipOutputStream out = new ZipOutputStream(fileOutputStream);
@@ -68,10 +62,6 @@ public class Compressor {
 
     /**
      * recursively compress a file or directory
-     *
-     * @param file
-     * @param out
-     * @param basedir
      */
     private static void compress(File file, ZipOutputStream out, String basedir) {
         System.out.println("Compress：" + basedir + file.getName());
@@ -91,7 +81,6 @@ public class Compressor {
             return;
         //noinspection ConstantConditions
         for (File file : dir.listFiles()) {
-            /* 递归 */
             compress(file, out, basedir + dir.getName() + "/");
         }
     }
@@ -100,7 +89,7 @@ public class Compressor {
      * compress a file.
      *
      * @param file    file to compress
-     * @param out     zip output stream
+     * @param out     files.archiver.zip output stream
      * @param basedir base directory of the file
      */
     private static void compressFile(File file, ZipOutputStream out, String basedir) {
@@ -111,8 +100,9 @@ public class Compressor {
             FileInputStream is = new FileInputStream(file);
             ZipEntry entry = new ZipEntry(basedir + file.getName());
             out.putNextEntry(entry);
-            copyStream(is, out);
+            IOUtils.copy(is, out);
             is.close();
+
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/NetworkClipboard.iml" filepath="$PROJECT_DIR$/NetworkClipboard.iml" />
+      <module fileurl="file://$PROJECT_DIR$/NetClipboard.iml" filepath="$PROJECT_DIR$/NetClipboard.iml" />
     </modules>
   </component>
 </project>

@@ -1,3 +1,8 @@
+package main;
+
+import net.FileTransfer;
+import net.TransferConnector;
+
 public class Main {
 
     public static void main(String[] args) {

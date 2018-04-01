@@ -1,4 +1,9 @@
-import zip.Compressor;
+package files;
+
+import files.archiver.tar.TarCompressor;
+import net.TransferConnector;
+import org.apache.commons.compress.compressors.snappy.FramedSnappyCompressorOutputStream;
+import org.apache.commons.io.IOUtils;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -18,7 +23,6 @@ public class FileSender implements Runnable, Cancelable {
     private InputStream inputStream;
     private boolean isCancelled;
 
-    //TODO Cancellation?
     private FileSender(int port) {
         listenPort = port;
     }
@@ -84,7 +88,7 @@ public class FileSender implements Runnable, Cancelable {
 
     public static Thread sendFileList(List<File> files, int port) {
         FileSender sender = new FileSender(port);
-        Thread thread = new Thread(() -> sender.runCompressed(files), "Compressed Sender");
+        Thread thread = new Thread(() -> sender.runTared(files), "Compressed Sender");
         thread.start();
         return thread;
     }
@@ -139,7 +143,7 @@ public class FileSender implements Runnable, Cancelable {
     public void run() {
         if (!openConnection()) return;
         try {
-            Compressor.copyStream(inputStream, sendOutputStream);
+            IOUtils.copy(inputStream, sendOutputStream);
         } catch (IOException e) {
             if (isCancelled) {
                 System.out.println("File send cancel with error" + e);
@@ -149,9 +153,14 @@ public class FileSender implements Runnable, Cancelable {
         System.out.println("File send done");
     }
 
-    public void runCompressed(List<File> files) {
+    public void runTared(List<File> files) {
         if (!openConnection()) return;
-        Compressor.compress(files, getSendOutputStream());
+        try {
+            sendOutputStream = new FramedSnappyCompressorOutputStream(sendOutputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        TarCompressor.compress(files, getSendOutputStream());
         if (isCancelled) {
             System.out.println("File send cancel with error");
             return;
