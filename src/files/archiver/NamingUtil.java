@@ -8,8 +8,8 @@ import java.util.Map;
 
 public class NamingUtil {
 
-    private static Map<String, String> rootFolder = new HashMap<>();
-    private static List<File> rootPaths; //both files and folders
+    private Map<String, String> rootFolder = new HashMap<>();
+    private List<File> rootPaths; //both files and folders
     private RenameStrategy strategy;
     public NamingUtil(RenameStrategy strategy) {
         this.strategy = strategy;

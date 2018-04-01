@@ -27,7 +27,7 @@ public class ClipboardIO {
      */
     public static boolean checkNew() {
         ContentType type = getSysClipboardFlavor();
-
+        if (type == null) return false;
         switch (type) {
             case FILES:
                 List<File> files = getSysClipboardFiles();
