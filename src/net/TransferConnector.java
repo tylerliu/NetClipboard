@@ -10,6 +10,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Arrays;
 import java.util.Objects;
 
 /**
@@ -18,12 +19,12 @@ import java.util.Objects;
 public class TransferConnector {
 
     private static final boolean isLoopBack = false;
+    private static boolean isServer;
     private static final int connectionPort = 31415;
     private static MultipleFormatInBuffer inBuffer;
     private static MultipleFormatOutBuffer outBuffer;
     private static SocketChannel socketChannel;
     private static ServerSocketChannel serverSocketChannel;
-    private static SocketChannel serverChannel;
     private static boolean terminateInitiated;
 
     public static InetAddress getTarget() {
@@ -45,49 +46,37 @@ public class TransferConnector {
         return null;
     }
 
+    /**
+     * determine if this is the server side of the connection
+     */
+    public static void checkServer() {
+        try {
+            isServer = Arrays.compare(InetAddress.getLocalHost().getAddress(), getTarget().getAddress()) > 0;
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public static void connect() {
         try {
-            serverSocketChannel = ServerSocketChannel.open();
-            serverSocketChannel.bind(new InetSocketAddress(connectionPort));
-            serverSocketChannel.configureBlocking(false);
-            socketChannel = SocketChannel.open();
-            socketChannel.configureBlocking(false);
-
-            Selector selector = Selector.open();
-            serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
-            if (socketChannel.connect(new InetSocketAddress(getTarget(), connectionPort))) {
-                System.out.println("Client Connected");
+            checkServer();
+            System.out.println("This computer is " + InetAddress.getLocalHost().toString());
+            System.out.println("This is configured as " + (isServer ? "Server. " : "Client. "));
+            if (isServer) {
+                serverSocketChannel = ServerSocketChannel.open();
+                serverSocketChannel.bind(new InetSocketAddress(connectionPort));
+                socketChannel = serverSocketChannel.accept();
+                serverSocketChannel.configureBlocking(false);
             } else {
-                socketChannel.register(selector, SelectionKey.OP_CONNECT);
-            }
-
-            while (true) {
-                selector.select();
-
-                for (SelectionKey s : selector.selectedKeys()) {
-                    if (s.isConnectable()) {
-                        System.out.println("Client Connected");
-                        if (socketChannel.isConnectionPending()) {
-                            socketChannel.finishConnect();
-                        }
-                        s.cancel();
-                        continue;
-                    }
-                    if (s.isAcceptable()) {
-                        System.out.println("Opened server");
-                        serverChannel = serverSocketChannel.accept();
-                        serverChannel.configureBlocking(false);
-                        s.cancel();
-                    }
-                }
-
-                if (selector.keys().size() == 1) break;
+                socketChannel = SocketChannel.open();
+                socketChannel.connect(new InetSocketAddress(getTarget(), connectionPort));
+                System.out.println("Client Connected");
+                socketChannel.configureBlocking(false);
             }
 
             inBuffer = new MultipleFormatInBuffer();
             outBuffer = new MultipleFormatOutBuffer();
-            selector.close();
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -98,7 +87,7 @@ public class TransferConnector {
     public static void DataTransferExecute() {
         try {
             Selector selector = Selector.open();
-            serverChannel.register(selector, SelectionKey.OP_READ);
+            socketChannel.register(selector, SelectionKey.OP_READ);
             socketChannel.register(selector, SelectionKey.OP_WRITE);
 
 
@@ -129,10 +118,10 @@ public class TransferConnector {
                     if (s1.isReadable()) {
                         //read
 
-                        serverChannel.read(inBuffer.getInput().peekLast());
+                        socketChannel.read(inBuffer.getInput().peekLast());
                         while (!inBuffer.getInput().peekLast().hasRemaining()) {
                             inBuffer.requestNext();
-                            serverChannel.read(inBuffer.getInput().peekLast());
+                            socketChannel.read(inBuffer.getInput().peekLast());
                         }
 
                         //set clipboard
@@ -193,9 +182,7 @@ public class TransferConnector {
             }
             if (socketChannel != null)
                 socketChannel.close();
-            if (serverChannel != null)
-                serverChannel.close();
-            if (serverSocketChannel != null)
+            if (isServer && serverSocketChannel != null)
                 serverSocketChannel.close();
         } catch (IOException e) {
             e.printStackTrace();
