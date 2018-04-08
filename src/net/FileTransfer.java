@@ -12,7 +12,8 @@ import java.util.concurrent.Executors;
 
 /**
  * Class for transferring files
- * TODO clean up files
+ * TODO clean up folders
+ * TODO Verify Checksum
  */
 public class FileTransfer {
 
