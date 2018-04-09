@@ -68,7 +68,7 @@ class MultipleFormatInStream extends FilterInputStream {
     /**
      * @return [0] is the type, [1] is the data if applicable
      */
-    Object[] readNext() throws IOException{
+    Object[] readNext() throws IOException {
         loadNext();
         switch (type) {
             case 0:

@@ -49,9 +49,8 @@ class MultipleFormatOutStream extends FilterOutputStream {
         int count = buf.position();
         super.write(new byte[]{type, (byte) (count >> 16), (byte) ((count >> 8) & 0XFF), (byte) (count & 0XFF)});
         buf.flip();
-        byte[] store = new byte[count];
-        buf.get(store);
-        super.write(store);
+        byte[] array = buf.compact().array();
+        super.write(buf.compact().array());
         buf.clear();
         type = 0;
     }

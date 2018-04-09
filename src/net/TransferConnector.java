@@ -82,7 +82,7 @@ public class TransferConnector {
 
     public static void DataTransferExecute() {
         Thread thread = new Thread(TransferConnector::writer, "writer");
-
+        thread.start();
         //read thread
         reader();
     }
