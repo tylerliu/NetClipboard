@@ -19,8 +19,8 @@ public class TransferConnector {
     private static final boolean isLoopBack = false;
     private static boolean isServer;
     private static final int connectionPort = 31415;
-    private static MultipleFormatInStream inBuffer;
-    private static MultipleFormatOutStream outBuffer;
+    private static MultipleFormatInStream inStream;
+    private static MultipleFormatOutStream outStream;
     private static Socket socket;
     private static ServerSocket serverSocket;
     private static boolean terminateInitiated;
@@ -71,8 +71,8 @@ public class TransferConnector {
                 System.out.println("Client Connected");
             }
 
-            inBuffer = new MultipleFormatInStream(socket.getInputStream());
-            outBuffer = new MultipleFormatOutStream(socket.getOutputStream());
+            inStream = new MultipleFormatInStream(socket.getInputStream());
+            outStream = new MultipleFormatOutStream(socket.getOutputStream());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -95,11 +95,11 @@ public class TransferConnector {
                 if (ClipboardIO.checkNew()) {
                     switch (ClipboardIO.getLastType()) {
                         case STRING:
-                            outBuffer.writeString(ClipboardIO.getLastString());
+                            outStream.writeString(ClipboardIO.getLastString());
                             break;
                         case HTML:
                         case FILES:
-                            outBuffer.writeFiles();
+                            outStream.writeFiles();
                             FileTransfer.sendFiles(ClipboardIO.getLastFiles());
                             break;
                         case END:
@@ -124,7 +124,7 @@ public class TransferConnector {
         //read
         try {
             while (true) {
-                Object[] b = inBuffer.readNext();
+                Object[] b = inStream.readNext();
                 if (b == null) System.exit(0);
                 switch (ClipboardIO.getContentType((int) b[0])) {
                     case STRING:
@@ -151,7 +151,7 @@ public class TransferConnector {
         try {
             if (!terminateInitiated && socket != null && socket.isConnected()) {
                 terminateInitiated = true;
-                outBuffer.writeEND();
+                outStream.writeEND();
 
                 try {
                     Thread.sleep(100);

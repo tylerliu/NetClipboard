@@ -47,25 +47,14 @@ class MultipleFormatOutStream extends FilterOutputStream {
      */
     private void flushBuffer() throws IOException{
         int count = buf.position();
-        super.write(new byte[]{type, (byte) (count >> 16), (byte) ((count >> 8) & 0XFF), (byte) (count & 0XFF)});
+        byte[] head = new byte[]{type, (byte) (count >> 16), (byte) ((count >> 8) & 0XFF), (byte) (count & 0XFF)};
+        super.write(head, 0, head.length);
         buf.flip();
-        byte[] array = buf.compact().array();
-        super.write(buf.compact().array());
+        byte[] array = new byte[count];
+        buf.get(array);
+        super.write(array);
         buf.clear();
         type = 0;
-    }
-
-    /**
-     * Writes the specified byte to this buffered output stream.
-     *
-     * @param b the byte to be written.
-     * @throws IOException if an I/O error occurs.
-     */
-    public synchronized void write(int b) throws IOException {
-        if (!buf.hasRemaining()) {
-            flushBuffer();
-        }
-        buf.put((byte) b);
     }
 
 
@@ -78,7 +67,7 @@ class MultipleFormatOutStream extends FilterOutputStream {
      * @param len the number of bytes to write.
      * @throws IOException if an I/O error occurs.
      */
-    public synchronized void write(byte b[], int off, int len) throws IOException {
+    public synchronized void writePayload(byte b[], int off, int len) throws IOException {
         if (!buf.hasRemaining()) {
             flushBuffer();
         }
@@ -89,14 +78,14 @@ class MultipleFormatOutStream extends FilterOutputStream {
             off += rem;
             len -= rem;
             flushBuffer();
-            write(b, off, len);
+            super.write(b, off, len);
         } else {
             buf.put(b, off, len);
         }
     }
 
-    public synchronized void write(byte b[]) throws IOException {
-        write(b, 0, b.length);
+    public synchronized void writePayload(byte b[]) throws IOException {
+        writePayload(b, 0, b.length);
     }
 
     //format specific operations
@@ -104,14 +93,14 @@ class MultipleFormatOutStream extends FilterOutputStream {
     public synchronized void writeString(String s) throws IOException {
         assert buf.position() == 0;
         type = 1;
-        write(s.getBytes());
+        writePayload(s.getBytes());
         flushBuffer();
     }
 
     public synchronized void writeHTML(String s) throws IOException {
         assert buf.position() == 0;
         type = 3;
-        write(s.getBytes());
+        writePayload(s.getBytes());
         flushBuffer();
     }
 
