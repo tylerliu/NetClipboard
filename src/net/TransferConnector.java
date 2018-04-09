@@ -3,15 +3,13 @@ package net;
 import main.ClipboardIO;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.UnknownHostException;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.*;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Handles the network connection for clipboard sharing
@@ -23,9 +21,12 @@ public class TransferConnector {
     private static final int connectionPort = 31415;
     private static MultipleFormatInBuffer inBuffer;
     private static MultipleFormatOutBuffer outBuffer;
-    private static SocketChannel socketChannel;
-    private static ServerSocketChannel serverSocketChannel;
+    private static Socket socket;
+    private static ServerSocket serverSocket;
+    private static InputStream inputStream;
+    private static OutputStream outputStream;
     private static boolean terminateInitiated;
+    private static ExecutorService executorService = Executors.newCachedThreadPool();
 
     public static InetAddress getTarget() {
         if (isLoopBack) return InetAddress.getLoopbackAddress();
@@ -64,15 +65,13 @@ public class TransferConnector {
             System.out.println("This computer is " + InetAddress.getLocalHost().toString());
             System.out.println("This is configured as " + (isServer ? "Server. " : "Client. "));
             if (isServer) {
-                serverSocketChannel = ServerSocketChannel.open();
-                serverSocketChannel.bind(new InetSocketAddress(connectionPort));
-                socketChannel = serverSocketChannel.accept();
-                serverSocketChannel.configureBlocking(false);
+                serverSocket = new ServerSocket();
+                serverSocket.bind(new InetSocketAddress(connectionPort));
+                socket = serverSocket.accept();
+                System.out.println("Server Connected");
             } else {
-                socketChannel = SocketChannel.open();
-                socketChannel.connect(new InetSocketAddress(getTarget(), connectionPort));
+                socket = new Socket(getTarget(), connectionPort);
                 System.out.println("Client Connected");
-                socketChannel.configureBlocking(false);
             }
 
             inBuffer = new MultipleFormatInBuffer();
@@ -86,13 +85,7 @@ public class TransferConnector {
 
     public static void DataTransferExecute() {
         try {
-            Selector selector = Selector.open();
-            socketChannel.register(selector, SelectionKey.OP_READ);
-            socketChannel.register(selector, SelectionKey.OP_WRITE);
-
-
             while (true) {
-                selector.select(25);
 
                 //check clipboard
                 if (ClipboardIO.checkNew()) {
@@ -102,62 +95,60 @@ public class TransferConnector {
                             break;
                         case HTML:
                         case FILES:
-                            //TODO run with random port?
                             outBuffer.writeFiles();
-                            //TODO Fix another send file opened
                             FileTransfer.sendFiles(ClipboardIO.getLastFiles());
                             break;
                         case END:
                             return;
                         default:
                     }
-                    socketChannel.register(selector, SelectionKey.OP_WRITE);
+                }
+                if (inputStream.available() > 0) {
+                    //read
+
+
+                    inputStream.read(inBuffer.getInput().peekLast());
+                    while (inputStream.available() > 0) {
+                        inBuffer.requestNext();
+                        inputStream.read(inBuffer.getInput().peekLast());
+                    }
+
+                    //set clipboard
+                    if (inBuffer.readyToRead()) {
+                        Object[] b = inBuffer.readNext();
+                        if (b == null) System.exit(0);
+                        switch (ClipboardIO.getContentType((int) b[0])) {
+                            case STRING:
+                                String s = (String) b[1];
+                                System.out.println("Remote Clipboard New: " + s);
+                                ClipboardIO.setSysClipboardText(s);
+                                break;
+                            case END:
+                                terminateInitiated = true;
+                                return;
+                            case HTML:
+                            case FILES:
+                                FileTransfer.receiveFiles();
+                                ClipboardIO.unsetSysClipboard();
+                            default:
+                        }
+                    }
+
+                }
+                //send
+                while (!outBuffer.getOutput().isEmpty()) {
+                    outputStream.write(outBuffer.getOutput().peek().array());
+                    if (outBuffer.getOutput().peek().hasRemaining()) break;
+                    outBuffer.getOutput().poll();
                 }
 
-                for (SelectionKey s1 : selector.selectedKeys()) {
-                    if (s1.isReadable()) {
-                        //read
-
-                        socketChannel.read(inBuffer.getInput().peekLast());
-                        while (!inBuffer.getInput().peekLast().hasRemaining()) {
-                            inBuffer.requestNext();
-                            socketChannel.read(inBuffer.getInput().peekLast());
-                        }
-
-                        //set clipboard
-                        if (inBuffer.readyToRead()) {
-                            Object[] b = inBuffer.readNext();
-                            if (b == null) System.exit(0);
-                            switch (ClipboardIO.getContentType((int) b[0])) {
-                                case STRING:
-                                    String s = (String) b[1];
-                                    System.out.println("Remote Clipboard New: " + s);
-                                    ClipboardIO.setSysClipboardText(s);
-                                    break;
-                                case END:
-                                    terminateInitiated = true;
-                                    return;
-                                case HTML:
-                                case FILES:
-                                    FileTransfer.receiveFiles();
-                                    ClipboardIO.unsetSysClipboard();
-                                default:
-                            }
-                        }
-
-                    }
-
-                    if (s1.isWritable()) {
-                        //send
-                        while (!outBuffer.getOutput().isEmpty()) {
-                            socketChannel.write(outBuffer.getOutput().peek());
-                            if (outBuffer.getOutput().peek().hasRemaining()) break;
-                            outBuffer.getOutput().poll();
-                        }
-                        s1.cancel();
-                    }
+                try {
+                    Thread.sleep(25);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
             }
+
 
         } catch (IOException e) {
             //do nothing
@@ -166,11 +157,11 @@ public class TransferConnector {
 
     public static void close() {
         try {
-            if (!terminateInitiated && socketChannel != null && socketChannel.isConnected()) {
+            if (!terminateInitiated && socket != null && socket.isConnected()) {
                 terminateInitiated = true;
                 outBuffer.writeEND();
                 while (!outBuffer.getOutput().isEmpty()) {
-                    socketChannel.write(outBuffer.getOutput().peek());
+                    outputStream.write(outBuffer.getOutput().peek().array());
                     if (!outBuffer.getOutput().peek().hasRemaining()) outBuffer.getOutput().poll();
                 }
 
@@ -180,10 +171,10 @@ public class TransferConnector {
                     //do nothing
                 }
             }
-            if (socketChannel != null)
-                socketChannel.close();
-            if (isServer && serverSocketChannel != null)
-                serverSocketChannel.close();
+            if (socket != null)
+                socket.close();
+            if (isServer && serverSocket != null)
+                serverSocket.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
