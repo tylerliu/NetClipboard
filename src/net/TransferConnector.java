@@ -19,14 +19,11 @@ public class TransferConnector {
     private static final boolean isLoopBack = false;
     private static boolean isServer;
     private static final int connectionPort = 31415;
-    private static MultipleFormatInBuffer inBuffer;
-    private static MultipleFormatOutBuffer outBuffer;
+    private static MultipleFormatInStream inBuffer;
+    private static MultipleFormatOutStream outBuffer;
     private static Socket socket;
     private static ServerSocket serverSocket;
-    private static InputStream inputStream;
-    private static OutputStream outputStream;
     private static boolean terminateInitiated;
-    private static ExecutorService executorService = Executors.newCachedThreadPool();
 
     public static InetAddress getTarget() {
         if (isLoopBack) return InetAddress.getLoopbackAddress();
@@ -74,8 +71,8 @@ public class TransferConnector {
                 System.out.println("Client Connected");
             }
 
-            inBuffer = new MultipleFormatInBuffer();
-            outBuffer = new MultipleFormatOutBuffer();
+            inBuffer = new MultipleFormatInStream(socket.getInputStream());
+            outBuffer = new MultipleFormatOutStream(socket.getOutputStream());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -84,6 +81,13 @@ public class TransferConnector {
     }
 
     public static void DataTransferExecute() {
+        Thread thread = new Thread(TransferConnector::writer, "writer");
+
+        //read thread
+        reader();
+    }
+
+    public static void writer() {
         try {
             while (true) {
 
@@ -103,55 +107,43 @@ public class TransferConnector {
                         default:
                     }
                 }
-                if (inputStream.available() > 0) {
-                    //read
-
-
-                    inputStream.read(inBuffer.getInput().peekLast());
-                    while (inputStream.available() > 0) {
-                        inBuffer.requestNext();
-                        inputStream.read(inBuffer.getInput().peekLast());
-                    }
-
-                    //set clipboard
-                    if (inBuffer.readyToRead()) {
-                        Object[] b = inBuffer.readNext();
-                        if (b == null) System.exit(0);
-                        switch (ClipboardIO.getContentType((int) b[0])) {
-                            case STRING:
-                                String s = (String) b[1];
-                                System.out.println("Remote Clipboard New: " + s);
-                                ClipboardIO.setSysClipboardText(s);
-                                break;
-                            case END:
-                                terminateInitiated = true;
-                                return;
-                            case HTML:
-                            case FILES:
-                                FileTransfer.receiveFiles();
-                                ClipboardIO.unsetSysClipboard();
-                            default:
-                        }
-                    }
-
-                }
-                //send
-                while (!outBuffer.getOutput().isEmpty()) {
-                    outputStream.write(outBuffer.getOutput().peek().array());
-                    if (outBuffer.getOutput().peek().hasRemaining()) break;
-                    outBuffer.getOutput().poll();
-                }
 
                 try {
                     Thread.sleep(25);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+
                 }
             }
 
-
         } catch (IOException e) {
             //do nothing
+        }
+    }
+
+    public static void reader() {
+        //read
+        try {
+            while (true) {
+                Object[] b = inBuffer.readNext();
+                if (b == null) System.exit(0);
+                switch (ClipboardIO.getContentType((int) b[0])) {
+                    case STRING:
+                        String s = (String) b[1];
+                        System.out.println("Remote Clipboard New: " + s);
+                        ClipboardIO.setSysClipboardText(s);
+                        break;
+                    case END:
+                        terminateInitiated = true;
+                        return;
+                    case HTML:
+                    case FILES:
+                        FileTransfer.receiveFiles();
+                        ClipboardIO.unsetSysClipboard();
+                    default:
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
@@ -160,10 +152,6 @@ public class TransferConnector {
             if (!terminateInitiated && socket != null && socket.isConnected()) {
                 terminateInitiated = true;
                 outBuffer.writeEND();
-                while (!outBuffer.getOutput().isEmpty()) {
-                    outputStream.write(outBuffer.getOutput().peek().array());
-                    if (!outBuffer.getOutput().peek().hasRemaining()) outBuffer.getOutput().poll();
-                }
 
                 try {
                     Thread.sleep(100);

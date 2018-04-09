@@ -1,6 +1,9 @@
 package net;
 
+import java.io.FilterOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.ArrayDeque;
 import java.util.Queue;
@@ -26,7 +29,7 @@ import java.util.Queue;
  * <p>
  * Created by TylerLiu on 2017/10/01.
  */
-class MultipleFormatOutBuffer {
+class MultipleFormatOutStream extends FilterOutputStream {
 
     /**
      * The internal buffer where data is stored.
@@ -34,27 +37,21 @@ class MultipleFormatOutBuffer {
     private ByteBuffer buf;
     private byte type;
 
-    private ArrayDeque<ByteBuffer> output;
-
-    public MultipleFormatOutBuffer() {
+    public MultipleFormatOutStream(OutputStream outputStream) {
+        super(outputStream);
         buf = ByteBuffer.allocate(0x10000);
-        output = new ArrayDeque<>();
-    }
-
-    public Queue<ByteBuffer> getOutput() {
-        return output;
     }
 
     /**
      * Flush the internal buffer
      */
-    private void flushBuffer() {
+    private void flushBuffer() throws IOException{
         int count = buf.position();
-        output.add(ByteBuffer.wrap(new byte[]{type, (byte) (count >> 16), (byte) ((count >> 8) & 0XFF), (byte) (count & 0XFF)}));
+        super.write(new byte[]{type, (byte) (count >> 16), (byte) ((count >> 8) & 0XFF), (byte) (count & 0XFF)});
         buf.flip();
         byte[] store = new byte[count];
         buf.get(store);
-        output.add(ByteBuffer.wrap(store));
+        super.write(store);
         buf.clear();
         type = 0;
     }
@@ -82,7 +79,7 @@ class MultipleFormatOutBuffer {
      * @param len the number of bytes to write.
      * @throws IOException if an I/O error occurs.
      */
-    private synchronized void write(byte b[], int off, int len) throws IOException {
+    public synchronized void write(byte b[], int off, int len) throws IOException {
         if (!buf.hasRemaining()) {
             flushBuffer();
         }
@@ -99,7 +96,7 @@ class MultipleFormatOutBuffer {
         }
     }
 
-    private synchronized void write(byte b[]) throws IOException {
+    public synchronized void write(byte b[]) throws IOException {
         write(b, 0, b.length);
     }
 

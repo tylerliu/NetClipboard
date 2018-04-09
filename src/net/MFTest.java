@@ -8,11 +8,12 @@ import java.util.Queue;
 /**
  * Created by TylerLiu on 2018/03/20.
  */
+/*
 public class MFTest {
     public static void main(String[] args) {
         try {
             ArrayChannel channel = new ArrayChannel();
-            MultipleFormatOutBuffer OutBuffer = new MultipleFormatOutBuffer();
+            MultipleFormatOutStream OutBuffer = new MultipleFormatOutStream();
             OutBuffer.writeString("你好\n");
 
             channel.putBuffer(OutBuffer.getOutput());
@@ -63,3 +64,4 @@ public class MFTest {
         }
     }
 }
+*/
