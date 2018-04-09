@@ -48,7 +48,7 @@ class MultipleFormatOutStream extends FilterOutputStream {
     private void flushBuffer() throws IOException{
         int count = buf.position();
         byte[] head = new byte[]{type, (byte) (count >> 16), (byte) ((count >> 8) & 0XFF), (byte) (count & 0XFF)};
-        super.write(head, 0, head.length);
+        super.write(head);
         buf.flip();
         byte[] array = new byte[count];
         buf.get(array);
@@ -78,7 +78,7 @@ class MultipleFormatOutStream extends FilterOutputStream {
             off += rem;
             len -= rem;
             flushBuffer();
-            super.write(b, off, len);
+            writePayload(b, off, len);
         } else {
             buf.put(b, off, len);
         }

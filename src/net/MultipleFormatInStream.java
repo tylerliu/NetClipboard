@@ -22,13 +22,13 @@ class MultipleFormatInStream extends FilterInputStream {
 
     private void loadNext() throws IOException{
         byte[] head = new byte[4];
-        super.read(head);
+        super.readNBytes(head, 0, head.length);
         type = head[0];
         cont = head[1];
         length = (cont << 16) + (Byte.toUnsignedInt(head[2]) << 8) + (Byte.toUnsignedInt(head[3]));
         payload = new byte[length];
         try {
-            super.read(payload);
+            super.readNBytes(payload, 0, payload.length);
         } catch (IOException e) {
             e.printStackTrace();
         }
