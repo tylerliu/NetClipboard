@@ -3,6 +3,7 @@ package net;
 import files.Cancelable;
 import files.FileReceiver;
 import files.FileSender;
+import org.apache.commons.io.FileUtils;
 
 import java.awt.datatransfer.*;
 import java.io.File;
@@ -24,7 +25,6 @@ import java.util.concurrent.Executors;
 
 /**
  * Class for receiving files
- * TODO clean up files
  */
 public class FileTransfer {
 
@@ -66,7 +66,7 @@ public class FileTransfer {
             transferConnector = null;
 
             if (isCancelled) {
-                newDstFolder.delete();
+                FileUtils.deleteQuietly(newDstFolder);
                 return;
             }
 
@@ -74,7 +74,7 @@ public class FileTransfer {
             isFinished = true;
 
             if (dstFolder != null && dstFolder.exists()) {
-                dstFolder.delete();
+                FileUtils.deleteQuietly(dstFolder);
             }
             dstFolder = newDstFolder;
             System.out.println("File receive done");
@@ -164,7 +164,7 @@ public class FileTransfer {
     public synchronized static boolean deleteFolder(){
         if (!isLastRetrival || dstFolder == null) return false;
         System.out.println("Delete Folder: " + dstFolder);
-        boolean result = dstFolder.delete();
+        boolean result = FileUtils.deleteQuietly(dstFolder);
         dstFolder = null;
         return result;
     }
