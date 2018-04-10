@@ -1,16 +1,13 @@
 package net;
 
 import main.ClipboardIO;
+import org.bouncycastle.crypto.tls.TlsProtocol;
 
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.*;
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 /**
  * Handles the network connection for clipboard sharing
  */
@@ -18,12 +15,14 @@ public class TransferConnector {
 
     private static final boolean isLoopBack = false;
     private static boolean isServer;
+    private static File keyFile = new File("./.NetClipboardKey");
     private static final int connectionPort = 31415;
     private static MultipleFormatInStream inStream;
     private static MultipleFormatOutStream outStream;
     private static Socket socket;
     private static ServerSocket serverSocket;
     private static boolean terminateInitiated;
+    private static TlsProtocol tlsProtocol;
 
     public static InetAddress getTarget() {
         if (isLoopBack) return InetAddress.getLoopbackAddress();
@@ -71,8 +70,9 @@ public class TransferConnector {
                 System.out.println("Client Connected");
             }
 
-            inStream = new MultipleFormatInStream(socket.getInputStream());
-            outStream = new MultipleFormatOutStream(socket.getOutputStream());
+            tlsProtocol = TLSHandler.getTlsProtocol(isServer, socket.getInputStream(), socket.getOutputStream(), keyFile);
+            inStream = new MultipleFormatInStream(tlsProtocol.getInputStream());
+            outStream = new MultipleFormatOutStream(tlsProtocol.getOutputStream());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -159,6 +159,8 @@ public class TransferConnector {
                     //do nothing
                 }
             }
+            if (tlsProtocol != null)
+                tlsProtocol.close();
             if (socket != null)
                 socket.close();
             if (isServer && serverSocket != null)

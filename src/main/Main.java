@@ -3,9 +3,16 @@ package main;
 import net.FileTransfer;
 import net.TransferConnector;
 
+import java.io.File;
+
 public class Main {
 
     public static void main(String[] args) {
+
+        if (args[0].toLowerCase().startsWith("-k")) {
+            Keygen.Keygen.keyToFile(new File("./.NetClipboardKey"));
+            return;
+        }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Shutdown: closing ports");

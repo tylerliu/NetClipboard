@@ -1,4 +1,4 @@
-package net;
+package files;
 
 import files.FileReceiver;
 import files.FileSender;
