@@ -1,7 +1,4 @@
-package net;
-
-import files.FileReceiver;
-import files.FileSender;
+package files;
 
 import java.io.File;
 import java.util.ArrayList;
