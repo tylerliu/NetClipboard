@@ -5,6 +5,8 @@ import net.TransferConnector;
 import org.apache.commons.compress.compressors.snappy.FramedSnappyCompressorInputStream;
 import org.apache.commons.io.IOUtils;
 
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
 import java.io.*;
 import java.net.Socket;
 
@@ -159,6 +161,25 @@ public class FileReceiver implements Runnable, Cancelable {
         if (!openConnection()) return;
         try {
             recvInputStream = new FramedSnappyCompressorInputStream(recvInputStream);
+            TarExtractor.decompress(recvInputStream, base);
+        } catch (IOException e) {
+            if (isCancelled) {
+                System.out.println("File receive cancelled with error " + e);
+            } else e.printStackTrace();
+        }
+        closeConnection();
+    }
+
+    /**
+     * Decryption by initialized cipher
+     * @param base
+     * @param cipher
+     */
+    public void runTared(File base, Cipher cipher) {
+        if (!openConnection()) return;
+        try {
+            recvInputStream = new FramedSnappyCompressorInputStream(recvInputStream);
+            recvInputStream = new CipherInputStream(recvInputStream, cipher);
             TarExtractor.decompress(recvInputStream, base);
         } catch (IOException e) {
             if (isCancelled) {

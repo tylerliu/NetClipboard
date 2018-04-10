@@ -1,7 +1,12 @@
 package net;
 
+import java.io.FilterOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
@@ -12,7 +17,7 @@ import java.util.Queue;
  * byte 0: kind of format:
  * 0: continue
  * 1: String/SegmentedHTML
- * 2: ZipFile
+ * 2: Files
  * 3: HTML
  * 4: END_SIGNAL
  * <p>
@@ -23,10 +28,12 @@ import java.util.Queue;
  * byte 2, 3: length of file
  * <p>
  * Data
+ *
+ * Files: 2 byte port, then key material
  * <p>
  * Created by TylerLiu on 2017/10/01.
  */
-class MultipleFormatOutBuffer {
+class MultipleFormatOutStream extends FilterOutputStream {
 
     /**
      * The internal buffer where data is stored.
@@ -34,42 +41,24 @@ class MultipleFormatOutBuffer {
     private ByteBuffer buf;
     private byte type;
 
-    private ArrayDeque<ByteBuffer> output;
-
-    public MultipleFormatOutBuffer() {
+    public MultipleFormatOutStream(OutputStream outputStream) {
+        super(outputStream);
         buf = ByteBuffer.allocate(0x10000);
-        output = new ArrayDeque<>();
-    }
-
-    public Queue<ByteBuffer> getOutput() {
-        return output;
     }
 
     /**
      * Flush the internal buffer
      */
-    private void flushBuffer() {
+    private void flushBuffer() throws IOException{
         int count = buf.position();
-        output.add(ByteBuffer.wrap(new byte[]{type, (byte) (count >> 16), (byte) ((count >> 8) & 0XFF), (byte) (count & 0XFF)}));
+        byte[] head = new byte[]{type, (byte) (count >> 16), (byte) ((count >> 8) & 0XFF), (byte) (count & 0XFF)};
+        super.write(head);
         buf.flip();
-        byte[] store = new byte[count];
-        buf.get(store);
-        output.add(ByteBuffer.wrap(store));
+        byte[] array = new byte[count];
+        buf.get(array);
+        super.write(array);
         buf.clear();
         type = 0;
-    }
-
-    /**
-     * Writes the specified byte to this buffered output stream.
-     *
-     * @param b the byte to be written.
-     * @throws IOException if an I/O error occurs.
-     */
-    public synchronized void write(int b) throws IOException {
-        if (!buf.hasRemaining()) {
-            flushBuffer();
-        }
-        buf.put((byte) b);
     }
 
 
@@ -82,7 +71,7 @@ class MultipleFormatOutBuffer {
      * @param len the number of bytes to write.
      * @throws IOException if an I/O error occurs.
      */
-    private synchronized void write(byte b[], int off, int len) throws IOException {
+    private synchronized void writePayload(byte b[], int off, int len) throws IOException {
         if (!buf.hasRemaining()) {
             flushBuffer();
         }
@@ -93,14 +82,14 @@ class MultipleFormatOutBuffer {
             off += rem;
             len -= rem;
             flushBuffer();
-            write(b, off, len);
+            writePayload(b, off, len);
         } else {
             buf.put(b, off, len);
         }
     }
 
-    private synchronized void write(byte b[]) throws IOException {
-        write(b, 0, b.length);
+    private synchronized void writePayload(byte b[]) throws IOException {
+        writePayload(b, 0, b.length);
     }
 
     //format specific operations
@@ -108,14 +97,14 @@ class MultipleFormatOutBuffer {
     public synchronized void writeString(String s) throws IOException {
         assert buf.position() == 0;
         type = 1;
-        write(s.getBytes());
+        writePayload(s.getBytes());
         flushBuffer();
     }
 
     public synchronized void writeHTML(String s) throws IOException {
         assert buf.position() == 0;
         type = 3;
-        write(s.getBytes());
+        writePayload(s.getBytes());
         flushBuffer();
     }
 
@@ -125,9 +114,11 @@ class MultipleFormatOutBuffer {
         flushBuffer();
     }
 
-    public synchronized void writeFiles() throws IOException {
+    public synchronized void writeFiles(int port, byte[] key) throws IOException {
         assert buf.position() == 0;
         type = 2;
+        writePayload(ByteBuffer.allocate(2).putShort((short) port).array());
+        writePayload(key);
         flushBuffer();
     }
 

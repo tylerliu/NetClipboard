@@ -1,6 +1,8 @@
 package net;
 
 import java.io.IOException;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Queue;
@@ -11,55 +13,20 @@ import java.util.Queue;
 public class MFTest {
     public static void main(String[] args) {
         try {
-            ArrayChannel channel = new ArrayChannel();
-            MultipleFormatOutBuffer OutBuffer = new MultipleFormatOutBuffer();
-            OutBuffer.writeString("你好\n");
 
-            channel.putBuffer(OutBuffer.getOutput());
+            PipedInputStream in = new PipedInputStream();
+            PipedOutputStream out = new PipedOutputStream(in);
 
-            MultipleFormatInBuffer inBuffer = new MultipleFormatInBuffer();
-            channel.read(inBuffer.getInput().peekLast());
-            while (!inBuffer.getInput().peekLast().hasRemaining()) {
-                inBuffer.requestNext();
-                channel.read(inBuffer.getInput().peekLast());
-            }
-
-            System.out.println(inBuffer.readyToRead() + " " + inBuffer.getString());
+            MultipleFormatOutStream outStream = new MultipleFormatOutStream(out);
+            MultipleFormatInStream inStream = new MultipleFormatInStream(in);
+            outStream.writeString("你好\n");
+            System.out.println(inStream.readNext()[1]);
+            outStream.writeFiles(8800, new byte[48]);
+            System.out.println(Short.toUnsignedInt(((ByteBuffer)inStream.readNext()[1]).getShort()));
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-    }
-
-    public static class ArrayChannel implements ReadableByteChannel {
-
-
-        ByteBuffer buffer = ByteBuffer.allocate(0x10000);
-
-        @Override
-        public int read(ByteBuffer dst) throws IOException {
-            byte[] arr = new byte[Math.min(dst.remaining(), buffer.remaining())];
-            buffer.get(arr);
-            dst.put(arr);
-            return arr.length;
-        }
-
-        public void putBuffer(Queue<ByteBuffer> buf) {
-            for (ByteBuffer b : buf) {
-                buffer.put(b.array());
-            }
-            buffer.flip();
-        }
-
-        @Override
-        public boolean isOpen() {
-            return true;
-        }
-
-        @Override
-        public void close() throws IOException {
-
-        }
     }
 }

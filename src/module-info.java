@@ -4,4 +4,5 @@ module NetClipboard {
     requires javafx.swing;
     requires org.apache.commons.io;
     requires org.apache.commons.compress;
+    requires bcprov.jdk15on;
 }
