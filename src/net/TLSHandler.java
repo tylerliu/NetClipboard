@@ -18,12 +18,12 @@ public class TLSHandler {
 
                 @Override
                 public byte[] getHint() {
-                    return "Test".getBytes();
+                    return "Clip".getBytes();
                 }
 
                 @Override
                 public byte[] getPSK(byte[] bytes) {
-                    assert Arrays.equals(bytes, "Test".getBytes());
+                    assert Arrays.equals(bytes, "Clip".getBytes());
                     return Keygen.fileToKey(keyFile);
                 }
             };
@@ -42,7 +42,7 @@ public class TLSHandler {
 
         public static TlsPSKIdentity getPSKIdentity(File keyFile) {
 
-            return new BasicTlsPSKIdentity("Test", Keygen.fileToKey(keyFile));
+            return new BasicTlsPSKIdentity("Clip", Keygen.fileToKey(keyFile));
         }
 
         public NetClipTlsClient(File keyFile) {
@@ -58,6 +58,7 @@ public class TLSHandler {
             return new int[] {
                     CipherSuite.TLS_DHE_PSK_WITH_AES_128_CBC_SHA256,
                     CipherSuite.TLS_DHE_PSK_WITH_AES_128_GCM_SHA256,
+                    CipherSuite.TLS_DHE_PSK_WITH_AES_128_CCM,
                     CipherSuite.TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256
             };
         }

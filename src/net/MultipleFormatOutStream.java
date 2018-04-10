@@ -4,7 +4,9 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.InetAddress;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayDeque;
 import java.util.Queue;
 
@@ -15,7 +17,7 @@ import java.util.Queue;
  * byte 0: kind of format:
  * 0: continue
  * 1: String/SegmentedHTML
- * 2: ZipFile
+ * 2: Files
  * 3: HTML
  * 4: END_SIGNAL
  * <p>
@@ -26,6 +28,8 @@ import java.util.Queue;
  * byte 2, 3: length of file
  * <p>
  * Data
+ *
+ * Files: 2 byte port, then key material
  * <p>
  * Created by TylerLiu on 2017/10/01.
  */
@@ -67,7 +71,7 @@ class MultipleFormatOutStream extends FilterOutputStream {
      * @param len the number of bytes to write.
      * @throws IOException if an I/O error occurs.
      */
-    public synchronized void writePayload(byte b[], int off, int len) throws IOException {
+    private synchronized void writePayload(byte b[], int off, int len) throws IOException {
         if (!buf.hasRemaining()) {
             flushBuffer();
         }
@@ -84,7 +88,7 @@ class MultipleFormatOutStream extends FilterOutputStream {
         }
     }
 
-    public synchronized void writePayload(byte b[]) throws IOException {
+    private synchronized void writePayload(byte b[]) throws IOException {
         writePayload(b, 0, b.length);
     }
 
@@ -110,9 +114,11 @@ class MultipleFormatOutStream extends FilterOutputStream {
         flushBuffer();
     }
 
-    public synchronized void writeFiles() throws IOException {
+    public synchronized void writeFiles(int port, byte[] key) throws IOException {
         assert buf.position() == 0;
         type = 2;
+        writePayload(ByteBuffer.allocate(2).putShort((short) port).array());
+        writePayload(key);
         flushBuffer();
     }
 

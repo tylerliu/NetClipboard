@@ -6,6 +6,9 @@ import org.bouncycastle.crypto.tls.TlsProtocol;
 import java.io.File;
 import java.io.IOException;
 import java.net.*;
+import java.nio.ByteBuffer;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Objects;
 /**
@@ -99,8 +102,10 @@ public class TransferConnector {
                             break;
                         case HTML:
                         case FILES:
-                            outStream.writeFiles();
-                            FileTransfer.sendFiles(ClipboardIO.getLastFiles());
+                            int port = PortAllocator.alloc();
+                            byte[] key = getTransKey();
+                            outStream.writeFiles(port, key);
+                            FileTransfer.sendFiles(ClipboardIO.getLastFiles(), port, key);
                             break;
                         case END:
                             return;
@@ -120,6 +125,16 @@ public class TransferConnector {
         }
     }
 
+    public static byte[] getTransKey() {
+        byte[] key = new byte[48];
+        try {
+            SecureRandom.getInstanceStrong().nextBytes(key);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return key;
+    }
+
     public static void reader() {
         //read
         try {
@@ -137,7 +152,7 @@ public class TransferConnector {
                         return;
                     case HTML:
                     case FILES:
-                        FileTransfer.receiveFiles();
+                        FileTransfer.receiveFiles((ByteBuffer) b[1]);
                         ClipboardIO.unsetSysClipboard();
                     default:
                 }

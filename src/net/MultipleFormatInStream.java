@@ -51,6 +51,14 @@ class MultipleFormatInStream extends FilterInputStream {
     }
 
     /**
+     * get file transfer info
+     */
+    private ByteBuffer tryFiles() throws IOException {
+        if (type != 2) return null;
+        return ByteBuffer.wrap(payload);
+    }
+
+    /**
      * Used only when sure the next is HTML
      */
     private String getHTML() throws IOException {
@@ -76,7 +84,7 @@ class MultipleFormatInStream extends FilterInputStream {
             case 1:
                 return new Object[]{1, tryString()};
             case 2:
-                return new Object[]{2};
+                return new Object[]{2, tryFiles()};
             case 3:
                 return new Object[]{3, tryHTML()};
             case 4:

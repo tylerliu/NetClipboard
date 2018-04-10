@@ -5,6 +5,8 @@ import net.TransferConnector;
 import org.apache.commons.compress.compressors.snappy.FramedSnappyCompressorOutputStream;
 import org.apache.commons.io.IOUtils;
 
+import javax.crypto.Cipher;
+import javax.crypto.CipherOutputStream;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -157,6 +159,28 @@ public class FileSender implements Runnable, Cancelable {
         if (!openConnection()) return;
         try {
             sendOutputStream = new FramedSnappyCompressorOutputStream(sendOutputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        TarCompressor.compress(files, getSendOutputStream());
+        if (isCancelled) {
+            System.out.println("File send cancel with error");
+            return;
+        }
+        closeConnection();
+        System.out.println("File send done");
+    }
+
+    /**
+     * Encryption by initialized cipher
+     * @param files
+     * @param cipher the initialized cipher to be used
+     */
+    public void runTared(List<File> files, Cipher cipher) {
+        if (!openConnection()) return;
+        try {
+            sendOutputStream = new FramedSnappyCompressorOutputStream(sendOutputStream);
+            sendOutputStream = new CipherOutputStream(sendOutputStream, cipher);
         } catch (IOException e) {
             e.printStackTrace();
         }
