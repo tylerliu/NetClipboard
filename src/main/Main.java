@@ -20,7 +20,7 @@ public class Main {
             FileTransfer.terminate();
         }));
         ClipboardIO.getSysClipboardText();
-        TransferConnector.connect();
+        if (!TransferConnector.connect()) return;
         TransferConnector.DataTransferExecute();
         TransferConnector.close();
         System.exit(0);

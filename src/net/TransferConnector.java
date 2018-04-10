@@ -58,7 +58,7 @@ public class TransferConnector {
     }
 
 
-    public static void connect() {
+    public static boolean connect() {
         try {
             checkServer();
             System.out.println("This computer is " + InetAddress.getLocalHost().toString());
@@ -74,6 +74,7 @@ public class TransferConnector {
             }
 
             tlsProtocol = TLSHandler.getTlsProtocol(isServer, socket.getInputStream(), socket.getOutputStream(), keyFile);
+            if (tlsProtocol == null) return false;
             inStream = new MultipleFormatInStream(tlsProtocol.getInputStream());
             outStream = new MultipleFormatOutStream(tlsProtocol.getOutputStream());
 
@@ -81,6 +82,8 @@ public class TransferConnector {
             e.printStackTrace();
             System.exit(0);
         }
+
+        return true;
     }
 
     public static void DataTransferExecute() {
@@ -164,7 +167,7 @@ public class TransferConnector {
 
     public static void close() {
         try {
-            if (!terminateInitiated && socket != null && socket.isConnected()) {
+            if (!terminateInitiated && socket != null && outStream != null && socket.isConnected()) {
                 terminateInitiated = true;
                 outStream.writeEND();
 

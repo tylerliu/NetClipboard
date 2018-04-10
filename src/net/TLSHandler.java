@@ -69,6 +69,11 @@ public class TLSHandler {
         TlsClientProtocol protocol = new TlsClientProtocol(inputStream, outputStream, new SecureRandom());
         try {
             protocol.connect(client);
+        } catch (TlsFatalAlert|TlsFatalAlertReceived alert) {
+            if (alert.getMessage().contains("20")){
+                System.out.println("Authentication fails for TLS Connection.");
+            } else alert.printStackTrace();
+            return null;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -80,6 +85,9 @@ public class TLSHandler {
         TlsServerProtocol protocol = new TlsServerProtocol(inputStream, outputStream, new SecureRandom());
         try {
             protocol.accept(server);
+        } catch (TlsFatalAlert|TlsFatalAlertReceived alert) {
+            alert.printStackTrace();
+            return null;
         } catch (IOException e) {
             e.printStackTrace();
         }

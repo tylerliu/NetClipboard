@@ -1,8 +1,5 @@
 package files;
 
-import files.FileReceiver;
-import files.FileSender;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
