@@ -1,6 +1,5 @@
 package net;
 
-import Keygen.Keygen;
 import filechooser.NativeJFileChooser;
 import files.FileReceiver;
 import files.FileSender;
