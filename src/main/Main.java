@@ -10,7 +10,7 @@ public class Main {
     public static void main(String[] args) {
 
         if (args.length >= 1 && args[0].toLowerCase().startsWith("-k")) {
-            Keygen.Keygen.keyToFile(new File("./.NetClipboardKey"));
+            keygen.Keygen.keyToFile(new File("./.NetClipboardKey"));
             return;
         }
 
