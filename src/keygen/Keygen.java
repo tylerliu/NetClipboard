@@ -1,4 +1,4 @@
-package Keygen;
+package keygen;
 
 import java.io.File;
 import java.io.FileInputStream;
