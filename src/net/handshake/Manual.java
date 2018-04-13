@@ -25,7 +25,6 @@ public class Manual {
     public static InetAddress getTarget() {
         try {
             others = new ArrayList<>();
-            System.out.println(InetAddress.getLocalHost().toString());
             System.out.println("Enter the index of the Address to connect:");
             socket = new MulticastSocket(port);
             InetAddress group = InetAddress.getByName("224.0.0.127");

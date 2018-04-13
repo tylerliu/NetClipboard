@@ -71,7 +71,6 @@ public class TransferConnector {
     public static boolean connect() {
         try {
             checkServer();
-            System.out.println("This computer is " + InetAddress.getLocalHost().toString());
             System.out.println("This is configured as " + (isServer ? "Server. " : "Client. "));
             if (isServer) {
                 serverSocket = new ServerSocket();

@@ -5,10 +5,7 @@ import key.KeyUtil;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
-import java.net.UnknownHostException;
+import java.net.*;
 import java.nio.ByteBuffer;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -29,6 +26,7 @@ public class KeyBased {
     private static final String groupAddress = "224.0.0.127"; //"255.255.255.255" for broadcast
     private static final AtomicReference<InetAddress> target = new AtomicReference<>();
     private static MulticastSocket socket;
+    private static DatagramSocket sendSocket;
     private static ConcurrentHashMap<InetAddress, Boolean> responded;
     private static ConcurrentHashMap<InetAddress, Boolean> authenticated;
     private static byte[] ran = new byte[32];
@@ -51,6 +49,7 @@ public class KeyBased {
             try {
                 executorService.awaitTermination(1, TimeUnit.MINUTES);
                 socket.close();
+                sendSocket.close();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -92,6 +91,7 @@ public class KeyBased {
             authenticated = new ConcurrentHashMap<>();
             authenticated.put(InetAddress.getLocalHost(), false); //prevent connecting itself
             socket = new MulticastSocket(port);
+            sendSocket = new DatagramSocket();
             InetAddress group = InetAddress.getByName(groupAddress);
             socket.joinGroup(group);
         } catch (IOException e) {
@@ -171,7 +171,7 @@ public class KeyBased {
 
             for (int i = 0; i < 4; i++) {
                 DatagramPacket rePacket = new DatagramPacket(response, response.length, packet.getAddress(), port);
-                socket.send(rePacket);
+                sendSocket.send(rePacket);
                 Thread.sleep(1000);
             }
         } catch (Exception e) {
@@ -204,15 +204,15 @@ public class KeyBased {
     private static void send() {
         try {
             SecureRandom.getInstanceStrong().nextBytes(ran);
-            socket.setBroadcast(true);
+            sendSocket.setBroadcast(true);
             byte[] send = ByteBuffer.allocate(ran.length + 1).put((byte) 0).put(ran).array();
             DatagramPacket packet = new DatagramPacket(send, send.length, InetAddress.getByName(groupAddress), port);
 
             while (target.get() == null) {
-                socket.send(packet);
+                sendSocket.send(packet);
                 Thread.sleep(1000);
             }
-            socket.send(packet); //last send to unclog receive
+            sendSocket.send(packet); //last send to unclog receive
         } catch (Exception e) {
             e.printStackTrace();
         }
