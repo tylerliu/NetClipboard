@@ -2,13 +2,11 @@ package net;
 import key.KeyUtil;
 import org.bouncycastle.crypto.tls.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.SecureRandom;
 import java.util.Arrays;
-import keygen.Keygen;
 
 public class TLSHandler {
 

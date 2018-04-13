@@ -4,6 +4,8 @@ import net.FileTransfer;
 import net.TransferConnector;
 
 import java.io.File;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 public class Main {
 
@@ -40,6 +42,12 @@ public class Main {
             TransferConnector.close();
             FileTransfer.terminate();
         }));
+
+        try {
+            System.out.println("This computer is " + InetAddress.getLocalHost().toString());
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+        }
         TransferConnector.setTarget();
         ClipboardIO.getSysClipboardText();
         if (!TransferConnector.connect()) return;

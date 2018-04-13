@@ -42,25 +42,19 @@ public class KeyBased {
     }
 
     public static InetAddress getTarget() {
-        boolean result = false;
-        try {
-            System.out.println("This computer is " + InetAddress.getLocalHost().toString());
-            initHandShake();
-            executorService.submit(KeyBased::receive);
-            executorService.submit(KeyBased::send);
-            result = monitor();
-            executorService.shutdown();
-            CompletableFuture.runAsync(() -> {
-                try {
-                    executorService.awaitTermination(1, TimeUnit.MINUTES);
-                    socket.close();
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-        }
+        initHandShake();
+        executorService.submit(KeyBased::receive);
+        executorService.submit(KeyBased::send);
+        boolean result = monitor();
+        executorService.shutdown();
+        CompletableFuture.runAsync(() -> {
+            try {
+                executorService.awaitTermination(1, TimeUnit.MINUTES);
+                socket.close();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
         if (!result) {
             System.out.println("Fail To Find Connection Target");
             System.exit(1);
