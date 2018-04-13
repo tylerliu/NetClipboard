@@ -12,24 +12,22 @@ import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.List;
+import net.handshake.DirectConnect;
+import net.handshake.KeyBased;
+import net.handshake.Manual;
 import org.bouncycastle.crypto.tls.TlsProtocol;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.Objects;
 /**
  * Handles the network connection for clipboard sharing
  */
 public class TransferConnector {
 
-    private static final boolean isLoopBack = false;
     private static boolean isServer;
-    private static File keyFile = new File("./.NetClipboardKey");
     private static final int connectionPort = 31415;
     private static MultipleFormatInStream inStream;
     private static MultipleFormatOutStream outStream;
@@ -37,24 +35,33 @@ public class TransferConnector {
     private static ServerSocket serverSocket;
     private static boolean terminateInitiated;
     private static TlsProtocol tlsProtocol;
+    private static InetAddress target;
+
+    /**
+     * set target by Key Based Handshake
+     */
+    public static void setTarget() {
+        if (target != null) return;
+        System.out.println("Connecting...");
+        target = KeyBased.getTarget();
+    }
+
+    public static void setDirectTarget(String name) {
+        if (target != null) return;
+        target = DirectConnect.getTarget(name);
+    }
+
+    public static void setManualTarget() {
+        if (target != null) return;
+        target = Manual.getTarget();
+    }
 
     public static InetAddress getTarget() {
-        if (isLoopBack) return InetAddress.getLoopbackAddress();
-            // TODO BroadCasting maybe?
-        else {
-            try {
-                InetAddress localHost = InetAddress.getLocalHost();
-                if (Objects.equals(localHost.getHostAddress(), "192.168.1.3"))
-                    return InetAddress.getByName("192.168.1.7");
-                if (Objects.equals(localHost.getHostAddress(), "192.168.1.7"))
-                    return InetAddress.getByName("192.168.1.3");
-            } catch (UnknownHostException u) {
-                u.printStackTrace();
-            }
+        return target;
+    }
 
-        }
-
-        return null;
+    public static void resetTarget() {
+        target = null;
     }
 
     /**
@@ -72,7 +79,6 @@ public class TransferConnector {
     public static boolean connect() {
         try {
             checkServer();
-            System.out.println("This computer is " + InetAddress.getLocalHost().toString());
             System.out.println("This is configured as " + (isServer ? "Server. " : "Client. "));
             if (isServer) {
                 serverSocket = new ServerSocket();
@@ -84,7 +90,7 @@ public class TransferConnector {
                 System.out.println("Client Connected");
             }
 
-            tlsProtocol = TLSHandler.getTlsProtocol(isServer, socket.getInputStream(), socket.getOutputStream(), keyFile);
+            tlsProtocol = TLSHandler.getTlsProtocol(isServer, socket.getInputStream(), socket.getOutputStream());
             if (tlsProtocol == null) return false;
             inStream = new MultipleFormatInStream(tlsProtocol.getInputStream());
             outStream = new MultipleFormatOutStream(tlsProtocol.getOutputStream());
