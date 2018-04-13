@@ -12,7 +12,7 @@ public class Main {
     public static void main(String[] args) {
 
         /**
-         * arguments that will not connect
+         * arguments that will not make connection
          */
         if (args.length >= 1) {
             if (args[0].toLowerCase().startsWith("-h") || args[0].toLowerCase().equals("--help")) {
