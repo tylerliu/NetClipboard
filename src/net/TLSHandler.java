@@ -1,19 +1,18 @@
 package net;
+import key.KeyUtil;
 import org.bouncycastle.crypto.tls.*;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.SecureRandom;
 import java.util.Arrays;
-import keygen.Keygen;
 
 public class TLSHandler {
 
     public static class NetClipTlsServer extends PSKTlsServer {
 
-        public static TlsPSKIdentityManager getPSKIdentityManager(File keyFile) {
+        public static TlsPSKIdentityManager getPSKIdentityManager() {
             return new TlsPSKIdentityManager() {
 
                 @Override
@@ -24,33 +23,33 @@ public class TLSHandler {
                 @Override
                 public byte[] getPSK(byte[] bytes) {
                     assert Arrays.equals(bytes, "Clip".getBytes());
-                    return Keygen.fileToKey(keyFile);
+                    return KeyUtil.getKey();
                 }
             };
         }
 
-        public NetClipTlsServer(File keyFile) {
-            super(getPSKIdentityManager(keyFile));
+        public NetClipTlsServer() {
+            super(getPSKIdentityManager());
         }
 
-        public NetClipTlsServer(TlsCipherFactory tlsCipherFactory, File keyFile) {
-            super(tlsCipherFactory, getPSKIdentityManager(keyFile));
+        public NetClipTlsServer(TlsCipherFactory tlsCipherFactory) {
+            super(tlsCipherFactory, getPSKIdentityManager());
         }
     }
 
     public static class NetClipTlsClient extends PSKTlsClient {
 
-        public static TlsPSKIdentity getPSKIdentity(File keyFile) {
+        public static TlsPSKIdentity getPSKIdentity() {
 
-            return new BasicTlsPSKIdentity("Clip", Keygen.fileToKey(keyFile));
+            return new BasicTlsPSKIdentity("Clip", KeyUtil.getKey());
         }
 
-        public NetClipTlsClient(File keyFile) {
-            super(getPSKIdentity(keyFile));
+        public NetClipTlsClient() {
+            super(getPSKIdentity());
         }
 
-        public NetClipTlsClient(TlsCipherFactory tlsCipherFactory, File keyFile) {
-            super(tlsCipherFactory, getPSKIdentity(keyFile));
+        public NetClipTlsClient(TlsCipherFactory tlsCipherFactory) {
+            super(tlsCipherFactory, getPSKIdentity());
         }
 
         @Override
@@ -64,8 +63,8 @@ public class TLSHandler {
         }
     }
 
-    public static TlsClientProtocol getClientProtocol(InputStream inputStream, OutputStream outputStream, File keyFile) {
-        PSKTlsClient client = new NetClipTlsClient(keyFile);
+    public static TlsClientProtocol getClientProtocol(InputStream inputStream, OutputStream outputStream) {
+        PSKTlsClient client = new NetClipTlsClient();
         TlsClientProtocol protocol = new TlsClientProtocol(inputStream, outputStream, new SecureRandom());
         try {
             protocol.connect(client);
@@ -80,8 +79,8 @@ public class TLSHandler {
         return protocol;
     }
 
-    public static TlsServerProtocol getServerProtocol(InputStream inputStream, OutputStream outputStream, File keyFile) {
-        PSKTlsServer server = new NetClipTlsServer(keyFile);
+    public static TlsServerProtocol getServerProtocol(InputStream inputStream, OutputStream outputStream) {
+        PSKTlsServer server = new NetClipTlsServer();
         TlsServerProtocol protocol = new TlsServerProtocol(inputStream, outputStream, new SecureRandom());
         try {
             protocol.accept(server);
@@ -96,9 +95,9 @@ public class TLSHandler {
         return protocol;
     }
 
-    public static TlsProtocol getTlsProtocol(boolean isServer, InputStream inputStream, OutputStream outputStream, File keyFile) {
+    public static TlsProtocol getTlsProtocol(boolean isServer, InputStream inputStream, OutputStream outputStream) {
         return isServer ?
-                getServerProtocol(inputStream, outputStream, keyFile) :
-                getClientProtocol(inputStream, outputStream, keyFile);
+                getServerProtocol(inputStream, outputStream) :
+                getClientProtocol(inputStream, outputStream);
     }
 }
