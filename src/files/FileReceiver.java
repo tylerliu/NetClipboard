@@ -52,7 +52,7 @@ public class FileReceiver implements Runnable, Cancelable {
         return receiveStream(outputStream, DEFAULT_PORT);
     }
 
-    public static FileReceiver recriveFileRun(File dstFile, int port) {
+    public static FileReceiver receiveFileRun(File dstFile, int port) {
         try {
             return receiveStreamRun(new FileOutputStream(dstFile), port);
         } catch (FileNotFoundException e) {
@@ -63,7 +63,7 @@ public class FileReceiver implements Runnable, Cancelable {
     }
 
     public static FileReceiver receiveFileRun(File dstFile) {
-        return recriveFileRun(dstFile, DEFAULT_PORT);
+        return receiveFileRun(dstFile, DEFAULT_PORT);
     }
 
     public static Thread receiveFile(File dstFile, int port) {
