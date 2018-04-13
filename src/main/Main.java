@@ -29,7 +29,6 @@ public class Main {
             }
             else if (args[0].toLowerCase().startsWith("-m")) {
                 TransferConnector.setManualTarget();
-                return;
             }
             else if (args.length >= 2 && args[0].toLowerCase().startsWith("-d")){
                 TransferConnector.setDirectTarget(args[1]);
