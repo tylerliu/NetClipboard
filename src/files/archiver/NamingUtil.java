@@ -11,6 +11,7 @@ public class NamingUtil {
     private Map<String, String> rootFolder = new HashMap<>();
     private List<File> rootPaths; //both files and folders
     private RenameStrategy strategy;
+
     public NamingUtil(RenameStrategy strategy) {
         this.strategy = strategy;
         rootPaths = new ArrayList<>();

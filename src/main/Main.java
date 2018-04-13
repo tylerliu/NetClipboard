@@ -1,9 +1,9 @@
 package main;
 
+import key.KeyUtil;
 import net.FileTransfer;
 import net.TransferConnector;
 
-import java.io.File;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
@@ -19,10 +19,15 @@ public class Main {
                 printHelp();
                 return;
             }
-            if (args[0].toLowerCase().startsWith("-k")) {
-                keygen.Keygen.keyToFile(new File("./.NetClipboardKey"));
+            if (args[0].toLowerCase().startsWith("-g")) {
+                KeyUtil.generateKey();
                 return;
             }
+        }
+
+        if (!KeyUtil.isKeyExist()) {
+            System.out.println("Encryption key file not found. Please generate encryption key with -g option.");
+            System.exit(1);
         }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -43,11 +48,9 @@ public class Main {
         if (args.length >= 1) {
             if (args[0].toLowerCase().startsWith("-m")) {
                 TransferConnector.setManualTarget();
-            }
-            else if (args.length >= 2 && args[0].toLowerCase().startsWith("-d")){
+            } else if (args.length >= 2 && args[0].toLowerCase().startsWith("-d")) {
                 TransferConnector.setDirectTarget(args[1]);
-            }
-            else System.out.println("Unknown Command. Use \"-h\" to show more options");
+            } else System.out.println("Unknown Command. Use \"-h\" to show more options");
         }
         TransferConnector.setTarget();
         ClipboardIO.getSysClipboardText();
@@ -62,7 +65,7 @@ public class Main {
         System.out.println("Shared Clipboard between computers");
         System.out.println("Options:");
         System.out.println("\t-h, --help\tShow Help");
-        System.out.println("\t\t\t-k\tGenerate Key File In Current Directory");
+        System.out.println("\t\t\t-g\tGenerate Encryption Key File In Current Directory");
         System.out.println("\t\t\t-m\tManually select the other computer to share clipboard");
         System.out.println("\t\t\t-d\tSpecify the other computer to share clipboard");
     }

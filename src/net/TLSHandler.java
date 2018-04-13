@@ -1,4 +1,5 @@
 package net;
+
 import key.KeyUtil;
 import org.bouncycastle.crypto.tls.*;
 
@@ -10,7 +11,53 @@ import java.util.Arrays;
 
 public class TLSHandler {
 
+    public static TlsClientProtocol getClientProtocol(InputStream inputStream, OutputStream outputStream) {
+        PSKTlsClient client = new NetClipTlsClient();
+        TlsClientProtocol protocol = new TlsClientProtocol(inputStream, outputStream, new SecureRandom());
+        try {
+            protocol.connect(client);
+        } catch (TlsFatalAlert | TlsFatalAlertReceived alert) {
+            if (alert.getMessage().contains("20")) {
+                System.out.println("Authentication fails for TLS Connection.");
+            } else alert.printStackTrace();
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return protocol;
+    }
+
+    public static TlsServerProtocol getServerProtocol(InputStream inputStream, OutputStream outputStream) {
+        PSKTlsServer server = new NetClipTlsServer();
+        TlsServerProtocol protocol = new TlsServerProtocol(inputStream, outputStream, new SecureRandom());
+        try {
+            protocol.accept(server);
+        } catch (TlsFatalAlert | TlsFatalAlertReceived alert) {
+            if (alert.getMessage().contains("20")) {
+                System.out.println("Authentication fails for TLS Connection.");
+            } else alert.printStackTrace();
+            return null;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return protocol;
+    }
+
+    public static TlsProtocol getTlsProtocol(boolean isServer, InputStream inputStream, OutputStream outputStream) {
+        return isServer ?
+                getServerProtocol(inputStream, outputStream) :
+                getClientProtocol(inputStream, outputStream);
+    }
+
     public static class NetClipTlsServer extends PSKTlsServer {
+
+        public NetClipTlsServer() {
+            super(getPSKIdentityManager());
+        }
+
+        public NetClipTlsServer(TlsCipherFactory tlsCipherFactory) {
+            super(tlsCipherFactory, getPSKIdentityManager());
+        }
 
         public static TlsPSKIdentityManager getPSKIdentityManager() {
             return new TlsPSKIdentityManager() {
@@ -27,22 +74,9 @@ public class TLSHandler {
                 }
             };
         }
-
-        public NetClipTlsServer() {
-            super(getPSKIdentityManager());
-        }
-
-        public NetClipTlsServer(TlsCipherFactory tlsCipherFactory) {
-            super(tlsCipherFactory, getPSKIdentityManager());
-        }
     }
 
     public static class NetClipTlsClient extends PSKTlsClient {
-
-        public static TlsPSKIdentity getPSKIdentity() {
-
-            return new BasicTlsPSKIdentity("Clip", KeyUtil.getKey());
-        }
 
         public NetClipTlsClient() {
             super(getPSKIdentity());
@@ -52,52 +86,19 @@ public class TLSHandler {
             super(tlsCipherFactory, getPSKIdentity());
         }
 
+        public static TlsPSKIdentity getPSKIdentity() {
+
+            return new BasicTlsPSKIdentity("Clip", KeyUtil.getKey());
+        }
+
         @Override
         public int[] getCipherSuites() {
-            return new int[] {
+            return new int[]{
                     CipherSuite.TLS_DHE_PSK_WITH_AES_128_CBC_SHA256,
                     CipherSuite.TLS_DHE_PSK_WITH_AES_128_GCM_SHA256,
                     CipherSuite.TLS_DHE_PSK_WITH_AES_128_CCM,
                     CipherSuite.TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256
             };
         }
-    }
-
-    public static TlsClientProtocol getClientProtocol(InputStream inputStream, OutputStream outputStream) {
-        PSKTlsClient client = new NetClipTlsClient();
-        TlsClientProtocol protocol = new TlsClientProtocol(inputStream, outputStream, new SecureRandom());
-        try {
-            protocol.connect(client);
-        } catch (TlsFatalAlert|TlsFatalAlertReceived alert) {
-            if (alert.getMessage().contains("20")){
-                System.out.println("Authentication fails for TLS Connection.");
-            } else alert.printStackTrace();
-            return null;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return protocol;
-    }
-
-    public static TlsServerProtocol getServerProtocol(InputStream inputStream, OutputStream outputStream) {
-        PSKTlsServer server = new NetClipTlsServer();
-        TlsServerProtocol protocol = new TlsServerProtocol(inputStream, outputStream, new SecureRandom());
-        try {
-            protocol.accept(server);
-        } catch (TlsFatalAlert|TlsFatalAlertReceived alert) {
-            if (alert.getMessage().contains("20")){
-                System.out.println("Authentication fails for TLS Connection.");
-            } else alert.printStackTrace();
-            return null;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return protocol;
-    }
-
-    public static TlsProtocol getTlsProtocol(boolean isServer, InputStream inputStream, OutputStream outputStream) {
-        return isServer ?
-                getServerProtocol(inputStream, outputStream) :
-                getClientProtocol(inputStream, outputStream);
     }
 }

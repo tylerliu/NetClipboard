@@ -173,6 +173,7 @@ public class FileSender implements Runnable, Cancelable {
 
     /**
      * Encryption by initialized cipher
+     *
      * @param files
      * @param cipher the initialized cipher to be used
      */

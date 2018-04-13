@@ -165,6 +165,7 @@ public class FileReceiver implements Runnable, Cancelable {
 
     /**
      * Decryption by initialized cipher
+     *
      * @param base
      * @param cipher
      */

@@ -2,8 +2,6 @@ package net;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Allocator for the connection port

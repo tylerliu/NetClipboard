@@ -11,6 +11,14 @@ public class KeyUtil {
     }
 
     public static byte[] getKey() {
-        return keygen.Keygen.fileToKey(keyFile);
+        return key.Keygen.fileToKey(keyFile);
+    }
+
+    public static void generateKey() {
+        Keygen.keyToFile(keyFile);
+    }
+
+    public static boolean isKeyExist() {
+        return keyFile.exists();
     }
 }

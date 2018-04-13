@@ -4,7 +4,6 @@ import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.util.ArrayDeque;
 
 /**
  * Created by TylerLiu on 2017/10/01.
@@ -20,7 +19,7 @@ class MultipleFormatInStream extends FilterInputStream {
         super(inputStream);
     }
 
-    private void loadNext() throws IOException{
+    private void loadNext() throws IOException {
         byte[] head = new byte[4];
         super.readNBytes(head, 0, head.length);
         type = head[0];
@@ -38,14 +37,14 @@ class MultipleFormatInStream extends FilterInputStream {
     /**
      * Used only when sure the next is string
      */
-    String getString() throws IOException{
+    String getString() throws IOException {
         byte lastType = type;
         loadNext();
         if (type != 1 && (type != 0 || lastType != 1)) return null;
         return new String(payload) + (cont != 0 ? getString() : "");
     }
 
-    private String tryString() throws IOException{
+    private String tryString() throws IOException {
         if (type != 1) return null;
         return new String(payload) + (cont != 0 ? getString() : "");
     }

@@ -2,13 +2,8 @@ package net;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.InetAddress;
 import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
-import java.util.ArrayDeque;
-import java.util.Queue;
 
 /**
  * a class output stream that can transfer multiple format of file
@@ -28,7 +23,7 @@ import java.util.Queue;
  * byte 2, 3: length of file
  * <p>
  * Data
- *
+ * <p>
  * Files: 2 byte port, then key material
  * <p>
  * Created by TylerLiu on 2017/10/01.
@@ -49,7 +44,7 @@ class MultipleFormatOutStream extends FilterOutputStream {
     /**
      * Flush the internal buffer
      */
-    private void flushBuffer() throws IOException{
+    private void flushBuffer() throws IOException {
         int count = buf.position();
         byte[] head = new byte[]{type, (byte) (count >> 16), (byte) ((count >> 8) & 0XFF), (byte) (count & 0XFF)};
         super.write(head);
