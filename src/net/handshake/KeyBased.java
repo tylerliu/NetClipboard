@@ -33,12 +33,6 @@ public class KeyBased {
     private static byte[] key = new byte[32];
     private static ExecutorService executorService = Executors.newCachedThreadPool();
 
-
-    public static void main(String[] args) {
-        //key.keyToFile(new File("./key"));
-        System.out.println("target is " + getTarget());
-    }
-
     public static InetAddress getTarget() {
         initHandShake();
         executorService.submit(KeyBased::receive);
@@ -92,8 +86,7 @@ public class KeyBased {
             authenticated.put(InetAddress.getLocalHost(), false); //prevent connecting itself
             socket = new MulticastSocket(port);
             sendSocket = new DatagramSocket();
-            InetAddress group = InetAddress.getByName(groupAddress);
-            socket.joinGroup(group);
+            socket.joinGroup(InetAddress.getByName(groupAddress));
         } catch (IOException e) {
             e.printStackTrace();
             System.exit(1);
@@ -153,6 +146,7 @@ public class KeyBased {
 
     /**
      * send response from for given packet
+     *
      * @param packet the received packet
      */
     private static void respond(DatagramPacket packet) {

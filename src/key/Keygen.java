@@ -1,4 +1,4 @@
-package keygen;
+package key;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,14 +14,7 @@ import java.util.Base64;
  */
 public class Keygen {
 
-    static final int KEY_LEN = 1 << 5;
-
-    public static void main(String[] args) {
-        keyToFile(new File("./Key"));
-        System.out.println(Arrays.toString(fileToKey(new File("./Key"))));
-        //System.out.println(Arrays.toString(generateKey()));
-    }
-
+    private static final int KEY_LEN = 1 << 5;
 
     public static byte[] generateKey() {
         return generateKey(KEY_LEN);
@@ -46,7 +39,7 @@ public class Keygen {
         int written = 0;
         while (written < keyLen) {
             byte[] temp = digest.digest(Arrays.copyOfRange(initial, written, (written + 32 * 3 / 2)));
-            for (int i = 0; i < Math.min(temp.length, out.length - written); i ++) {
+            for (int i = 0; i < Math.min(temp.length, out.length - written); i++) {
                 out[written + i] = temp[i];
             }
             written += temp.length;

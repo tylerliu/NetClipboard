@@ -6,21 +6,20 @@ import net.handshake.KeyBased;
 import net.handshake.Manual;
 import org.bouncycastle.crypto.tls.TlsProtocol;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.Objects;
+
 /**
  * Handles the network connection for clipboard sharing
  */
 public class TransferConnector {
 
-    private static boolean isServer;
     private static final int connectionPort = 31415;
+    private static boolean isServer;
     private static MultipleFormatInStream inStream;
     private static MultipleFormatOutStream outStream;
     private static Socket socket;
