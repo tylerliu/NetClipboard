@@ -38,7 +38,7 @@ public class Manual {
             }
             found = true;
             return others.get(i - 1);
-        } catch (InputMismatchException | IndexOutOfBoundsException inError) {
+        } catch(InputMismatchException | IndexOutOfBoundsException inError) {
             System.out.println("Cannot Recognize the index. Connection cancelled");
             System.exit(1);
         } catch (Exception e) {
