@@ -62,7 +62,8 @@ public class FileTransfer {
             transferConnector = null;
 
             if (isCancelled) {
-                FileUtils.deleteQuietly(newDstFolder);
+                tempFolders.add(newDstFolder);
+                deleteFolder();
                 return null;
             }
 
