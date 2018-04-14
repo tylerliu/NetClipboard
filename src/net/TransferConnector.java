@@ -6,14 +6,12 @@ import net.handshake.KeyBased;
 import net.handshake.Manual;
 import org.bouncycastle.crypto.tls.TlsProtocol;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Handles the network connection for clipboard sharing
@@ -107,13 +105,6 @@ public class TransferConnector {
         try {
             while (true) {
 
-                //set clipboard if file receiving finished
-                if (FileTransfer.isNewlyReceived()) {
-                    List<File> files = FileTransfer.getFiles();
-                    System.out.println("Remote Clipboard New: " + files);
-                    ClipboardIO.setSysCLipboardFiles(files);
-                }
-
                 //check clipboard
                 if (ClipboardIO.checkNew()) {
                     if (FileTransfer.isTransferring()) { //file Transferring
@@ -179,7 +170,11 @@ public class TransferConnector {
                         return;
                     case HTML:
                     case FILES:
-                        FileTransfer.receiveFiles((ByteBuffer) b[1]);
+                        FileTransfer.receiveFiles((ByteBuffer) b[1]).thenAccept((files) -> {
+                            if (files == null) return;
+                            System.out.println("Remote Clipboard New: " + files);
+                            ClipboardIO.setSysCLipboardFiles(files);
+                        });
                     default:
                 }
             }
