@@ -9,6 +9,7 @@ import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import java.io.*;
 import java.net.Socket;
+import java.util.List;
 
 /**
  * Created by TylerLiu on 2018/03/22.
@@ -157,17 +158,19 @@ public class FileReceiver implements Runnable, Cancelable {
         closeConnection();
     }
 
-    public void runTared(File base) {
-        if (!openConnection()) return;
+    public List<File> runTared(File base) {
+        List<File> files = null;
+        if (!openConnection()) return null;
         try {
             recvInputStream = new FramedSnappyCompressorInputStream(recvInputStream);
-            TarExtractor.decompress(recvInputStream, base);
+            files = TarExtractor.decompress(recvInputStream, base);
         } catch (IOException e) {
             if (isCancelled) {
                 System.out.println("File receive cancelled with error " + e);
             } else e.printStackTrace();
         }
         closeConnection();
+        return files;
     }
 
     /**
@@ -176,17 +179,19 @@ public class FileReceiver implements Runnable, Cancelable {
      * @param base
      * @param cipher
      */
-    public void runTared(File base, Cipher cipher) {
-        if (!openConnection()) return;
+    public List<File> runTared(File base, Cipher cipher) {
+        if (!openConnection()) return null;
+        List<File> files = null;
         try {
             recvInputStream = new FramedSnappyCompressorInputStream(recvInputStream);
             recvInputStream = new CipherInputStream(recvInputStream, cipher);
-            TarExtractor.decompress(recvInputStream, base);
+            files = TarExtractor.decompress(recvInputStream, base);
         } catch (IOException e) {
             if (isCancelled) {
                 System.out.println("File receive cancelled with error " + e);
             } else e.printStackTrace();
         }
         closeConnection();
+        return files;
     }
 }
