@@ -1,6 +1,6 @@
 package main;
 
-import net.FileTransfer;
+import files.FilesTransferable;
 
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
@@ -125,12 +125,19 @@ public class ClipboardIO {
         }
     }
 
-    public static void setSysCLipboardFiles(List<File> files) {
+    public static void setSysClipboardFiles(List<File> files) {
         lastType = ContentType.FILES;
         lastFiles = files;
         isFromRemote = true;
-        FileTransfer.FileTransferable fileTransferable = new FileTransfer.FileTransferable(files);
+        FilesTransferable fileTransferable = new FilesTransferable(files);
         sysClip.setContents(fileTransferable, fileTransferable);
+    }
+
+    public static void unsetSysClipboard() {
+        lastString = "";
+        isFromRemote = true;
+        StringSelection ss = new StringSelection("");
+        sysClip.setContents(ss, ss);
     }
 
     public enum ContentType {

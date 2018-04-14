@@ -173,7 +173,7 @@ public class TransferConnector {
                         FileTransfer.receiveFiles((ByteBuffer) b[1]).thenAccept((files) -> {
                             if (files == null) return;
                             System.out.println("Remote Clipboard New: " + files);
-                            ClipboardIO.setSysCLipboardFiles(files);
+                            ClipboardIO.setSysClipboardFiles(files);
                         });
                     default:
                 }
