@@ -16,6 +16,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -27,11 +28,12 @@ public class FileTransfer {
     private static File lastSavedDirectory;
     private static ExecutorService executor = Executors.newCachedThreadPool();
 
-    public synchronized static void receiveFiles(ByteBuffer spec) {
-        executor.submit(() -> receiveFilesWorker(spec));
+    public synchronized static CompletableFuture<List<File>> receiveFiles(ByteBuffer spec) {
+        return CompletableFuture.supplyAsync(() -> receiveFilesWorker(spec), executor);
     }
 
-    private static void receiveFilesWorker(ByteBuffer spec) {
+    private static List<File> receiveFilesWorker(ByteBuffer spec) {
+        List<File> files;
         int port = Short.toUnsignedInt(spec.getShort());
         byte[] master = new byte[spec.remaining()];
         spec.get(master);
@@ -55,13 +57,14 @@ public class FileTransfer {
         } else {
             System.out.println("Cancelled Pasting.");
             FileReceiver.cancelConnection(port);
-            return;
+            return null;
         }
 
         System.out.println("File receiving from port: " + port);
         FileReceiver receiver = FileReceiver.receiveTarObj(port);
-        receiver.runTared(toDir, cipher);
+        files = receiver.runTared(toDir, cipher);
         System.out.println("File receive done");
+        return files;
     }
 
     public synchronized static void sendFiles(List<File> sendFiles, int port, byte[] key) {

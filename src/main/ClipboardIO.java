@@ -1,5 +1,7 @@
 package main;
 
+import files.FilesTransferable;
+
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
@@ -121,6 +123,14 @@ public class ClipboardIO {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public static void setSysClipboardFiles(List<File> files) {
+        lastType = ContentType.FILES;
+        lastFiles = files;
+        isFromRemote = true;
+        FilesTransferable fileTransferable = new FilesTransferable(files);
+        sysClip.setContents(fileTransferable, fileTransferable);
     }
 
     public static void unsetSysClipboard() {
