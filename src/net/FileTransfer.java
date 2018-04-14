@@ -5,22 +5,23 @@ import files.FileReceiver;
 import files.FileSender;
 import org.apache.commons.io.FileUtils;
 
-import java.awt.datatransfer.*;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.io.File;
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Class for receiving files
@@ -133,9 +134,9 @@ public class FileTransfer {
         executor.shutdown();
     }
 
-    public synchronized static void deleteFolder(){
+    public synchronized static void deleteFolder() {
         while (!tempFolders.isEmpty()) {
-            if (tempFolders.peek() == null || !tempFolders.peek().exists()||
+            if (tempFolders.peek() == null || !tempFolders.peek().exists() ||
                     FileUtils.deleteQuietly(tempFolders.peek())) tempFolders.pop();
         }
     }

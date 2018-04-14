@@ -8,9 +8,6 @@ import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * implementation of unencrypted handshake
@@ -41,7 +38,7 @@ public class Manual {
             }
             found = true;
             return others.get(i - 1);
-        } catch(InputMismatchException | IndexOutOfBoundsException inError) {
+        } catch (InputMismatchException | IndexOutOfBoundsException inError) {
             System.out.println("Cannot Recognize the index. Connection cancelled");
             System.exit(1);
         } catch (Exception e) {
