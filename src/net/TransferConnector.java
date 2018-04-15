@@ -86,6 +86,7 @@ public class TransferConnector {
 
             tlsProtocol = TLSHandler.getTlsProtocol(isServer, socket.getInputStream(), socket.getOutputStream());
             if (tlsProtocol == null) return false;
+            exchangeProtocol(tlsProtocol);
             inStream = new MultipleFormatInStream(tlsProtocol.getInputStream());
             outStream = new MultipleFormatOutStream(tlsProtocol.getOutputStream());
 
@@ -95,6 +96,26 @@ public class TransferConnector {
         }
 
         return true;
+    }
+
+    public static void exchangeProtocol(TlsProtocol protocol) {
+        try {
+            int magicNumber = 5;
+            protocol.getOutputStream().write(magicNumber);
+            protocol.getOutputStream().write(FileTransferMode.getLocalMode().ordinal());
+            if (protocol.getInputStream().read() != magicNumber) {
+                System.out.println("Communication protocol does not match! ");
+                System.exit(1);
+            }
+            int targetMode = protocol.getInputStream().read();
+            if (targetMode != -1) {
+                FileTransferMode.setTargetMode(FileTransferMode.Mode.values()[targetMode]);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("protocol exchange failed");
+            System.exit(1);
+        }
     }
 
     public static void DataTransferExecute() {

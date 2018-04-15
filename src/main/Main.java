@@ -46,9 +46,8 @@ public class Main {
         }
 
 
-        if (args.length > 1 && args[0].toLowerCase().startsWith("-c")) {
+        if (args.length >= 1 && args[0].toLowerCase().startsWith("-c")) {
             FileTransferMode.setLocalMode(FileTransferMode.Mode.CACHED);
-            FileTransferMode.setTargetMode(FileTransferMode.Mode.CACHED);
             args = Arrays.copyOfRange(args, 1, args.length);
         }
 
