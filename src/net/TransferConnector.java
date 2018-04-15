@@ -6,12 +6,15 @@ import net.handshake.KeyBased;
 import net.handshake.Manual;
 import org.bouncycastle.crypto.tls.TlsProtocol;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Handles the network connection for clipboard sharing
@@ -107,6 +110,8 @@ public class TransferConnector {
 
                 //check clipboard
                 if (ClipboardIO.checkNew()) {
+                    FileTransfer.attemptCancelTransfer();//if file Transferring
+                    FileTransfer.deleteTempFolder();
                     switch (ClipboardIO.getLastType()) {
                         case STRING:
                             outStream.writeString(ClipboardIO.getLastString());
@@ -127,7 +132,7 @@ public class TransferConnector {
                 try {
                     Thread.sleep(25);
                 } catch (InterruptedException e) {
-
+                    //do nothing
                 }
             }
 
@@ -152,6 +157,8 @@ public class TransferConnector {
             while (true) {
                 Object[] b = inStream.readNext();
                 if (b == null) System.exit(0);
+                FileTransfer.attemptCancelTransfer(); //cancel if file transferring
+                FileTransfer.deleteTempFolder();
                 switch (ClipboardIO.getContentType((int) b[0])) {
                     case STRING:
                         String s = (String) b[1];
@@ -163,8 +170,16 @@ public class TransferConnector {
                         return;
                     case HTML:
                     case FILES:
-                        FileTransfer.receiveFiles((ByteBuffer) b[1]);
-                        ClipboardIO.unsetSysClipboard();
+                        CompletableFuture<List<File>> re = FileTransfer.receiveFiles((ByteBuffer) b[1]);
+                        if (FileTransferMode.getLocalMode() == FileTransferMode.Mode.CACHED) {
+                            re.thenAccept((files) -> {
+                                if (files == null) return;
+                                System.out.println("Remote Clipboard New: " + files);
+                                ClipboardIO.setSysClipboardFiles(files);
+                            });
+                        } else {
+                            ClipboardIO.unsetSysClipboard();
+                        }
                     default:
                 }
             }

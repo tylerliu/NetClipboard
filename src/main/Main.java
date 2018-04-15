@@ -3,6 +3,7 @@ package main;
 import clip.ClipboardIO;
 import key.KeyUtil;
 import net.FileTransfer;
+import net.FileTransferMode;
 import net.TransferConnector;
 
 import java.net.InetAddress;
@@ -53,6 +54,12 @@ public class Main {
                 TransferConnector.setDirectTarget(args[1]);
             } else System.out.println("Unknown Command. Use \"-h\" to show more options");
         }
+
+        /*
+        FileTransferMode.setLocalMode(FileTransferMode.Mode.CACHED);
+        FileTransferMode.setTargetMode(FileTransferMode.Mode.CACHED);
+        */
+
         TransferConnector.setTarget();
         ClipboardIO.getSysClipboardText();
         if (!TransferConnector.connect()) return;
