@@ -41,7 +41,7 @@ public class FileTransfer {
 
         File toDir = getSavingDirectory();
         if (toDir != null) {
-            System.out.println("Saving to: " + lastSavedDirectory.getAbsolutePath());
+            System.out.println("Saving to: " + toDir.getAbsolutePath());
         } else {
             System.out.println("Cancelled Pasting.");
             FileReceiver.cancelConnection(port);
