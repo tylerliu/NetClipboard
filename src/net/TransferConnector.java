@@ -108,7 +108,7 @@ public class TransferConnector {
                 //check clipboard
                 if (ClipboardIO.checkNew()) {
                     FileTransfer.cancelTransfer();//if file Transferring
-                    FileTransfer.deleteFolder();
+                    FileTransfer.deleteTempFolder();
                     switch (ClipboardIO.getLastType()) {
                         case STRING:
                             outStream.writeString(ClipboardIO.getLastString());
@@ -154,7 +154,7 @@ public class TransferConnector {
                 Object[] b = inStream.readNext();
                 if (b == null) System.exit(0);
                 FileTransfer.cancelTransfer(); //cancel if file transferring
-                FileTransfer.deleteFolder();
+                FileTransfer.deleteTempFolder();
                 switch (ClipboardIO.getContentType((int) b[0])) {
                     case STRING:
                         String s = (String) b[1];

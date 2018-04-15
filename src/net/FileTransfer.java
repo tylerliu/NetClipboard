@@ -43,30 +43,41 @@ public class FileTransfer {
         byte[] master = new byte[spec.remaining()];
         spec.get(master);
         Cipher cipher = getCipher(master, false);
-        try {
 
+        File toDir = getSavingDirectory();
+        if (toDir != null) {
+            System.out.println("Saving to: " + toDir.getAbsolutePath());
+        } else {
+            System.out.println("Cancelled Pasting.");
+            FileReceiver.cancelConnection(port);
+            return null;
+        }
+
+        System.out.println("File receiving from port: " + port);
+        FileReceiver receiver = FileReceiver.receiveTarObj(port);
+        receivers.add(receiver);
+        files = receiver.runTared(toDir, cipher);
+
+        if (receiver.isCancelled()) {
+            tempFolders.add(toDir);
+            deleteTempFolder();
+            return null;
+        }
+
+        receivers.remove(receiver);
+
+        deleteTempFolder();
+        tempFolders.add(toDir);
+        System.out.println("File receive done");
+        return files;
+    }
+
+    public static File getSavingDirectory() {
+        try {
             File newDstFolder = Files.createTempDirectory("NetClipboard").toFile();
             newDstFolder.deleteOnExit();
-            System.out.println("Receive Folder: " + newDstFolder.getAbsolutePath());
-
-            System.out.println("File receiving from port: " + port);
-            FileReceiver receiver = FileReceiver.receiveTarObj(port);
-            receivers.add(receiver);
-            files = receiver.runTared(newDstFolder, cipher);
-
-            if (receiver.isCancelled()) {
-                tempFolders.add(newDstFolder);
-                deleteFolder();
-                return null;
-            }
-
-            receivers.remove(receiver);
-
-            deleteFolder();
-            tempFolders.add(newDstFolder);
-            System.out.println("File receive done");
-            return files;
-        } catch (IOException e) {
+            return newDstFolder;
+        } catch (IOException e){
             e.printStackTrace();
         }
         return null;
@@ -77,12 +88,12 @@ public class FileTransfer {
         executor.submit(() -> FileTransfer.sendFilesWorker(sendFiles, port, key));
     }
 
-    public static void sendFilesWorker(List<File> files, int port, byte[] key) {
+    public static void sendFilesWorker(List<File> sendFiles, int port, byte[] key) {
         Cipher cipher = getCipher(key, true);
         System.out.println("File sending on port: " + port);
         FileSender sender = FileSender.sendFileListObj(port);
         senders.add(sender);
-        sender.runTared(files, cipher);
+        sender.runTared(sendFiles, cipher);
         senders.remove(sender);
     }
 
@@ -138,7 +149,7 @@ public class FileTransfer {
         }
     }
 
-    public synchronized static void deleteFolder() {
+    public synchronized static void deleteTempFolder() {
         while (!tempFolders.isEmpty()) {
             if (tempFolders.peek() == null || !tempFolders.peek().exists() ||
                     FileUtils.deleteQuietly(tempFolders.peek())) tempFolders.pop();
