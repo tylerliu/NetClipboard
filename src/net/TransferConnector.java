@@ -1,6 +1,6 @@
 package net;
 
-import main.ClipboardIO;
+import clip.ClipboardIO;
 import net.handshake.DirectConnect;
 import net.handshake.KeyBased;
 import net.handshake.Manual;

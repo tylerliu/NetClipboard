@@ -38,21 +38,9 @@ public class FileTransfer {
         byte[] master = new byte[spec.remaining()];
         spec.get(master);
         Cipher cipher = getCipher(master, false);
-        File toDir;
 
-        //choose destination
-        //TODO track default directory
-        if (lastSavedDirectory == null) {
-            lastSavedDirectory = new File(System.getProperty("user.home"));
-        }
-        NativeJFileChooser chooser = new NativeJFileChooser(lastSavedDirectory);
-        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        chooser.setDialogTitle("Paste Files...");
-
-        int chooseResult = chooser.showDialog(null, "Paste");
-        if (chooseResult == JFileChooser.APPROVE_OPTION) {
-            toDir = chooser.getSelectedFile();
-            lastSavedDirectory = toDir;
+        File toDir = getSavingDirectory();
+        if (toDir != null) {
             System.out.println("Saving to: " + lastSavedDirectory.getAbsolutePath());
         } else {
             System.out.println("Cancelled Pasting.");
@@ -65,6 +53,24 @@ public class FileTransfer {
         files = receiver.runTared(toDir, cipher);
         System.out.println("File receive done");
         return files;
+    }
+
+    private static File getSavingDirectory() {
+        //choose destination
+        //TODO track default directory
+        if (lastSavedDirectory == null) {
+            lastSavedDirectory = new File(System.getProperty("user.home"));
+        }
+        NativeJFileChooser chooser = new NativeJFileChooser(lastSavedDirectory);
+        chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        chooser.setDialogTitle("Paste Files...");
+
+        int chooseResult = chooser.showDialog(null, "Paste");
+        if (chooseResult == JFileChooser.APPROVE_OPTION) {
+            return lastSavedDirectory = chooser.getSelectedFile();
+        } else {
+            return null;
+        }
     }
 
     public synchronized static void sendFiles(List<File> sendFiles, int port, byte[] key) {
