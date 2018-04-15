@@ -165,13 +165,13 @@ public class FileSender implements Runnable, Cancelable {
         if (!openConnection()) return;
         try {
             sendOutputStream = new FramedSnappyCompressorOutputStream(sendOutputStream);
-        } catch (IOException e) {
+            TarCompressor.compress(files, getSendOutputStream());
+        } catch (Exception e) {
+            if (isCancelled) {
+                System.out.println("File send cancel with error");
+                return;
+            }
             e.printStackTrace();
-        }
-        TarCompressor.compress(files, getSendOutputStream());
-        if (isCancelled) {
-            System.out.println("File send cancel with error");
-            return;
         }
         closeConnection();
         System.out.println("File send done");
@@ -188,14 +188,15 @@ public class FileSender implements Runnable, Cancelable {
         try {
             sendOutputStream = new FramedSnappyCompressorOutputStream(sendOutputStream);
             sendOutputStream = new CipherOutputStream(sendOutputStream, cipher);
-        } catch (IOException e) {
+            TarCompressor.compress(files, getSendOutputStream());
+        } catch (Exception e) {
+            if (isCancelled) {
+                System.out.println("File send cancel with error");
+                return;
+            }
             e.printStackTrace();
         }
-        TarCompressor.compress(files, getSendOutputStream());
-        if (isCancelled) {
-            System.out.println("File send cancel with error");
-            return;
-        }
+
         closeConnection();
         System.out.println("File send done");
     }
