@@ -141,8 +141,14 @@ public class FileReceiver implements Runnable, Cancelable {
 
     @Override
     public synchronized void cancel() {
+        if (isCancelled) return;
         isCancelled = true;
         closeConnection();
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return isCancelled;
     }
 
     @Override

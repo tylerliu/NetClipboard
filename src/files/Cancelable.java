@@ -5,4 +5,5 @@ package files;
  */
 public interface Cancelable {
     void cancel();
+    boolean isCancelled();
 }
