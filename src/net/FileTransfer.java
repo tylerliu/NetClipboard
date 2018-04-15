@@ -1,5 +1,6 @@
 package net;
 
+import filechooser.NativeJFileChooser;
 import files.FileReceiver;
 import files.FileSender;
 import org.apache.commons.io.FileUtils;
@@ -8,6 +9,7 @@ import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -22,18 +24,19 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Class for receiving files
+ * Class for transferring files
  */
 public class FileTransfer {
 
     private static ConcurrentLinkedDeque<File> tempFolders = new ConcurrentLinkedDeque<>();
+    private static File lastSavedDirectory;
     private static ExecutorService executor = Executors.newCachedThreadPool();
     //TODO use Executors.newWorkStealingPool()
     private static List<FileReceiver> receivers = Collections.synchronizedList(new LinkedList<>());
     private static List<FileSender> senders = Collections.synchronizedList(new LinkedList<>());
 
     public synchronized static CompletableFuture<List<File>> receiveFiles(ByteBuffer spec) {
-        cancelReceive(); //cancel other receive
+        if (FileTransferMode.getLocalMode() == FileTransferMode.Mode.CACHED) cancelReceive(); //cancel other receive
         return CompletableFuture.supplyAsync(() -> receiveFilesWorker(spec), executor);
     }
 
@@ -46,7 +49,7 @@ public class FileTransfer {
 
         File toDir = getSavingDirectory();
         if (toDir != null) {
-            System.out.println("Saving to: " + toDir.getAbsolutePath());
+            System.out.println("Retrieve files to: " + toDir.getAbsolutePath());
         } else {
             System.out.println("Cancelled Pasting.");
             FileReceiver.cancelConnection(port);
@@ -59,32 +62,49 @@ public class FileTransfer {
         files = receiver.runTared(toDir, cipher);
 
         if (receiver.isCancelled()) {
-            tempFolders.add(toDir);
             deleteTempFolder();
             return null;
         }
 
         receivers.remove(receiver);
 
-        deleteTempFolder();
-        tempFolders.add(toDir);
+        deleteTempFolder(toDir);
         System.out.println("File receive done");
         return files;
     }
 
-    public static File getSavingDirectory() {
-        try {
-            File newDstFolder = Files.createTempDirectory("NetClipboard").toFile();
-            newDstFolder.deleteOnExit();
-            return newDstFolder;
-        } catch (IOException e){
-            e.printStackTrace();
+    private static File getSavingDirectory() {
+        if (FileTransferMode.getLocalMode() == FileTransferMode.Mode.CACHED) {
+            try {
+                File newDstFolder = Files.createTempDirectory("NetClipboard").toFile();
+                newDstFolder.deleteOnExit();
+                tempFolders.add(newDstFolder);
+                return newDstFolder;
+            } catch (IOException e) {
+                e.printStackTrace();
+                return null;
+            }
+        } else {
+            //choose destination
+            //TODO track default directory
+            if (lastSavedDirectory == null) {
+                lastSavedDirectory = new File(System.getProperty("user.home"));
+            }
+            NativeJFileChooser chooser = new NativeJFileChooser(lastSavedDirectory);
+            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+            chooser.setDialogTitle("Paste Files...");
+
+            int chooseResult = chooser.showDialog(null, "Paste");
+            if (chooseResult == JFileChooser.APPROVE_OPTION) {
+                return lastSavedDirectory = chooser.getSelectedFile();
+            } else {
+                return null;
+            }
         }
-        return null;
     }
 
     public synchronized static void sendFiles(List<File> sendFiles, int port, byte[] key) {
-        cancelSend();
+        if (FileTransferMode.getTargetMode() == FileTransferMode.Mode.CACHED) cancelSend();
         executor.submit(() -> FileTransfer.sendFilesWorker(sendFiles, port, key));
     }
 
@@ -111,9 +131,9 @@ public class FileTransfer {
         }
     }
 
-    public synchronized static void cancelTransfer() {
-        cancelReceive();
-        cancelSend();
+    public synchronized static void attemptCancelTransfer() {
+        if (FileTransferMode.getLocalMode() == FileTransferMode.Mode.CACHED) cancelReceive();
+        if (FileTransferMode.getTargetMode() == FileTransferMode.Mode.CACHED) cancelSend();
     }
 
     public static Cipher getCipher(byte[] master, boolean isEncrypt) {
@@ -137,7 +157,7 @@ public class FileTransfer {
     }
 
     public synchronized static void terminate() {
-        cancelTransfer();
+        attemptCancelTransfer();
         executor.shutdown();
         while (!executor.isTerminated()) {
             System.out.println("Wait for transferring...");
@@ -152,7 +172,24 @@ public class FileTransfer {
     public synchronized static void deleteTempFolder() {
         while (!tempFolders.isEmpty()) {
             if (tempFolders.peek() == null || !tempFolders.peek().exists() ||
-                    FileUtils.deleteQuietly(tempFolders.peek())) tempFolders.pop();
+                    FileUtils.deleteQuietly(tempFolders.peek())) {
+                tempFolders.poll();
+            }
+            else {
+                return;
+            }
+        }
+    }
+
+    public synchronized static void deleteTempFolder(File exclude) {
+        while (!tempFolders.isEmpty()) {
+            if (tempFolders.peek() == null || !tempFolders.peek().exists() ||
+                    (!tempFolders.peek().equals(exclude) && FileUtils.deleteQuietly(tempFolders.peek()))) {
+                tempFolders.poll();
+            }
+            else {
+                return;
+            }
         }
     }
 }
