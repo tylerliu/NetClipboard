@@ -132,7 +132,7 @@ public class TransferConnector {
                 try {
                     Thread.sleep(25);
                 } catch (InterruptedException e) {
-
+                    //do nothing
                 }
             }
 
