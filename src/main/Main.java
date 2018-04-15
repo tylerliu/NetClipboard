@@ -1,5 +1,6 @@
 package main;
 
+import clip.ClipboardIO;
 import key.KeyUtil;
 import net.FileTransfer;
 import net.TransferConnector;

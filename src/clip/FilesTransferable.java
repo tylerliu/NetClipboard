@@ -1,4 +1,4 @@
-package files;
+package clip;
 
 import java.awt.datatransfer.*;
 import java.io.File;
