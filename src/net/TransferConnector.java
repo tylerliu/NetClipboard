@@ -61,7 +61,7 @@ public class TransferConnector {
     /**
      * determine if this is the server side of the connection
      */
-    public static void checkServer() {
+    private static void checkServer() {
         try {
             isServer = Arrays.compare(InetAddress.getLocalHost().getAddress(), getTarget().getAddress()) > 0;
         } catch (UnknownHostException e) {
@@ -141,7 +141,7 @@ public class TransferConnector {
         }
     }
 
-    public static byte[] getTransKey() {
+    private static byte[] getTransKey() {
         byte[] key = new byte[48];
         try {
             SecureRandom.getInstanceStrong().nextBytes(key);
@@ -151,7 +151,7 @@ public class TransferConnector {
         return key;
     }
 
-    public static void reader() {
+    private static void reader() {
         //read
         try {
             while (true) {

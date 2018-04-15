@@ -20,6 +20,7 @@ public class FileTransferMode {
     public static void setLocalMode(Mode localMode) {
         FileTransferMode.localMode = localMode;
     }
+
     public enum Mode {
         CACHED, //file is cached in a temporary directory
         CHOOSER //file location chosen by a file save dialog

@@ -8,6 +8,7 @@ import net.TransferConnector;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 public class Main {
 
@@ -44,6 +45,13 @@ public class Main {
             e.printStackTrace();
         }
 
+
+        if (args.length > 1 && args[0].toLowerCase().startsWith("-c")) {
+            FileTransferMode.setLocalMode(FileTransferMode.Mode.CACHED);
+            FileTransferMode.setTargetMode(FileTransferMode.Mode.CACHED);
+            args = Arrays.copyOfRange(args, 1, args.length);
+        }
+
         /**
          * target options
          */
@@ -54,11 +62,6 @@ public class Main {
                 TransferConnector.setDirectTarget(args[1]);
             } else System.out.println("Unknown Command. Use \"-h\" to show more options");
         }
-
-        /*
-        FileTransferMode.setLocalMode(FileTransferMode.Mode.CACHED);
-        FileTransferMode.setTargetMode(FileTransferMode.Mode.CACHED);
-        */
 
         TransferConnector.setTarget();
         ClipboardIO.getSysClipboardText();
@@ -72,6 +75,7 @@ public class Main {
         System.out.println("Net Clipboard");
         System.out.println("Shared Clipboard between computers");
         System.out.println("Options:");
+        System.out.println("\t\t\t-c\tAllow Pasting by Clipboard (Windows only)");
         System.out.println("\t-h, --help\tShow Help");
         System.out.println("\t\t\t-g\tGenerate Encryption Key File In Current Directory");
         System.out.println("\t\t\t-m\tManually select the other computer to share clipboard");

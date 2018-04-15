@@ -9,7 +9,7 @@ import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import javax.swing.*;
+import javax.swing.JFileChooser;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -17,7 +17,10 @@ import java.nio.file.Files;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
@@ -30,8 +33,7 @@ public class FileTransfer {
 
     private static ConcurrentLinkedDeque<File> tempFolders = new ConcurrentLinkedDeque<>();
     private static File lastSavedDirectory;
-    private static ExecutorService executor = Executors.newCachedThreadPool();
-    //TODO use Executors.newWorkStealingPool()
+    private static ExecutorService executor = Executors.newWorkStealingPool();
     private static List<FileReceiver> receivers = Collections.synchronizedList(new LinkedList<>());
     private static List<FileSender> senders = Collections.synchronizedList(new LinkedList<>());
 
@@ -173,8 +175,7 @@ public class FileTransfer {
             if (tempFolders.peek() == null || !tempFolders.peek().exists() ||
                     FileUtils.deleteQuietly(tempFolders.peek())) {
                 tempFolders.poll();
-            }
-            else {
+            } else {
                 return;
             }
         }
@@ -185,8 +186,7 @@ public class FileTransfer {
             if (tempFolders.peek() == null || !tempFolders.peek().exists() ||
                     (!tempFolders.peek().equals(exclude) && FileUtils.deleteQuietly(tempFolders.peek()))) {
                 tempFolders.poll();
-            }
-            else {
+            } else {
                 return;
             }
         }
