@@ -98,13 +98,7 @@ public class FileTransfer {
             else cipher.init(Cipher.DECRYPT_MODE, key, gcmSpec);
             cipher.updateAAD(aad);
             return cipher;
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        } catch (NoSuchPaddingException e) {
-            e.printStackTrace();
-        } catch (InvalidKeyException e) {
-            e.printStackTrace();
-        } catch (InvalidAlgorithmParameterException e) {
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException e) {
             e.printStackTrace();
         }
         return null;
