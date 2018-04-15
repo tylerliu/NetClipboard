@@ -60,13 +60,12 @@ public class FileTransfer {
         FileReceiver receiver = FileReceiver.receiveTarObj(port);
         receivers.add(receiver);
         files = receiver.runTared(toDir, cipher);
+        receivers.remove(receiver);
 
         if (receiver.isCancelled()) {
             deleteTempFolder();
             return null;
         }
-
-        receivers.remove(receiver);
 
         deleteTempFolder(toDir);
         System.out.println("File receive done");
