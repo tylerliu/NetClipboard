@@ -1,6 +1,5 @@
 package net;
 
-import files.Cancelable;
 import files.FileReceiver;
 import files.FileSender;
 import org.apache.commons.io.FileUtils;
@@ -16,8 +15,7 @@ import java.nio.file.Files;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
@@ -29,17 +27,13 @@ import java.util.concurrent.Executors;
 public class FileTransfer {
 
     private static ConcurrentLinkedDeque<File> tempFolders = new ConcurrentLinkedDeque<>();
-    private static boolean isCancelled;
-    private static ExecutorService executor = Executors.newSingleThreadExecutor();
-    private static Cancelable transferConnector;
-    private static boolean isReceiveScheduled;
-    private static boolean isFinished;
+    private static ExecutorService executor = Executors.newCachedThreadPool();
+    //TODO use Executors.newWorkStealingPool()
+    private static List<FileReceiver> receivers = Collections.synchronizedList(new LinkedList<>());
+    private static List<FileSender> senders = Collections.synchronizedList(new LinkedList<>());
 
     public synchronized static CompletableFuture<List<File>> receiveFiles(ByteBuffer spec) {
-        if (isTransferring()) cancelTransfer();
-        isReceiveScheduled = true;
-        isCancelled = false;
-        isFinished = false;
+        cancelReceive(); //cancel other receive
         return CompletableFuture.supplyAsync(() -> receiveFilesWorker(spec), executor);
     }
 
@@ -57,17 +51,16 @@ public class FileTransfer {
 
             System.out.println("File receiving from port: " + port);
             FileReceiver receiver = FileReceiver.receiveTarObj(port);
-            transferConnector = receiver;
+            receivers.add(receiver);
             files = receiver.runTared(newDstFolder, cipher);
-            transferConnector = null;
 
-            if (isCancelled) {
+            if (receiver.isCancelled()) {
                 tempFolders.add(newDstFolder);
                 deleteFolder();
                 return null;
             }
 
-            isFinished = true;
+            receivers.remove(receiver);
 
             deleteFolder();
             tempFolders.add(newDstFolder);
@@ -80,10 +73,7 @@ public class FileTransfer {
     }
 
     public synchronized static void sendFiles(List<File> sendFiles, int port, byte[] key) {
-        if (isTransferring()) cancelTransfer();
-        isReceiveScheduled = true;
-        isCancelled = false;
-        isFinished = false;
+        cancelSend();
         executor.submit(() -> FileTransfer.sendFilesWorker(sendFiles, port, key));
     }
 
@@ -91,23 +81,28 @@ public class FileTransfer {
         Cipher cipher = getCipher(key, true);
         System.out.println("File sending on port: " + port);
         FileSender sender = FileSender.sendFileListObj(port);
-        transferConnector = sender;
+        senders.add(sender);
         sender.runTared(files, cipher);
-        isFinished = true;
+        senders.remove(sender);
+    }
 
+    public synchronized static void cancelReceive() {
+        if (!receivers.isEmpty()) System.out.println("File receive cancelled");
+        for (FileReceiver receiver : receivers) {
+            receiver.cancel();
+        }
+    }
+
+    public synchronized static void cancelSend() {
+        if (!senders.isEmpty()) System.out.println("File send cancelled");
+        for (FileSender sender : senders) {
+            sender.cancel();
+        }
     }
 
     public synchronized static void cancelTransfer() {
-        if (isCancelled) return;
-        isCancelled = true;
-        if (isTransferring() && transferConnector != null) {
-            transferConnector.cancel();
-        }
-        System.out.println("File receive cancelled");
-    }
-
-    public synchronized static boolean isTransferring() {
-        return !isFinished && isReceiveScheduled;
+        cancelReceive();
+        cancelSend();
     }
 
     public static Cipher getCipher(byte[] master, boolean isEncrypt) {
@@ -131,8 +126,16 @@ public class FileTransfer {
     }
 
     public synchronized static void terminate() {
-        if (isTransferring()) cancelTransfer();
+        cancelTransfer();
         executor.shutdown();
+        while (!executor.isTerminated()) {
+            System.out.println("Wait for transferring...");
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     public synchronized static void deleteFolder() {

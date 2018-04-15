@@ -1,6 +1,6 @@
 package net;
 
-import main.ClipboardIO;
+import clip.ClipboardIO;
 import net.handshake.DirectConnect;
 import net.handshake.KeyBased;
 import net.handshake.Manual;
@@ -107,9 +107,7 @@ public class TransferConnector {
 
                 //check clipboard
                 if (ClipboardIO.checkNew()) {
-                    if (FileTransfer.isTransferring()) { //file Transferring
-                        FileTransfer.cancelTransfer();
-                    }
+                    FileTransfer.cancelTransfer();//if file Transferring
                     FileTransfer.deleteFolder();
                     switch (ClipboardIO.getLastType()) {
                         case STRING:
@@ -155,9 +153,7 @@ public class TransferConnector {
             while (true) {
                 Object[] b = inStream.readNext();
                 if (b == null) System.exit(0);
-                if (FileTransfer.isTransferring()) {
-                    FileTransfer.cancelTransfer();
-                }
+                FileTransfer.cancelTransfer(); //cancel if file transferring
                 FileTransfer.deleteFolder();
                 switch (ClipboardIO.getContentType((int) b[0])) {
                     case STRING:

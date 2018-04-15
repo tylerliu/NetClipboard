@@ -1,6 +1,4 @@
-package main;
-
-import files.FilesTransferable;
+package clip;
 
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;

@@ -54,9 +54,9 @@ public class FileReceiver implements Runnable, Cancelable {
 
     public static FileReceiver receiveFileRun(File dstFile, int port) {
         try {
+            if (!dstFile.exists()) dstFile.createNewFile();
             return receiveStreamRun(new FileOutputStream(dstFile), port);
-        } catch (FileNotFoundException e) {
-            System.out.println("File not found! " + dstFile.getAbsolutePath());
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
@@ -68,9 +68,9 @@ public class FileReceiver implements Runnable, Cancelable {
 
     public static Thread receiveFile(File dstFile, int port) {
         try {
+            if (!dstFile.exists()) dstFile.createNewFile();
             return receiveStream(new FileOutputStream(dstFile), port);
-        } catch (FileNotFoundException e) {
-            System.out.println("File not found! " + dstFile.getAbsolutePath());
+        } catch (IOException e) {
             e.printStackTrace();
         }
         return null;
@@ -98,6 +98,16 @@ public class FileReceiver implements Runnable, Cancelable {
 
     public static Thread receiveTar(File base) {
         return receiveTar(base, DEFAULT_PORT);
+    }
+
+    public static void cancelConnection(int port) {
+        FileReceiver receiver = new FileReceiver(port);
+        receiver.openConnection();
+        receiver.closeConnection();
+    }
+
+    public static void cancelConnection() {
+        cancelConnection(DEFAULT_PORT);
     }
 
     private boolean openConnection() {
@@ -131,8 +141,14 @@ public class FileReceiver implements Runnable, Cancelable {
 
     @Override
     public synchronized void cancel() {
+        if (isCancelled) return;
         isCancelled = true;
         closeConnection();
+    }
+
+    @Override
+    public boolean isCancelled() {
+        return isCancelled;
     }
 
     @Override
