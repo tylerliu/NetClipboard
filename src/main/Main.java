@@ -5,6 +5,7 @@ import key.KeyUtil;
 import net.FileTransfer;
 import net.FileTransferMode;
 import net.TransferConnector;
+import org.apache.commons.cli.*;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -14,18 +15,27 @@ public class Main {
 
     public static void main(String[] args) {
 
+        CommandLineParser parser = new DefaultParser();
+        CommandLine cmd;
+        try {
+            cmd = parser.parse(getOptions(), args);
+        } catch (ParseException e) {
+            System.out.println(e.getLocalizedMessage());
+            printHelp();
+            //e.printStackTrace();
+            return;
+        }
+
         /**
          * arguments that will not make connection
          */
-        if (args.length >= 1) {
-            if (args[0].toLowerCase().startsWith("-h") || args[0].toLowerCase().equals("--help")) {
-                printHelp();
-                return;
-            }
-            if (args[0].toLowerCase().startsWith("-g")) {
-                KeyUtil.generateKey();
-                return;
-            }
+        if (cmd.hasOption('h')) {
+            printHelp();
+            return;
+        }
+        if (cmd.hasOption('g')) {
+            KeyUtil.generateKey();
+            return;
         }
 
         if (!KeyUtil.isKeyExist()) {
@@ -46,21 +56,17 @@ public class Main {
         }
 
 
-        if (args.length >= 1 && args[0].toLowerCase().startsWith("-c")) {
+        if (cmd.hasOption('c')) {
             FileTransferMode.setLocalMode(FileTransferMode.Mode.CACHED);
             args = Arrays.copyOfRange(args, 1, args.length);
         }
-
-        /**
-         * target options
-         */
-        if (args.length >= 1) {
-            if (args[0].toLowerCase().startsWith("-m")) {
-                TransferConnector.setManualTarget();
-            } else if (args.length >= 2 && args[0].toLowerCase().startsWith("-d")) {
-                TransferConnector.setDirectTarget(args[1]);
-            } else System.out.println("Unknown Command. Use \"-h\" to show more options");
+        if (cmd.hasOption('m')) {
+            TransferConnector.setManualTarget();
         }
+        else if (cmd.hasOption('r')) {
+            TransferConnector.setDirectTarget(cmd.getOptionValue('r'));
+        }
+
 
         TransferConnector.setTarget();
         ClipboardIO.getSysClipboardText();
@@ -70,14 +76,35 @@ public class Main {
         System.exit(0);
     }
 
+    public static Options getOptions() {
+        Options options = new Options();
+
+        options.addOption(Option.builder("c")
+                .longOpt("cached")
+                .desc("Allow Pasting by Clipboard (Windows only)")
+                .build());
+        options.addOption(Option.builder("g")
+                .longOpt("generate")
+                .desc("Generate Encryption Key File In Current Directory")
+                .build());
+        options.addOption(Option.builder("m")
+                .longOpt("manual")
+                .desc("Select the other computer to share clipboard Manually")
+                .build());
+        options.addOption(Option.builder("r")
+                .longOpt("remote")
+                .desc("Specify the other computer to share clipboard with")
+                .hasArg()
+                .argName("REMOTE")
+                .build());
+        options.addOption(Option.builder("h").longOpt("help").desc("Show Help").build());
+        return options;
+    }
+
     public static void printHelp() {
-        System.out.println("Net Clipboard");
-        System.out.println("Shared Clipboard between computers");
-        System.out.println("Options:");
-        System.out.println("\t\t\t-c\tAllow Pasting by Clipboard (Windows only)");
-        System.out.println("\t-h, --help\tShow Help");
-        System.out.println("\t\t\t-g\tGenerate Encryption Key File In Current Directory");
-        System.out.println("\t\t\t-m\tManually select the other computer to share clipboard");
-        System.out.println("\t\t\t-d\tSpecify the other computer to share clipboard");
+        String header = "Shared Clipboard between computers";
+        String footer = "";
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp("netClipboard", header, getOptions(), footer, true);
     }
 }
