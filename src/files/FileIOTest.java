@@ -1,8 +1,14 @@
 package files;
 
-import java.io.File;
+import net.TransferConnector;
+
+import java.io.*;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A test for file receiver and sender
@@ -10,8 +16,18 @@ import java.util.List;
 public class FileIOTest {
 
     public static void main(String[] args) {
-        //send();
-        receive();
+
+        TransferConnector.setDirectTarget(InetAddress.getLoopbackAddress().getHostName());
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        executorService.submit(FileIOTest::send);
+        executorService.submit(FileIOTest::receive);
+        executorService.shutdown();
+        try {
+            executorService.awaitTermination(10, TimeUnit.MINUTES);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public static void receive() {

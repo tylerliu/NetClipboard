@@ -168,7 +168,7 @@ public class FileReceiver implements Runnable, Cancelable {
         List<File> files = null;
         if (!openConnection()) return null;
         try {
-            recvInputStream = new FramedSnappyCompressorInputStream(recvInputStream);
+            recvInputStream = new SkipableZstdInputStream(recvInputStream);
             files = TarExtractor.decompress(recvInputStream, base);
         } catch (IOException e) {
             if (isCancelled) {
@@ -189,7 +189,7 @@ public class FileReceiver implements Runnable, Cancelable {
         if (!openConnection()) return null;
         List<File> files = null;
         try {
-            recvInputStream = new FramedSnappyCompressorInputStream(recvInputStream);
+            recvInputStream = new SkipableZstdInputStream(recvInputStream);
             recvInputStream = new CipherInputStream(recvInputStream, cipher);
             files = TarExtractor.decompress(recvInputStream, base);
         } catch (IOException e) {

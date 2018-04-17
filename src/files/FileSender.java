@@ -1,8 +1,10 @@
 package files;
 
+import com.github.luben.zstd.ZstdOutputStream;
 import files.archiver.tar.TarCompressor;
 import net.TransferConnector;
 import org.apache.commons.compress.compressors.snappy.FramedSnappyCompressorOutputStream;
+import org.apache.commons.compress.compressors.zstandard.ZstdCompressorOutputStream;
 import org.apache.commons.io.IOUtils;
 
 import javax.crypto.Cipher;
@@ -164,7 +166,7 @@ public class FileSender implements Runnable, Cancelable {
     public void runTared(List<File> files) {
         if (!openConnection()) return;
         try {
-            sendOutputStream = new FramedSnappyCompressorOutputStream(sendOutputStream);
+            sendOutputStream = new ZstdOutputStream(sendOutputStream);
             TarCompressor.compress(files, getSendOutputStream());
         } catch (Exception e) {
             if (isCancelled) {
@@ -186,7 +188,7 @@ public class FileSender implements Runnable, Cancelable {
     public void runTared(List<File> files, Cipher cipher) {
         if (!openConnection()) return;
         try {
-            sendOutputStream = new FramedSnappyCompressorOutputStream(sendOutputStream);
+            sendOutputStream = new ZstdOutputStream(sendOutputStream);
             sendOutputStream = new CipherOutputStream(sendOutputStream, cipher);
             TarCompressor.compress(files, getSendOutputStream());
         } catch (Exception e) {

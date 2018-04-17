@@ -6,4 +6,5 @@ module NetClipboard {
     requires org.apache.commons.compress;
     requires commons.cli;
     requires bcprov.jdk15on;
+    requires zstd.jni;
 }
