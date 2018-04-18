@@ -186,8 +186,8 @@ public class FileSender implements Runnable, Cancelable {
     public void runTared(List<File> files, Cipher cipher) {
         if (!openConnection()) return;
         try {
-            sendOutputStream = new FramedSnappyCompressorOutputStream(sendOutputStream);
             sendOutputStream = new CipherOutputStream(sendOutputStream, cipher);
+            sendOutputStream = new FramedSnappyCompressorOutputStream(sendOutputStream);
             TarCompressor.compress(files, getSendOutputStream());
         } catch (Exception e) {
             if (isCancelled) {
