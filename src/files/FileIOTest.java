@@ -1,6 +1,7 @@
 package files;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,7 +12,7 @@ public class FileIOTest {
 
     public static void main(String[] args) {
         //send();
-        receive();
+        //receive();
     }
 
     public static void receive() {

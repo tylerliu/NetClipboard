@@ -51,7 +51,7 @@ public class TarExtractor {
 
             System.out.println("Decompressing file: " + entryName);
 
-            File outFile = util.getUnconflictFileName(base.toString(), entryName); //Define Output Path
+            File outFile = util.getUnconflictFileName(base.getCanonicalPath(), entryName); //Define Output Path
 
             if (!outFile.getParentFile().exists()) outFile.getParentFile().mkdirs(); //make sure directory exist
             if (!outFile.exists()) outFile.createNewFile(); //make sure file exist

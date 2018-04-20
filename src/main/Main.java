@@ -69,7 +69,7 @@ public class Main {
 
 
         TransferConnector.setTarget();
-        ClipboardIO.getSysClipboardText();
+        ClipboardIO.checkNew();
         if (!TransferConnector.connect()) return;
         TransferConnector.DataTransferExecute();
         TransferConnector.close();
