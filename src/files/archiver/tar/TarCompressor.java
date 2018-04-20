@@ -86,6 +86,15 @@ public class TarCompressor {
         if (!dir.exists())
             return;
 
+        try {
+            ArchiveEntry entry = out.createArchiveEntry(dir, basedir + dir.getName());
+            out.putArchiveEntry(entry);
+            out.closeArchiveEntry();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+
         //noinspection ConstantConditions
         for (File file : dir.listFiles()) {
             compress(file, out, basedir + dir.getName() + "/");
@@ -111,6 +120,7 @@ public class TarCompressor {
             is.close();
             out.closeArchiveEntry();
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }

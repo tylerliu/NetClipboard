@@ -31,11 +31,10 @@ public class ZipExtractor {
     }
 
     public static List<File> decompress(File zipPath, File base, RenameStrategy strategy) throws IOException {
-        NamingUtil namingUtil = new NamingUtil(strategy);
+        NamingUtil namingUtil = new NamingUtil(strategy, base.getCanonicalPath());
         ZipFile zipFile = new ZipFile(zipPath);   // instantiate ZipFile
         ZipInputStream zipInput = new ZipInputStream(new FileInputStream(zipPath));  // instantiate ZipInputStream
 
-        System.out.println(base.getAbsoluteFile());
         ZipEntry entry;
         while ((entry = zipInput.getNextEntry()) != null) { //iterating through
 
@@ -43,10 +42,16 @@ public class ZipExtractor {
 
             System.out.println("Decompressing file: " + entryName);
 
-            File outFile = namingUtil.getUnconflictFileName(base.getCanonicalPath(), entryName); //Define Output Path
+            File outFile = namingUtil.getUnconflictFileName(entryName); //Define Output Path
 
             if (!outFile.getParentFile().exists()) outFile.getParentFile().mkdirs(); //make sure directory exist
-            if (!outFile.exists()) outFile.createNewFile(); //make sure file exist
+            if (!outFile.exists()) { //make sure file exist
+                if (entry.isDirectory()) {
+                    outFile.mkdir();
+                    continue;
+                }
+                else outFile.createNewFile();
+            }
 
             InputStream input = zipFile.getInputStream(entry);
             OutputStream out = new FileOutputStream(outFile);

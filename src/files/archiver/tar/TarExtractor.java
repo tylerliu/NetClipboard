@@ -40,21 +40,25 @@ public class TarExtractor {
     }
 
     public static List<File> decompress(InputStream tarIn, File base, RenameStrategy strategy) throws IOException {
-        NamingUtil util = new NamingUtil(strategy);
+        NamingUtil util = new NamingUtil(strategy, base.getCanonicalPath());
         TarArchiveInputStream tarInput = new TarArchiveInputStream(tarIn, "UTF8"); // instantiate TarInputStream
         TarArchiveEntry entry;
         while ((entry = tarInput.getNextTarEntry()) != null) { //iterating through
 
             String entryName = entry.getName();
 
-            if (entryName.endsWith("/")) continue;
-
             System.out.println("Decompressing file: " + entryName);
 
-            File outFile = util.getUnconflictFileName(base.getCanonicalPath(), entryName); //Define Output Path
+            File outFile = util.getUnconflictFileName(entryName); //Define Output Path
 
             if (!outFile.getParentFile().exists()) outFile.getParentFile().mkdirs(); //make sure directory exist
-            if (!outFile.exists()) outFile.createNewFile(); //make sure file exist
+            if (!outFile.exists()) { //make sure file exist
+                if (entry.isDirectory()) {
+                    outFile.mkdir();
+                    continue;
+                }
+                else outFile.createNewFile();
+            }
 
             FileOutputStream out = new FileOutputStream(outFile);
             IOUtils.copy(tarInput, out);

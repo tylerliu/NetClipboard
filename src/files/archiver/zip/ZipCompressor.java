@@ -79,6 +79,14 @@ public class ZipCompressor {
     private static void compressDirectory(File dir, ZipOutputStream out, String basedir) {
         if (!dir.exists())
             return;
+        try {
+            ZipEntry entry = new ZipEntry(basedir + dir.getName());
+            out.putNextEntry(entry);
+            out.closeEntry();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
         //noinspection ConstantConditions
         for (File file : dir.listFiles()) {
             compress(file, out, basedir + dir.getName() + "/");
@@ -102,8 +110,10 @@ public class ZipCompressor {
             out.putNextEntry(entry);
             IOUtils.copy(is, out);
             is.close();
+            out.closeEntry();
 
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }

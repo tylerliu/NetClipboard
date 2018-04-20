@@ -11,10 +11,12 @@ public class NamingUtil {
     private Map<String, String> rootFolder = new HashMap<>();
     private List<File> rootPaths; //both files and folders
     private RenameStrategy strategy;
+    private String base;
 
-    public NamingUtil(RenameStrategy strategy) {
+    public NamingUtil(RenameStrategy strategy, String base) {
         this.strategy = strategy;
         rootPaths = new ArrayList<>();
+        this.base = base;
     }
 
     private static File ReplaceGetName(String base, String entry) {
@@ -48,25 +50,25 @@ public class NamingUtil {
         return outFile;
     }
 
-    public File getUnconflictFileName(String base, String entry) {
+    public File getUnconflictFileName(String entry) {
         File f;
         switch (strategy) {
             case REPLACE:
                 f = ReplaceGetName(base, entry);
-                addToRootPath(base, entry, f);
+                addToRootPath(entry, f);
                 return f;
             case COMBINE_FOLDER:
 
                 f = CombineGetName(base, entry);
-                addToRootPath(base, entry, f);
+                addToRootPath(entry, f);
                 return f;
             case RENAME_ROOT:
-                return renameGetName(base, entry);
+                return renameGetName(entry);
         }
         return null;
     }
 
-    private void addToRootPath(String base, String entry, File f) {
+    private void addToRootPath(String entry, File f) {
         if (entry.indexOf('/') == -1) {
             rootPaths.add(f);
         } else { //in a folder
@@ -79,7 +81,7 @@ public class NamingUtil {
         return rootPaths;
     }
 
-    private String getRootName(String base, String entry) {
+    private String getRootName(String entry) {
 
         File outFile = new File(base + File.separator + entry);
 
@@ -107,9 +109,9 @@ public class NamingUtil {
         return stem + "_" + index + suffix;
     }
 
-    private File renameGetName(String base, String entry) {
+    private File renameGetName(String entry) {
         if (entry.indexOf('/') == -1) { //file itself
-            File file = new File(base + File.separator + getRootName(base, entry));
+            File file = new File(base + File.separator + getRootName(entry));
             rootPaths.add(file);
             return file;
         }
@@ -117,7 +119,7 @@ public class NamingUtil {
         String stemFolder = entry.substring(0, entry.indexOf('/'));
 
         if (!rootFolder.containsKey(stemFolder)) {
-            rootFolder.put(stemFolder, getRootName(base, stemFolder));
+            rootFolder.put(stemFolder, getRootName(stemFolder));
             rootPaths.add(new File(base + File.separator + rootFolder.get(stemFolder)));
         }
 
