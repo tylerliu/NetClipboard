@@ -23,7 +23,7 @@ public class ClipboardIO {
      *
      * @return true if change happens
      */
-    public static boolean checkNew() {
+    public static synchronized boolean checkNew() {
         ContentType type = getSysClipboardFlavor();
         if (type == null) return false;
         switch (type) {
@@ -81,7 +81,7 @@ public class ClipboardIO {
     }
 
     //TODO support Image?
-    public static ContentType getSysClipboardFlavor() {
+    public synchronized static ContentType getSysClipboardFlavor() {
         try {
             //if (sysClip.isDataFlavorAvailable(DataFlavor.imageFlavor)) return ContentType.IMAGE;
             if (sysClip.isDataFlavorAvailable(DataFlavor.javaFileListFlavor)) return ContentType.FILES;
@@ -97,16 +97,16 @@ public class ClipboardIO {
     /**
      * Get Text from Clipboard
      */
-    public static String getSysClipboardText() {
+    public static synchronized String getSysClipboardText() {
         try {
-            return (String) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
+            return (String) sysClip.getData(DataFlavor.stringFlavor);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public static void setSysClipboardText(String s) {
+    public static synchronized void setSysClipboardText(String s) {
         lastType = ContentType.STRING;
         lastString = s;
         isFromRemote = true;
@@ -114,24 +114,28 @@ public class ClipboardIO {
         sysClip.setContents(ss, ss);
     }
 
-    public static List<File> getSysClipboardFiles() {
+    public static synchronized List<File> getSysClipboardFiles() {
         try {
-            return (List<File>) Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.javaFileListFlavor);
+            return (List<File>) sysClip.getData(DataFlavor.javaFileListFlavor);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public static void setSysClipboardFiles(List<File> files) {
+    public static synchronized void setSysClipboardFiles(List<File> files) {
         lastType = ContentType.FILES;
         lastFiles = files;
         isFromRemote = true;
-        FilesTransferable fileTransferable = new FilesTransferable(files);
-        sysClip.setContents(fileTransferable, fileTransferable);
+        if (MacFilesClipboard.isMac()) {
+            MacFilesClipboard.setMacSysClipboardFile(files);
+        } else {
+            FilesTransferable fileTransferable = new FilesTransferable(files);
+            sysClip.setContents(fileTransferable, fileTransferable);
+        }
     }
 
-    public static void unsetSysClipboard() {
+    public static synchronized void unsetSysClipboard() {
         lastString = "";
         isFromRemote = true;
         StringSelection ss = new StringSelection("");

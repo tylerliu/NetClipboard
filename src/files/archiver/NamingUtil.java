@@ -23,7 +23,6 @@ public class NamingUtil {
 
     private static File CombineGetName(String base, String entry) {
         File outFile = new File(base + File.separator + entry);
-
         //check if the file exist
         if (!outFile.exists()) {
             return outFile;
