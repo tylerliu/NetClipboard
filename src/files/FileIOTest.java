@@ -40,7 +40,7 @@ public class FileIOTest {
 
     public static void send() {
         List<File> files = new ArrayList<>();
-        files.add(new File("src"));
+        files.add(new File("src/key"));
         try {
             FileSender.sendFileList(files).join();
         } catch (InterruptedException e) {

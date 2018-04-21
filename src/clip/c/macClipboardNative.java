@@ -1,9 +1,12 @@
 package clip.c;
 
 import clip.MacFilesClipboard;
+import org.apache.commons.io.FileUtils;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 
 public class macClipboardNative {
@@ -12,11 +15,36 @@ public class macClipboardNative {
 
     private macClipboardNative() {
         assert MacFilesClipboard.isMac();
+        File tempFile = null;
+        try {
+            tempFile = File.createTempFile("NetClipboard", ".dylib");
+            tempFile.deleteOnExit();
+            System.out.println("Temp Library file: " + tempFile.getCanonicalPath());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try (InputStream inputStream = getClass().getResourceAsStream("/libClipboardJNI.dylib")) {
+            Files.copy(inputStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            FileUtils.deleteQuietly(tempFile);
+            e.printStackTrace();
+        } catch (NullPointerException e) {
+            FileUtils.deleteQuietly(tempFile);
+            new FileNotFoundException("File " + "\"/libClipboardJNI.dylib\"" + " was not found inside JAR.").printStackTrace();
+        }
+        try {
+            System.load(tempFile.getAbsolutePath());
+        } finally {
+            FileUtils.deleteQuietly(tempFile);
+        }
+        /*
         try {
             System.load(new File("./native/libClipboardJNI.dylib").getCanonicalPath());
         } catch (IOException e) {
             e.printStackTrace();
         }
+        */
     }
 
     private native void setClipboardFiles(String[] files);
