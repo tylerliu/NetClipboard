@@ -1,9 +1,8 @@
-package net;
+package format;
 
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
-import java.nio.ByteBuffer;
 
 /**
  * Created by TylerLiu on 2018/03/20.
@@ -17,10 +16,12 @@ public class MFTest {
 
             MultipleFormatOutStream outStream = new MultipleFormatOutStream(out);
             MultipleFormatInStream inStream = new MultipleFormatInStream(in);
-            outStream.writeString("你好\n");
-            System.out.println(inStream.readNext()[1]);
+            outStream.writeSTRING("你好\n");
+            inStream.nextEntry();
+            System.out.println(inStream.getString());
             outStream.writeFiles(8800, new byte[48]);
-            System.out.println(Short.toUnsignedInt(((ByteBuffer) inStream.readNext()[1]).getShort()));
+            inStream.nextEntry();
+            System.out.println(Short.toUnsignedInt(inStream.getFiles().getShort()));
 
         } catch (IOException e) {
             e.printStackTrace();

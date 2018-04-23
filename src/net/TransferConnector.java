@@ -1,12 +1,12 @@
 package net;
 
 import clip.ClipboardIO;
-import net.handshake.DirectConnect;
-import net.handshake.KeyBased;
-import net.handshake.Manual;
+import format.DataFormat;
+import format.MultipleFormatInStream;
+import format.MultipleFormatOutStream;
+import net.handshake.*;
 import org.bouncycastle.crypto.tls.TlsProtocol;
 
-import javax.sound.sampled.Clip;
 import java.io.File;
 import java.io.IOException;
 import java.net.*;
@@ -99,7 +99,7 @@ public class TransferConnector {
         return true;
     }
 
-    public static void exchangeProtocol(TlsProtocol protocol) {
+    private static void exchangeProtocol(TlsProtocol protocol) {
         try {
             int magicNumber = 5;
             protocol.getOutputStream().write(magicNumber);
@@ -126,7 +126,7 @@ public class TransferConnector {
         reader();
     }
 
-    public static void writer() {
+    private static void writer() {
         try {
             while (true) {
 
@@ -135,17 +135,17 @@ public class TransferConnector {
                     FileTransfer.attemptCancelTransfer();//if file Transferring
                     FileTransfer.deleteTempFolder();
                     switch (ClipboardIO.getLastType()) {
-                        case STRING:
-                            outStream.writeString(ClipboardIO.getLastString());
+                        case DataFormat.STRING:
+                            outStream.writeSTRING(ClipboardIO.getLastString());
                             break;
-                        case HTML:
-                        case FILES:
+                        case DataFormat.HTML:
+                        case DataFormat.FILES:
                             int port = PortAllocator.alloc();
                             byte[] key = getTransKey();
                             outStream.writeFiles(port, key);
                             FileTransfer.sendFiles(ClipboardIO.getLastFiles(), port, key);
                             break;
-                        case END:
+                        case DataFormat.END_SIGNAL:
                             return;
                         default:
                     }
@@ -177,22 +177,20 @@ public class TransferConnector {
         //read
         try {
             while (true) {
-                Object[] b = inStream.readNext();
-                if (b == null) System.exit(0);
+                int type = inStream.nextEntry();
                 FileTransfer.attemptCancelTransfer(); //cancel if file transferring
                 FileTransfer.deleteTempFolder();
-                switch (ClipboardIO.getContentType((int) b[0])) {
-                    case STRING:
-                        String s = (String) b[1];
+                switch (type) {
+                    case DataFormat.STRING:
+                        String s = inStream.getString();
                         System.out.println("Remote Clipboard New: " + s);
                         ClipboardIO.setSysClipboardText(s);
                         break;
-                    case END:
+                    case DataFormat.END_SIGNAL:
                         terminateInitiated = true;
                         return;
-                    case HTML:
-                    case FILES:
-                        CompletableFuture<List<File>> re = FileTransfer.receiveFiles((ByteBuffer) b[1]);
+                    case DataFormat.FILES:
+                        CompletableFuture<List<File>> re = FileTransfer.receiveFiles(inStream.getFiles());
                         if (FileTransferMode.getLocalMode() == FileTransferMode.Mode.CACHED) {
                             re.thenAccept((files) -> {
                                 if (files == null) return;
