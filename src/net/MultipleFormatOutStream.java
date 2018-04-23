@@ -44,16 +44,21 @@ class MultipleFormatOutStream extends FilterOutputStream {
     /**
      * Flush the internal buffer
      */
-    private void flushBuffer() throws IOException {
-        int count = buf.position();
-        byte[] head = new byte[]{type, (byte) (count >> 16), (byte) ((count >> 8) & 0XFF), (byte) (count & 0XFF)};
-        super.write(head);
-        buf.flip();
-        byte[] array = new byte[count];
-        buf.get(array);
-        super.write(array);
-        buf.clear();
-        type = 0;
+    private void flushBuffer() {
+        try {
+            int count = buf.position();
+            byte[] head = new byte[]{type, (byte) (count >> 16), (byte) ((count >> 8) & 0XFF), (byte) (count & 0XFF)};
+            super.write(head);
+            buf.flip();
+            byte[] array = new byte[count];
+            buf.get(array);
+            super.write(array);
+            buf.clear();
+            type = 0;
+        } catch(Exception e) {
+            if(e instanceof IOException) return;
+            else e.printStackTrace();
+        }
     }
 
 

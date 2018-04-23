@@ -19,17 +19,20 @@ class MultipleFormatInStream extends FilterInputStream {
         super(inputStream);
     }
 
-    private void loadNext() throws IOException {
+    private void loadNext() {
+        try {
         byte[] head = new byte[4];
         super.readNBytes(head, 0, head.length);
         type = head[0];
         cont = head[1];
         length = (cont << 16) + (Byte.toUnsignedInt(head[2]) << 8) + (Byte.toUnsignedInt(head[3]));
         payload = new byte[length];
-        try {
             super.readNBytes(payload, 0, payload.length);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+
+            if(e instanceof java.net.SocketException) {System.out.printf("Connection Closed.\n"); return;}
+            else if(e instanceof java.io.IOException) {System.out.printf("IO Error\n"); return;}
+            else e.printStackTrace();
         }
     }
 
