@@ -21,8 +21,8 @@ public class Keygen {
     }
 
     public static byte[] generateKey(int keyLen) {
-        System.out.println("Enter Key generation seed, as complex as possible, at least " + (keyLen * 3 / 2) + " Characters long");
-        byte[] initial = new byte[keyLen * 3 / 2];
+        System.out.println("Enter Key generation seed, at least " + keyLen + " Characters long");
+        byte[] initial = new byte[keyLen];
         try {
             System.in.readNBytes(initial, 0, initial.length);
         } catch (IOException e) {
@@ -38,7 +38,7 @@ public class Keygen {
         byte[] out = new byte[keyLen];
         int written = 0;
         while (written < keyLen) {
-            byte[] temp = digest.digest(Arrays.copyOfRange(initial, written, (written + 32 * 3 / 2)));
+            byte[] temp = digest.digest(Arrays.copyOfRange(initial, written, written + 32));
             for (int i = 0; i < Math.min(temp.length, out.length - written); i++) {
                 out[written + i] = temp[i];
             }
