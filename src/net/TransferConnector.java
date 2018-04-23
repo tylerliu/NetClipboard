@@ -2,15 +2,14 @@ package net;
 
 import clip.ClipboardIO;
 import format.DataFormat;
-import format.MultipleFormatInStream;
-import format.MultipleFormatOutStream;
+import format.FormattedInStream;
+import format.FormattedOutStream;
 import net.handshake.*;
 import org.bouncycastle.crypto.tls.TlsProtocol;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.*;
-import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
@@ -24,8 +23,8 @@ public class TransferConnector {
 
     private static final int connectionPort = 31415;
     private static boolean isServer;
-    private static MultipleFormatInStream inStream;
-    private static MultipleFormatOutStream outStream;
+    private static FormattedInStream inStream;
+    private static FormattedOutStream outStream;
     private static Socket socket;
     private static ServerSocket serverSocket;
     private static boolean terminateInitiated;
@@ -88,8 +87,8 @@ public class TransferConnector {
             tlsProtocol = TLSHandler.getTlsProtocol(isServer, socket.getInputStream(), socket.getOutputStream());
             if (tlsProtocol == null) return false;
             exchangeProtocol(tlsProtocol);
-            inStream = new MultipleFormatInStream(tlsProtocol.getInputStream());
-            outStream = new MultipleFormatOutStream(tlsProtocol.getOutputStream());
+            inStream = new FormattedInStream(tlsProtocol.getInputStream());
+            outStream = new FormattedOutStream(tlsProtocol.getOutputStream());
 
         } catch (IOException e) {
             e.printStackTrace();

@@ -8,9 +8,9 @@ import java.nio.ByteBuffer;
 /**
  * an output stream wrapper
  */
-public class MultipleFormatOutStream extends FilterOutputStream {
+public class FormattedOutStream extends FilterOutputStream {
 
-    public MultipleFormatOutStream(OutputStream outputStream) {
+    public FormattedOutStream(OutputStream outputStream) {
         super(outputStream);
     }
 

@@ -8,13 +8,13 @@ import java.nio.ByteBuffer;
 /**
  * An input stream wrapper
  */
-public class MultipleFormatInStream extends FilterInputStream {
+public class FormattedInStream extends FilterInputStream {
 
     private byte type;
     private long length;
     private boolean read;
 
-    public MultipleFormatInStream(InputStream inputStream) {
+    public FormattedInStream(InputStream inputStream) {
         super(inputStream);
     }
 

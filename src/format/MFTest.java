@@ -14,8 +14,8 @@ public class MFTest {
             PipedInputStream in = new PipedInputStream();
             PipedOutputStream out = new PipedOutputStream(in);
 
-            MultipleFormatOutStream outStream = new MultipleFormatOutStream(out);
-            MultipleFormatInStream inStream = new MultipleFormatInStream(in);
+            FormattedOutStream outStream = new FormattedOutStream(out);
+            FormattedInStream inStream = new FormattedInStream(in);
             outStream.writeSTRING("你好\n");
             inStream.nextEntry();
             System.out.println(inStream.getString());
