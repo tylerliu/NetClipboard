@@ -56,7 +56,7 @@ public class FileSender implements Runnable, Cancelable {
         try {
             return sendStreamRun(new FileInputStream(file), port);
         } catch (FileNotFoundException e) {
-            System.out.println("File not found! " + file.getAbsolutePath());
+            Interfacing.printInfo("File not found! " + file.getAbsolutePath());
             Interfacing.printError(e);
         }
         return null;
@@ -70,7 +70,7 @@ public class FileSender implements Runnable, Cancelable {
         try {
             return sendStream(new FileInputStream(file), port);
         } catch (FileNotFoundException e) {
-            System.out.println("File not found! " + file.getAbsolutePath());
+            Interfacing.printInfo("File not found! " + file.getAbsolutePath());
             Interfacing.printError(e);
         }
         return null;
@@ -105,12 +105,12 @@ public class FileSender implements Runnable, Cancelable {
             sendServer = new ServerSocket(listenPort);
             sendSocket = sendServer.accept();
             if (!sendSocket.getInetAddress().equals(TransferConnector.getTarget())) {
-                System.out.println("Wrong connection: " + sendSocket.getInetAddress());
+                Interfacing.printInfo("Wrong connection: " + sendSocket.getInetAddress());
                 sendSocket.close();
                 sendSocket = sendServer.accept();
             }
             sendOutputStream = sendSocket.getOutputStream();
-            System.out.println("Sender connected");
+            Interfacing.setClipStatus("Local File Sending");
         } catch (IOException e) {
             return false;
         }
@@ -155,11 +155,10 @@ public class FileSender implements Runnable, Cancelable {
             IOUtils.copy(inputStream, sendOutputStream);
         } catch (IOException e) {
             if (isCancelled) {
-                System.out.println("File send cancel with error" + e);
+                Interfacing.printInfo("File send cancel with error: " + e);
             } else Interfacing.printError(e);
         }
         closeConnection();
-        System.out.println("File send done");
     }
 
     public void runTared(List<File> files) {
@@ -169,13 +168,12 @@ public class FileSender implements Runnable, Cancelable {
             TarCompressor.compress(files, getSendOutputStream());
         } catch (Exception e) {
             if (isCancelled) {
-                System.out.println("File send cancel with error");
+                Interfacing.printInfo("File send cancel with error: " + e);
                 return;
             }
             Interfacing.printError(e);
         }
         closeConnection();
-        System.out.println("File send done");
     }
 
     /**
@@ -192,13 +190,12 @@ public class FileSender implements Runnable, Cancelable {
             TarCompressor.compress(files, getSendOutputStream());
         } catch (Exception e) {
             if (isCancelled) {
-                System.out.println("File send cancel with error");
+                Interfacing.printInfo("File send cancel with error: " + e);
                 return;
             }
             Interfacing.printError(e);
         }
 
         closeConnection();
-        System.out.println("File send done");
     }
 }

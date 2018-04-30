@@ -65,7 +65,7 @@ public class ZipCompressor {
      * recursively compress a file or directory
      */
     private static void compress(File file, ZipOutputStream out, String basedir) {
-        System.out.println("Compress：" + basedir + file.getName());
+        Interfacing.printInfo("Compress：" + basedir + file.getName());
         //categorize
         if (file.isDirectory()) {
             compressDirectory(file, out, basedir);

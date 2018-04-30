@@ -35,7 +35,7 @@ public class TLSHandler {
             protocol.accept(server);
         } catch (TlsFatalAlert | TlsFatalAlertReceived alert) {
             if (alert.getMessage().contains("20")) {
-                System.out.println("Authentication fails for TLS Connection.");
+                Interfacing.printInfo("Authentication fails for TLS Connection.");
             } else alert.printStackTrace();
             return null;
         } catch (IOException e) {

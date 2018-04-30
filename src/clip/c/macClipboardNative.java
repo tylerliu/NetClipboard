@@ -19,7 +19,7 @@ public class macClipboardNative {
         try {
             tempFile = File.createTempFile("NetClipboard", ".dylib");
             tempFile.deleteOnExit();
-            System.out.println("Temp Library file: " + tempFile.getCanonicalPath());
+            Interfacing.printInfo("Temp Library file: " + tempFile.getCanonicalPath());
         } catch (IOException e) {
             Interfacing.printError(e);
         }
@@ -52,7 +52,7 @@ public class macClipboardNative {
     public static void setClipboardFiles(List<File> files) {
         //check os
         if (!MacFilesClipboard.isMac()) {
-            System.out.println("Clipboard: this is not Mac!");
+            Interfacing.printInfo("Clipboard: this is not Mac!");
             return;
         }
         if (instance == null) instance = new macClipboardNative();

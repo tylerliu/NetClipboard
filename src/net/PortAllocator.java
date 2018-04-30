@@ -15,7 +15,7 @@ public class PortAllocator {
             ServerSocket socket = new ServerSocket(0);
             int port = socket.getLocalPort();
             socket.close();
-            System.out.println("Allocated: " + port);
+            Interfacing.printInfo("Allocated: " + port);
             return port;
         } catch (IOException e) {
             Interfacing.printError(e);

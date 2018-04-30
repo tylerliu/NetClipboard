@@ -3,6 +3,7 @@ package files.archiver.zip;
 import files.archiver.NamingUtil;
 import files.archiver.NamingUtil.RenameStrategy;
 import org.apache.commons.io.IOUtils;
+import tray.Interfacing;
 
 import java.io.*;
 import java.util.List;
@@ -40,7 +41,7 @@ public class ZipExtractor {
 
             String entryName = entry.getName();
 
-            System.out.println("Decompressing file: " + entryName);
+            Interfacing.printInfo("Decompressing file: " + entryName);
 
             File outFile = namingUtil.getUnconflictFileName(entryName); //Define Output Path
 

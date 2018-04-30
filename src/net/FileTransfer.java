@@ -52,14 +52,14 @@ public class FileTransfer {
 
         File toDir = getSavingDirectory();
         if (toDir != null) {
-            System.out.println("Retrieve files to: " + toDir.getAbsolutePath());
+            Interfacing.printInfo("Retrieve files to: " + toDir.getAbsolutePath());
         } else {
-            System.out.println("Cancelled Pasting.");
+            Interfacing.setClipStatus("Cancelled File Pasting");
             FileReceiver.cancelConnection(port);
             return null;
         }
 
-        System.out.println("File receiving from port: " + port);
+        Interfacing.printInfo("File receiving from port: " + port);
         FileReceiver receiver = FileReceiver.receiveTarObj(port);
         receivers.add(receiver);
         files = receiver.runTared(toDir, cipher);
@@ -71,7 +71,7 @@ public class FileTransfer {
         }
 
         deleteTempFolder(toDir);
-        System.out.println("File receive done");
+        Interfacing.setClipStatus("File received");
         return files;
     }
 
@@ -112,22 +112,23 @@ public class FileTransfer {
 
     public static void sendFilesWorker(List<File> sendFiles, int port, byte[] key) {
         Cipher cipher = getCipher(key, true);
-        System.out.println("File sending on port: " + port);
+        Interfacing.printInfo("File sending on port: " + port);
         FileSender sender = FileSender.sendFileListObj(port);
         senders.add(sender);
         sender.runTared(sendFiles, cipher);
         senders.remove(sender);
+        Interfacing.setClipStatus("File Sent");
     }
 
     public synchronized static void cancelReceive() {
-        if (!receivers.isEmpty()) System.out.println("File receive cancelled");
+        if (!receivers.isEmpty()) Interfacing.setClipStatus("Cancelled File Pasting");
         for (FileReceiver receiver : receivers) {
             receiver.cancel();
         }
     }
 
     public synchronized static void cancelSend() {
-        if (!senders.isEmpty()) System.out.println("File send cancelled");
+        if (!senders.isEmpty()) Interfacing.setClipStatus("Cancelled File Sending");
         for (FileSender sender : senders) {
             sender.cancel();
         }
@@ -162,7 +163,7 @@ public class FileTransfer {
         attemptCancelTransfer();
         executor.shutdown();
         while (!executor.isTerminated()) {
-            System.out.println("Wait for transferring...");
+            Interfacing.setConnStatus("Wait for transferring...");
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {

@@ -22,7 +22,7 @@ public class Main {
         try {
             cmd = parser.parse(getOptions(), args);
         } catch (ParseException e) {
-            System.out.println(e.getLocalizedMessage());
+            Interfacing.printInfo(e.getLocalizedMessage());
             printHelp();
             //Interfacing.printError(e);
             return;

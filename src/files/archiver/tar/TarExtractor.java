@@ -5,6 +5,7 @@ import files.archiver.NamingUtil.RenameStrategy;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.IOUtils;
+import tray.Interfacing;
 
 import java.io.*;
 import java.util.List;
@@ -47,7 +48,7 @@ public class TarExtractor {
 
             String entryName = entry.getName();
 
-            System.out.println("Decompressing file: " + entryName);
+            Interfacing.printInfo("Decompressing file: " + entryName);
 
             File outFile = util.getUnconflictFileName(entryName); //Define Output Path
 
