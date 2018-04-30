@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 
-public class Interfacing {
+public class UserInterfacing {
 
     private static boolean isCommandLine = false;
     private static boolean isLog = false;
@@ -20,14 +20,18 @@ public class Interfacing {
         }
     }
 
+    public static boolean isCommandLine() {
+        return isCommandLine;
+    }
+
     /**
      * have to be called before init
      * @param isCommandLine1
      */
-    public static void setIsCommandLine(boolean isCommandLine1) {
+    public static void setCommandLine(boolean isCommandLine1) {
         isCommandLine = isCommandLine1;
     }
-    public static void setIsLogging(boolean isLog1) {
+    public static void setLogging(boolean isLog1) {
         isLog = isLog1;
     }
 

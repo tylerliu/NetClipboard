@@ -1,7 +1,8 @@
 package clip;
 
-import tray.Interfacing;
+import tray.UserInterfacing;
 import format.DataFormat;
+
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
@@ -35,8 +36,8 @@ public class ClipboardIO {
                     lastType = DataFormat.FILES;
                     lastFiles = files;
                     isFromRemote = false;
-                    Interfacing.printInfo("Local Clipboard New: " + files);
-                    Interfacing.setClipStatus("Local Files");
+                    UserInterfacing.printInfo("Local Clipboard New: " + files);
+                    UserInterfacing.setClipStatus("Local Files");
                     return true;
                 }
                 break;
@@ -46,9 +47,9 @@ public class ClipboardIO {
                     lastType = DataFormat.STRING;
                     lastString = n;
                     isFromRemote = false;
-                    Interfacing.printInfo("Local Clipboard New: " + n);
+                    UserInterfacing.printInfo("Local Clipboard New: " + n);
                     if (n.contains("\n")) n = n.substring(0, n.indexOf('\n')) + "...";
-                    Interfacing.setClipStatus("Local: " + (n.length() > 30 ? n.substring(0, 30) + "..." : n));
+                    UserInterfacing.setClipStatus("Local: " + (n.length() > 30 ? n.substring(0, 30) + "..." : n));
                     return true;
                 }
                 break;
@@ -89,7 +90,7 @@ public class ClipboardIO {
             if (sysClip.isDataFlavorAvailable(DataFlavor.stringFlavor)) return DataFormat.STRING;
         } catch (IllegalStateException e) {
             if (!e.getMessage().contains("cannot open system clipboard")) {
-                Interfacing.printError(e);
+                UserInterfacing.printError(e);
             }
         }
         return DataFormat.NULL;
@@ -102,7 +103,7 @@ public class ClipboardIO {
         try {
             return (String) sysClip.getData(DataFlavor.stringFlavor);
         } catch (Exception e) {
-            Interfacing.printError(e);
+            UserInterfacing.printError(e);
             return null;
         }
     }
@@ -119,7 +120,7 @@ public class ClipboardIO {
         try {
             return (List<File>) sysClip.getData(DataFlavor.javaFileListFlavor);
         } catch (Exception e) {
-            Interfacing.printError(e);
+            UserInterfacing.printError(e);
             return null;
         }
     }

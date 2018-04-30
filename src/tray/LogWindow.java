@@ -1,15 +1,11 @@
 package tray;
 
 import javax.swing.*;
-import javax.swing.text.AttributeSet;
-import javax.swing.text.SimpleAttributeSet;
-import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
-import java.awt.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
 class LogWindow extends JFrame {
+    //TODO change to jFX window
     private static LogWindow window = null;
 
     private JTextArea textArea;

@@ -4,7 +4,7 @@ import files.archiver.tar.TarCompressor;
 import net.TransferConnector;
 import org.apache.commons.compress.compressors.snappy.FramedSnappyCompressorOutputStream;
 import org.apache.commons.io.IOUtils;
-import tray.Interfacing;
+import tray.UserInterfacing;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
@@ -56,8 +56,8 @@ public class FileSender implements Runnable, Cancelable {
         try {
             return sendStreamRun(new FileInputStream(file), port);
         } catch (FileNotFoundException e) {
-            Interfacing.printInfo("File not found! " + file.getAbsolutePath());
-            Interfacing.printError(e);
+            UserInterfacing.printInfo("File not found! " + file.getAbsolutePath());
+            UserInterfacing.printError(e);
         }
         return null;
     }
@@ -70,8 +70,8 @@ public class FileSender implements Runnable, Cancelable {
         try {
             return sendStream(new FileInputStream(file), port);
         } catch (FileNotFoundException e) {
-            Interfacing.printInfo("File not found! " + file.getAbsolutePath());
-            Interfacing.printError(e);
+            UserInterfacing.printInfo("File not found! " + file.getAbsolutePath());
+            UserInterfacing.printError(e);
         }
         return null;
     }
@@ -105,12 +105,12 @@ public class FileSender implements Runnable, Cancelable {
             sendServer = new ServerSocket(listenPort);
             sendSocket = sendServer.accept();
             if (!sendSocket.getInetAddress().equals(TransferConnector.getTarget())) {
-                Interfacing.printInfo("Wrong connection: " + sendSocket.getInetAddress());
+                UserInterfacing.printInfo("Wrong connection: " + sendSocket.getInetAddress());
                 sendSocket.close();
                 sendSocket = sendServer.accept();
             }
             sendOutputStream = sendSocket.getOutputStream();
-            Interfacing.setClipStatus("Local File Sending");
+            UserInterfacing.setClipStatus("Local File Sending");
         } catch (IOException e) {
             return false;
         }
@@ -144,7 +144,7 @@ public class FileSender implements Runnable, Cancelable {
             if (sendSocket != null) sendSocket.close();
             if (sendServer != null) sendServer.close();
         } catch (IOException e) {
-            Interfacing.printError(e);
+            UserInterfacing.printError(e);
         }
     }
 
@@ -155,8 +155,8 @@ public class FileSender implements Runnable, Cancelable {
             IOUtils.copy(inputStream, sendOutputStream);
         } catch (IOException e) {
             if (isCancelled) {
-                Interfacing.printInfo("File send cancel with error: " + e);
-            } else Interfacing.printError(e);
+                UserInterfacing.printInfo("File send cancel with error: " + e);
+            } else UserInterfacing.printError(e);
         }
         closeConnection();
     }
@@ -168,10 +168,10 @@ public class FileSender implements Runnable, Cancelable {
             TarCompressor.compress(files, getSendOutputStream());
         } catch (Exception e) {
             if (isCancelled) {
-                Interfacing.printInfo("File send cancel with error: " + e);
+                UserInterfacing.printInfo("File send cancel with error: " + e);
                 return;
             }
-            Interfacing.printError(e);
+            UserInterfacing.printError(e);
         }
         closeConnection();
     }
@@ -190,10 +190,10 @@ public class FileSender implements Runnable, Cancelable {
             TarCompressor.compress(files, getSendOutputStream());
         } catch (Exception e) {
             if (isCancelled) {
-                Interfacing.printInfo("File send cancel with error: " + e);
+                UserInterfacing.printInfo("File send cancel with error: " + e);
                 return;
             }
-            Interfacing.printError(e);
+            UserInterfacing.printError(e);
         }
 
         closeConnection();

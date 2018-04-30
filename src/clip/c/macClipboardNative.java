@@ -2,7 +2,7 @@ package clip.c;
 
 import clip.MacFilesClipboard;
 import org.apache.commons.io.FileUtils;
-import tray.Interfacing;
+import tray.UserInterfacing;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -19,16 +19,16 @@ public class macClipboardNative {
         try {
             tempFile = File.createTempFile("NetClipboard", ".dylib");
             tempFile.deleteOnExit();
-            Interfacing.printInfo("Temp Library file: " + tempFile.getCanonicalPath());
+            UserInterfacing.printInfo("Temp Library file: " + tempFile.getCanonicalPath());
         } catch (IOException e) {
-            Interfacing.printError(e);
+            UserInterfacing.printError(e);
         }
 
         try (InputStream inputStream = getClass().getResourceAsStream("/resources/libClipboardJNI.dylib")) {
             Files.copy(inputStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             FileUtils.deleteQuietly(tempFile);
-            Interfacing.printError(e);
+            UserInterfacing.printError(e);
         } catch (NullPointerException e) {
             FileUtils.deleteQuietly(tempFile);
             new FileNotFoundException("File " + "\"/libClipboardJNI.dylib\"" + " was not found inside JAR.").printStackTrace();
@@ -42,7 +42,7 @@ public class macClipboardNative {
         try {
             System.load(new File("./native/libClipboardJNI.dylib").getCanonicalPath());
         } catch (IOException e) {
-            Interfacing.printError(e);
+            UserInterfacing.printError(e);
         }
         */
     }
@@ -52,7 +52,7 @@ public class macClipboardNative {
     public static void setClipboardFiles(List<File> files) {
         //check os
         if (!MacFilesClipboard.isMac()) {
-            Interfacing.printInfo("Clipboard: this is not Mac!");
+            UserInterfacing.printInfo("Clipboard: this is not Mac!");
             return;
         }
         if (instance == null) instance = new macClipboardNative();
@@ -62,7 +62,7 @@ public class macClipboardNative {
             try {
                 filePaths[i] = files.get(i).getCanonicalPath();
             } catch (IOException e) {
-                Interfacing.printError(e);
+                UserInterfacing.printError(e);
             }
         }
 

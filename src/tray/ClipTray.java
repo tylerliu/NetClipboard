@@ -39,6 +39,9 @@ public class ClipTray {
         connStatusItem = new MenuItem("Connection status");
         MenuItem warningItem = new MenuItem("Warnings");
         lastItem = new MenuItem("Waiting for Transfer");
+        //TODO implement this to set cached or not
+        //TODO implement change password
+        MenuItem settingItem = new MenuItem("Setting");
         MenuItem exitItem = new MenuItem("Exit");
 
         //Add components to pop-up menu
@@ -46,6 +49,7 @@ public class ClipTray {
         statusMenu.add(connStatusItem);
         statusMenu.add(lastItem);
         statusMenu.add(warningItem);
+        popup.add(settingItem);
         popup.add(exitItem);
         exitItem.addActionListener((e) -> System.exit(0));
         warningItem.addActionListener((e) -> LogWindow.getLogWindow().toggle());

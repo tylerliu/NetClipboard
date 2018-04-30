@@ -1,6 +1,6 @@
 package net.handshake;
 
-import tray.Interfacing;
+import tray.UserInterfacing;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -11,7 +11,7 @@ public class DirectConnect {
         try {
             return InetAddress.getByName(name);
         } catch (UnknownHostException e) {
-            Interfacing.printInfo("Target " + name + " is unknown");
+            UserInterfacing.printInfo("Target " + name + " is unknown");
         }
         return null;
     }

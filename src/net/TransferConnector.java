@@ -6,7 +6,7 @@ import format.FormattedInStream;
 import format.FormattedOutStream;
 import net.handshake.*;
 import org.bouncycastle.crypto.tls.TlsProtocol;
-import tray.Interfacing;
+import tray.UserInterfacing;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +37,7 @@ public class TransferConnector {
      */
     public static void setTarget() {
         if (target != null) return;
-        Interfacing.printInfo("Connecting...");
+        UserInterfacing.printInfo("Connecting...");
         target = KeyBased.getTarget();
     }
 
@@ -66,7 +66,7 @@ public class TransferConnector {
         try {
             isServer = Arrays.compare(InetAddress.getLocalHost().getAddress(), getTarget().getAddress()) > 0;
         } catch (UnknownHostException e) {
-            Interfacing.printError(e);
+            UserInterfacing.printError(e);
         }
     }
 
@@ -74,15 +74,15 @@ public class TransferConnector {
     public static boolean connect() {
         try {
             checkServer();
-            Interfacing.printInfo("This is configured as " + (isServer ? "Server. " : "Client. "));
+            UserInterfacing.printInfo("This is configured as " + (isServer ? "Server. " : "Client. "));
             if (isServer) {
                 serverSocket = new ServerSocket();
                 serverSocket.bind(new InetSocketAddress(connectionPort));
                 socket = serverSocket.accept();
-                Interfacing.setConnStatus("Server Connected");
+                UserInterfacing.setConnStatus("Server Connected");
             } else {
                 socket = new Socket(getTarget(), connectionPort);
-                Interfacing.setConnStatus("Client Connected");
+                UserInterfacing.setConnStatus("Client Connected");
             }
 
             tlsProtocol = TLSHandler.getTlsProtocol(isServer, socket.getInputStream(), socket.getOutputStream());
@@ -92,7 +92,7 @@ public class TransferConnector {
             outStream = new FormattedOutStream(tlsProtocol.getOutputStream());
 
         } catch (IOException e) {
-            Interfacing.printError(e);
+            UserInterfacing.printError(e);
             System.exit(0);
         }
 
@@ -105,7 +105,7 @@ public class TransferConnector {
             protocol.getOutputStream().write(magicNumber);
             protocol.getOutputStream().write(FileTransferMode.getLocalMode().ordinal());
             if (protocol.getInputStream().read() != magicNumber) {
-                Interfacing.printInfo("Communication protocol does not match! ");
+                UserInterfacing.printInfo("Communication protocol does not match! ");
                 //System.exit(1);
             }
             int targetMode = protocol.getInputStream().read();
@@ -113,8 +113,8 @@ public class TransferConnector {
                 FileTransferMode.setTargetMode(FileTransferMode.Mode.values()[targetMode]);
             }
         } catch (Exception e) {
-            Interfacing.printError(e);
-            Interfacing.printInfo("protocol exchange failed");
+            UserInterfacing.printError(e);
+            UserInterfacing.printInfo("protocol exchange failed");
             //System.exit(1);
         }
     }
@@ -160,7 +160,7 @@ public class TransferConnector {
 
         } catch (IOException e) {
             //do nothing
-            if (!terminateInitiated) Interfacing.printError(e);
+            if (!terminateInitiated) UserInterfacing.printError(e);
         }
     }
 
@@ -169,7 +169,7 @@ public class TransferConnector {
         try {
             SecureRandom.getInstanceStrong().nextBytes(key);
         } catch (NoSuchAlgorithmException e) {
-            Interfacing.printError(e);
+            UserInterfacing.printError(e);
         }
         return key;
     }
@@ -185,9 +185,9 @@ public class TransferConnector {
                     case DataFormat.STRING:
                         String s = inStream.getString();
                         ClipboardIO.setSysClipboardText(s);
-                        Interfacing.printInfo("Remote Clipboard New: " + s);
+                        UserInterfacing.printInfo("Remote Clipboard New: " + s);
                         if (s.contains("\n")) s = s.substring(0, s.indexOf('\n')) + "...";
-                        Interfacing.setClipStatus("Remote: " + (s.length() > 30 ? s.substring(0, 30) + "..." : s));
+                        UserInterfacing.setClipStatus("Remote: " + (s.length() > 30 ? s.substring(0, 30) + "..." : s));
                         break;
                     case DataFormat.END_SIGNAL:
                         terminateInitiated = true;
@@ -197,8 +197,8 @@ public class TransferConnector {
                         if (FileTransferMode.getLocalMode() == FileTransferMode.Mode.CACHED) {
                             re.thenAccept((files) -> {
                                 if (files == null) return;
-                                Interfacing.printInfo("Remote Clipboard New: " + files);
-                                Interfacing.setClipStatus("Remote Files");
+                                UserInterfacing.printInfo("Remote Clipboard New: " + files);
+                                UserInterfacing.setClipStatus("Remote Files");
                                 ClipboardIO.setSysClipboardFiles(files);
                             });
                         } else {
@@ -209,7 +209,7 @@ public class TransferConnector {
             }
         } catch (IOException e) {
 
-            if (!terminateInitiated) Interfacing.printError(e);
+            if (!terminateInitiated) UserInterfacing.printError(e);
         }
     }
 
@@ -232,7 +232,7 @@ public class TransferConnector {
             if (isServer && serverSocket != null)
                 serverSocket.close();
         } catch (IOException e) {
-            Interfacing.printError(e);
+            UserInterfacing.printError(e);
             e.printStackTrace();
         }
     }

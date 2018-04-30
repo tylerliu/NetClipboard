@@ -6,7 +6,7 @@ import net.FileTransfer;
 import net.FileTransferMode;
 import net.TransferConnector;
 import org.apache.commons.cli.*;
-import tray.Interfacing;
+import tray.UserInterfacing;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -16,65 +16,58 @@ public class Main {
     public static void main(String[] args) {
 
         System.setProperty("apple.awt.UIElement", "true");
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            UserInterfacing.setConnStatus("Shutdown: closing ports");
+            TransferConnector.close();
+            FileTransfer.terminate();
+        }));
 
-        CommandLineParser parser = new DefaultParser();
-        CommandLine cmd;
-        try {
-            cmd = parser.parse(getOptions(), args);
-        } catch (ParseException e) {
-            Interfacing.printInfo(e.getLocalizedMessage());
-            printHelp();
-            //Interfacing.printError(e);
-            return;
-        }
-
-        /**
-         * arguments that will not make connection
-         */
-        if (cmd.hasOption('h')) {
-            printHelp();
-            return;
-        }
-        if (cmd.hasOption('g')) {
-            KeyUtil.generateKey();
-            return;
-        }
-
+        parseCommand(args);
         if (!KeyUtil.isKeyExist()) {
             System.out.println("Encryption key file not found. Please generate encryption key with -g option.");
             System.exit(1);
         }
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            Interfacing.setConnStatus("Shutdown: closing ports");
-            TransferConnector.close();
-            FileTransfer.terminate();
-        }));
-
         try {
-            Interfacing.printInfo("This computer is " + InetAddress.getLocalHost().toString());
+            UserInterfacing.printInfo("This computer is " + InetAddress.getLocalHost().toString());
         } catch (UnknownHostException e) {
-            Interfacing.printError(e);
+            UserInterfacing.printError(e);
         }
-
-
-        if (cmd.hasOption('c')) {
-            FileTransferMode.setLocalMode(FileTransferMode.Mode.CACHED);
-        }
-        if (cmd.hasOption('m')) {
-            TransferConnector.setManualTarget();
-        }
-        else if (cmd.hasOption('r')) {
-            TransferConnector.setDirectTarget(cmd.getOptionValue('r'));
-        }
-
-        Interfacing.init();
+        UserInterfacing.init();
         TransferConnector.setTarget();
         ClipboardIO.checkNew();
         if (!TransferConnector.connect()) return;
         TransferConnector.DataTransferExecute();
         TransferConnector.close();
         System.exit(0);
+    }
+
+    public static void parseCommand(String[] args) {
+        CommandLineParser parser = new DefaultParser();
+        CommandLine cmd;
+        try {
+            cmd = parser.parse(getOptions(), args);
+        } catch (ParseException e) {
+            UserInterfacing.printInfo(e.getLocalizedMessage());
+            printHelp();
+            //UserInterfacing.printError(e);
+            System.exit(0);
+            return;
+        }
+        if (UserInterfacing.isCommandLine()) {
+            if (cmd.hasOption('h')) {
+                printHelp();
+                System.exit(0);
+            }
+            if (cmd.hasOption('g')) {
+                KeyUtil.generateKey();
+                System.exit(0);
+            }
+        }
+
+        if (cmd.hasOption('c')) FileTransferMode.setLocalMode(FileTransferMode.Mode.CACHED);
+        if (cmd.hasOption('r')) TransferConnector.setDirectTarget(cmd.getOptionValue('r'));
+        if (cmd.hasOption('m')) TransferConnector.setManualTarget();
     }
 
     public static Options getOptions() {

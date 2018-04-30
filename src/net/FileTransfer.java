@@ -4,7 +4,7 @@ import filechooser.NativeJFileChooser;
 import files.FileReceiver;
 import files.FileSender;
 import org.apache.commons.io.FileUtils;
-import tray.Interfacing;
+import tray.UserInterfacing;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
@@ -52,14 +52,14 @@ public class FileTransfer {
 
         File toDir = getSavingDirectory();
         if (toDir != null) {
-            Interfacing.printInfo("Retrieve files to: " + toDir.getAbsolutePath());
+            UserInterfacing.printInfo("Retrieve files to: " + toDir.getAbsolutePath());
         } else {
-            Interfacing.setClipStatus("Cancelled File Pasting");
+            UserInterfacing.setClipStatus("Cancelled File Pasting");
             FileReceiver.cancelConnection(port);
             return null;
         }
 
-        Interfacing.printInfo("File receiving from port: " + port);
+        UserInterfacing.printInfo("File receiving from port: " + port);
         FileReceiver receiver = FileReceiver.receiveTarObj(port);
         receivers.add(receiver);
         files = receiver.runTared(toDir, cipher);
@@ -71,7 +71,7 @@ public class FileTransfer {
         }
 
         deleteTempFolder(toDir);
-        Interfacing.setClipStatus("File received");
+        UserInterfacing.setClipStatus("File received");
         return files;
     }
 
@@ -83,7 +83,7 @@ public class FileTransfer {
                 tempFolders.add(newDstFolder);
                 return newDstFolder;
             } catch (IOException e) {
-                Interfacing.printError(e);
+                UserInterfacing.printError(e);
                 return null;
             }
         } else {
@@ -112,23 +112,23 @@ public class FileTransfer {
 
     public static void sendFilesWorker(List<File> sendFiles, int port, byte[] key) {
         Cipher cipher = getCipher(key, true);
-        Interfacing.printInfo("File sending on port: " + port);
+        UserInterfacing.printInfo("File sending on port: " + port);
         FileSender sender = FileSender.sendFileListObj(port);
         senders.add(sender);
         sender.runTared(sendFiles, cipher);
         senders.remove(sender);
-        Interfacing.setClipStatus("File Sent");
+        UserInterfacing.setClipStatus("File Sent");
     }
 
     public synchronized static void cancelReceive() {
-        if (!receivers.isEmpty()) Interfacing.setClipStatus("Cancelled File Pasting");
+        if (!receivers.isEmpty()) UserInterfacing.setClipStatus("Cancelled File Pasting");
         for (FileReceiver receiver : receivers) {
             receiver.cancel();
         }
     }
 
     public synchronized static void cancelSend() {
-        if (!senders.isEmpty()) Interfacing.setClipStatus("Cancelled File Sending");
+        if (!senders.isEmpty()) UserInterfacing.setClipStatus("Cancelled File Sending");
         for (FileSender sender : senders) {
             sender.cancel();
         }
@@ -154,7 +154,7 @@ public class FileTransfer {
             cipher.updateAAD(aad);
             return cipher;
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException e) {
-            Interfacing.printError(e);
+            UserInterfacing.printError(e);
         }
         return null;
     }
@@ -163,11 +163,11 @@ public class FileTransfer {
         attemptCancelTransfer();
         executor.shutdown();
         while (!executor.isTerminated()) {
-            Interfacing.setConnStatus("Wait for transferring...");
+            UserInterfacing.setConnStatus("Wait for transferring...");
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                Interfacing.printError(e);
+                UserInterfacing.printError(e);
             }
         }
     }

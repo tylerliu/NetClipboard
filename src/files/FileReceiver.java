@@ -4,7 +4,7 @@ import files.archiver.tar.TarExtractor;
 import net.TransferConnector;
 import org.apache.commons.compress.compressors.snappy.FramedSnappyCompressorInputStream;
 import org.apache.commons.io.IOUtils;
-import tray.Interfacing;
+import tray.UserInterfacing;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -58,7 +58,7 @@ public class FileReceiver implements Runnable, Cancelable {
             if (!dstFile.exists()) dstFile.createNewFile();
             return receiveStreamRun(new FileOutputStream(dstFile), port);
         } catch (IOException e) {
-            Interfacing.printError(e);
+            UserInterfacing.printError(e);
         }
         return null;
     }
@@ -72,7 +72,7 @@ public class FileReceiver implements Runnable, Cancelable {
             if (!dstFile.exists()) dstFile.createNewFile();
             return receiveStream(new FileOutputStream(dstFile), port);
         } catch (IOException e) {
-            Interfacing.printError(e);
+            UserInterfacing.printError(e);
         }
         return null;
     }
@@ -115,7 +115,7 @@ public class FileReceiver implements Runnable, Cancelable {
         try {
             recvSocket = new Socket(TransferConnector.getTarget(), listenPort);
             recvInputStream = recvSocket.getInputStream();
-            Interfacing.setClipStatus("Local File Pasting");
+            UserInterfacing.setClipStatus("Local File Pasting");
         } catch (IOException e) {
             return false;
         }
@@ -136,7 +136,7 @@ public class FileReceiver implements Runnable, Cancelable {
             if (recvInputStream != null) recvInputStream.close();
             if (recvSocket != null) recvSocket.close();
         } catch (IOException e) {
-            Interfacing.printError(e);
+            UserInterfacing.printError(e);
         }
     }
 
@@ -159,8 +159,8 @@ public class FileReceiver implements Runnable, Cancelable {
             IOUtils.copy(recvInputStream, outputStream);
         } catch (IOException e) {
             if (isCancelled) {
-                Interfacing.printInfo("File receive cancelled with error: " + e);
-            } else Interfacing.printError(e);
+                UserInterfacing.printInfo("File receive cancelled with error: " + e);
+            } else UserInterfacing.printError(e);
         }
         closeConnection();
     }
@@ -173,8 +173,8 @@ public class FileReceiver implements Runnable, Cancelable {
             files = TarExtractor.decompress(recvInputStream, base);
         } catch (IOException e) {
             if (isCancelled) {
-                Interfacing.printInfo("File receive cancelled with error: " + e);
-            } else Interfacing.printError(e);
+                UserInterfacing.printInfo("File receive cancelled with error: " + e);
+            } else UserInterfacing.printError(e);
         }
         closeConnection();
         return files;
@@ -195,8 +195,8 @@ public class FileReceiver implements Runnable, Cancelable {
             files = TarExtractor.decompress(recvInputStream, base);
         } catch (IOException e) {
             if (isCancelled) {
-                Interfacing.printInfo("File receive cancelled with error: " + e);
-            } else Interfacing.printError(e);
+                UserInterfacing.printInfo("File receive cancelled with error: " + e);
+            } else UserInterfacing.printError(e);
         }
         closeConnection();
         return files;
