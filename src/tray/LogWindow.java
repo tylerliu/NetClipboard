@@ -4,34 +4,50 @@ import javax.swing.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-class LogWindow extends JFrame {
+import javafx.application.Platform;
+import javafx.embed.swing.JFXPanel;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+
+class LogWindow {
     //TODO change to jFX window
-    private static LogWindow window = null;
+    private static Alert warnings = null;
 
-    private JTextArea textArea;
-    private JScrollPane pane;
+    private static TextArea textArea;
 
-    public static LogWindow getLogWindow() {
-        if (window == null) window = new LogWindow("Warning", 500, 300);
-        return window;
+    public static void init() {
+        if (warnings != null) return;
+
+        new JFXPanel();
+        Platform.runLater(() -> {
+            warnings = new Alert(Alert.AlertType.INFORMATION);
+            warnings.setTitle("Warning Logs");
+            warnings.setHeaderText("Logs for Debug and Warning");
+
+            textArea = new TextArea();
+            textArea.setEditable(false);
+            textArea.setWrapText(true);
+
+            textArea.setMaxWidth(Double.MAX_VALUE);
+            textArea.setMaxHeight(Double.MAX_VALUE);
+            GridPane.setVgrow(textArea, Priority.ALWAYS);
+            GridPane.setHgrow(textArea, Priority.ALWAYS);
+
+            GridPane expContent = new GridPane();
+            expContent.setMaxWidth(Double.MAX_VALUE);
+            expContent.add(textArea, 0, 0);
+
+            warnings.getDialogPane().setContent(expContent);
+            warnings.setOnCloseRequest((e) -> warnings.hide());
+        });
     }
 
-    public LogWindow(String title, int width, int height) {
-        super(title);
-        setSize(width, height);
-        textArea = new JTextArea();
-        textArea.setEditable(false);
-        pane = new JScrollPane(textArea);
-        getContentPane().add(pane);
-        setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-    }
-
-    public void toggle() {
-        if (hasFocus()) setVisible(false);
-        else {
-            setVisible(true);
-            requestFocus();
-        }
+    public static void toggle() {
+        init();
+        Platform.runLater(() -> {if (!warnings.isShowing()) warnings.show();});
     }
 
     /**
@@ -40,12 +56,14 @@ class LogWindow extends JFrame {
      * @param data
      *            the Logging information data
      */
-    void showInfo(String data) {
-        textArea.append(data);
-        this.getContentPane().validate();
+    public static void showInfo(String data) {
+        init();
+        Platform.runLater(() -> textArea.appendText(data));
+        //this.getContentPane().validate();
     }
 
-    void showError(Exception e) {
+    public static void showError(Exception e) {
+        init();
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
         e.printStackTrace(pw);

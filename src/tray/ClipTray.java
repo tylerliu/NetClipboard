@@ -52,7 +52,7 @@ public class ClipTray {
         popup.add(settingItem);
         popup.add(exitItem);
         exitItem.addActionListener((e) -> System.exit(0));
-        warningItem.addActionListener((e) -> LogWindow.getLogWindow().toggle());
+        warningItem.addActionListener((e) -> LogWindow.toggle());
 
         trayIcon.setPopupMenu(popup);
 

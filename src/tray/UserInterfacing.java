@@ -12,7 +12,7 @@ public class UserInterfacing {
     private static PrintWriter writer;
     public static void init() {
         if (!isCommandLine) ClipTray.init();
-        LogWindow.getLogWindow();
+        LogWindow.init();
         try {
             if (isLog) writer = new PrintWriter(logFile);
         } catch (FileNotFoundException e) {
@@ -50,12 +50,12 @@ public class UserInterfacing {
     public static void printInfo(String s) {
         if (isLog) writer.println(s);
         if (isCommandLine) System.out.println(s);
-        else LogWindow.getLogWindow().showInfo(s + "\n");
+        else LogWindow.showInfo(s + "\n");
     }
 
     public static void printError(Exception e) {
         if (isLog) e.printStackTrace(writer);
         if (isCommandLine) e.printStackTrace();
-        else LogWindow.getLogWindow().showError(e);
+        else LogWindow.showError(e);
     }
 }
