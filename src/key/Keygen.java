@@ -18,11 +18,38 @@ public class Keygen {
 
     private static final int KEY_LEN = 1 << 5;
 
-    public static byte[] generateKey() {
-        return generateKey(KEY_LEN);
+    public static byte[] generateKeyGUI(int keyLen, boolean exitOnCancel) {
+        System.out.println("Enter Key generation seed, at least " + keyLen + " Characters long");
+        byte[] initial = new byte[keyLen];
+        try {
+            System.in.readNBytes(initial, 0, initial.length);
+        } catch (IOException e) {
+            UserInterfacing.printError(e);
+        }
+        MessageDigest digest = null;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException e) {
+            UserInterfacing.printError(e);
+        }
+
+        byte[] out = new byte[keyLen];
+        int written = 0;
+        while (written < keyLen) {
+            byte[] temp = digest.digest(Arrays.copyOfRange(initial, written, written + 32));
+            for (int i = 0; i < Math.min(temp.length, out.length - written); i++) {
+                out[written + i] = temp[i];
+            }
+            written += temp.length;
+        }
+        return out;
     }
 
-    public static byte[] generateKey(int keyLen) {
+    public static byte[] generateKeyCMD() {
+        return generateKeyCMD(KEY_LEN);
+    }
+
+    public static byte[] generateKeyCMD(int keyLen) {
         System.out.println("Enter Key generation seed, at least " + keyLen + " Characters long");
         byte[] initial = new byte[keyLen];
         try {
@@ -56,7 +83,7 @@ public class Keygen {
     public static void keyToFile(File file, int keyLen) {
         try {
             FileOutputStream outputStream = new FileOutputStream(file);
-            outputStream.write(Base64.getEncoder().encode(generateKey(keyLen)));
+            outputStream.write(Base64.getEncoder().encode(generateKeyCMD(keyLen)));
             outputStream.close();
         } catch (IOException e) {
             UserInterfacing.printError(e);

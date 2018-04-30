@@ -1,6 +1,7 @@
 package main;
 
 import clip.ClipboardIO;
+import javafx.application.Platform;
 import key.KeyUtil;
 import net.FileTransfer;
 import net.FileTransferMode;
