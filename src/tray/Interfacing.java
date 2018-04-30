@@ -27,6 +27,9 @@ public class Interfacing {
     public static void setIsCommandLine(boolean isCommandLine1) {
         isCommandLine = isCommandLine1;
     }
+    public static void setIsLogging(boolean isLog1) {
+        isLog = isLog1;
+    }
 
     public static void setConnStatus(String s) {
         if (isLog) writer.println(s);
