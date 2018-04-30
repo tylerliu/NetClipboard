@@ -29,26 +29,26 @@ public class Interfacing {
     }
 
     public static void setConnStatus(String s) {
-        if (isCommandLine) System.out.println(s);
         if (isLog) writer.println(s);
+        if (isCommandLine) System.out.println(s);
         else ClipTray.setStatus(s);
     }
 
     public static void setClipStatus(String s) {
-        if (isCommandLine) System.out.println(s);
         if (isLog) writer.println(s);
+        if (isCommandLine) System.out.println(s);
         else ClipTray.setLastItem(s);
     }
 
     public static void printInfo(String s) {
-        if (isCommandLine) System.out.println(s);
         if (isLog) writer.println(s);
+        if (isCommandLine) System.out.println(s);
         else LogWindow.getLogWindow().showInfo(s + "\n");
     }
 
     public static void printError(Exception e) {
-        if (isCommandLine) e.printStackTrace();
         if (isLog) e.printStackTrace(writer);
+        if (isCommandLine) e.printStackTrace();
         else LogWindow.getLogWindow().showError(e);
     }
 }
