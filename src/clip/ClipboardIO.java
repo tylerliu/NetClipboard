@@ -1,8 +1,8 @@
 package clip;
 
 import tray.Interfacing;
-
-import java.awt.*;
+import format.DataFormat;
+import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
@@ -14,7 +14,7 @@ import java.util.List;
  */
 public class ClipboardIO {
 
-    private static ContentType lastType;
+    private static byte lastType;
     private static Clipboard sysClip = Toolkit.getDefaultToolkit().getSystemClipboard();
     private static String lastString;
     private static List<File> lastFiles;
@@ -26,13 +26,13 @@ public class ClipboardIO {
      * @return true if change happens
      */
     public static synchronized boolean checkNew() {
-        ContentType type = getSysClipboardFlavor();
-        if (type == null) return false;
+        byte type = getSysClipboardFlavor();
+        if (type == 0) return false;
         switch (type) {
-            case FILES:
+            case DataFormat.FILES:
                 List<File> files = getSysClipboardFiles();
                 if (isNewFiles(files)) {
-                    lastType = ContentType.FILES;
+                    lastType = DataFormat.FILES;
                     lastFiles = files;
                     isFromRemote = false;
                     Interfacing.printInfo("Local Clipboard New: " + files);
@@ -40,10 +40,10 @@ public class ClipboardIO {
                     return true;
                 }
                 break;
-            case STRING:
+            case DataFormat.STRING:
                 String n = getSysClipboardText();
                 if (isNewString(n)) {//have new
-                    lastType = ContentType.STRING;
+                    lastType = DataFormat.STRING;
                     lastString = n;
                     isFromRemote = false;
                     Interfacing.printInfo("Local Clipboard New: " + n);
@@ -58,14 +58,14 @@ public class ClipboardIO {
     }
 
     private static boolean isNewString(String data) {
-        return data != null && (ContentType.STRING != lastType || lastString == null || !lastString.equals(data));
+        return data != null && (DataFormat.STRING != lastType || lastString == null || !lastString.equals(data));
     }
 
     private static boolean isNewFiles(List<File> data) {
-        return data != null && (ContentType.FILES != lastType || lastFiles == null || !lastFiles.equals(data));
+        return data != null && (DataFormat.FILES != lastType || lastFiles == null || !lastFiles.equals(data));
     }
 
-    public static ContentType getLastType() {
+    public static byte getLastType() {
         return lastType;
     }
 
@@ -81,22 +81,18 @@ public class ClipboardIO {
         return isFromRemote;
     }
 
-    public static ContentType getContentType(int type) {
-        return ContentType.values()[type - 1];
-    }
-
     //TODO support Image?
-    public synchronized static ContentType getSysClipboardFlavor() {
+    public synchronized static byte getSysClipboardFlavor() {
         try {
-            //if (sysClip.isDataFlavorAvailable(DataFlavor.imageFlavor)) return ContentType.IMAGE;
-            if (sysClip.isDataFlavorAvailable(DataFlavor.javaFileListFlavor)) return ContentType.FILES;
-            if (sysClip.isDataFlavorAvailable(DataFlavor.stringFlavor)) return ContentType.STRING;
+            //if (sysClip.isDataFlavorAvailable(DataFlavor.imageFlavor)) return DataFormat.IMAGE;
+            if (sysClip.isDataFlavorAvailable(DataFlavor.javaFileListFlavor)) return DataFormat.FILES;
+            if (sysClip.isDataFlavorAvailable(DataFlavor.stringFlavor)) return DataFormat.STRING;
         } catch (IllegalStateException e) {
             if (!e.getMessage().contains("cannot open system clipboard")) {
                 Interfacing.printError(e);
             }
         }
-        return null;
+        return DataFormat.NULL;
     }
 
     /**
@@ -112,7 +108,7 @@ public class ClipboardIO {
     }
 
     public static synchronized void setSysClipboardText(String s) {
-        lastType = ContentType.STRING;
+        lastType = DataFormat.STRING;
         lastString = s;
         isFromRemote = true;
         StringSelection ss = new StringSelection(s);
@@ -129,7 +125,7 @@ public class ClipboardIO {
     }
 
     public static synchronized void setSysClipboardFiles(List<File> files) {
-        lastType = ContentType.FILES;
+        lastType = DataFormat.FILES;
         lastFiles = files;
         isFromRemote = true;
         if (MacFilesClipboard.isMac()) {
@@ -145,9 +141,5 @@ public class ClipboardIO {
         isFromRemote = true;
         StringSelection ss = new StringSelection("");
         sysClip.setContents(ss, ss);
-    }
-
-    public enum ContentType {
-        STRING, HTML, FILES, END
     }
 }
