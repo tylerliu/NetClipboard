@@ -4,6 +4,7 @@ import files.archiver.tar.TarExtractor;
 import net.TransferConnector;
 import org.apache.commons.compress.compressors.snappy.FramedSnappyCompressorInputStream;
 import org.apache.commons.io.IOUtils;
+import tray.Interfacing;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -57,7 +58,7 @@ public class FileReceiver implements Runnable, Cancelable {
             if (!dstFile.exists()) dstFile.createNewFile();
             return receiveStreamRun(new FileOutputStream(dstFile), port);
         } catch (IOException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
         return null;
     }
@@ -71,7 +72,7 @@ public class FileReceiver implements Runnable, Cancelable {
             if (!dstFile.exists()) dstFile.createNewFile();
             return receiveStream(new FileOutputStream(dstFile), port);
         } catch (IOException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
         return null;
     }
@@ -135,7 +136,7 @@ public class FileReceiver implements Runnable, Cancelable {
             if (recvInputStream != null) recvInputStream.close();
             if (recvSocket != null) recvSocket.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
     }
 
@@ -159,7 +160,7 @@ public class FileReceiver implements Runnable, Cancelable {
         } catch (IOException e) {
             if (isCancelled) {
                 System.out.println("File receive cancelled with error " + e);
-            } else e.printStackTrace();
+            } else Interfacing.printError(e);
         }
         closeConnection();
     }
@@ -173,7 +174,7 @@ public class FileReceiver implements Runnable, Cancelable {
         } catch (IOException e) {
             if (isCancelled) {
                 System.out.println("File receive cancelled with error " + e);
-            } else e.printStackTrace();
+            } else Interfacing.printError(e);
         }
         closeConnection();
         return files;
@@ -195,7 +196,7 @@ public class FileReceiver implements Runnable, Cancelable {
         } catch (IOException e) {
             if (isCancelled) {
                 System.out.println("File receive cancelled with error " + e);
-            } else e.printStackTrace();
+            } else Interfacing.printError(e);
         }
         closeConnection();
         return files;

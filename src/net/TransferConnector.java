@@ -5,6 +5,7 @@ import net.handshake.DirectConnect;
 import net.handshake.KeyBased;
 import net.handshake.Manual;
 import org.bouncycastle.crypto.tls.TlsProtocol;
+import tray.Interfacing;
 
 import javax.sound.sampled.Clip;
 import java.io.File;
@@ -66,7 +67,7 @@ public class TransferConnector {
         try {
             isServer = Arrays.compare(InetAddress.getLocalHost().getAddress(), getTarget().getAddress()) > 0;
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
     }
 
@@ -92,7 +93,7 @@ public class TransferConnector {
             outStream = new MultipleFormatOutStream(tlsProtocol.getOutputStream());
 
         } catch (IOException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
             System.exit(0);
         }
 
@@ -113,7 +114,7 @@ public class TransferConnector {
                 FileTransferMode.setTargetMode(FileTransferMode.Mode.values()[targetMode]);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
             System.out.println("protocol exchange failed");
             System.exit(1);
         }
@@ -168,7 +169,7 @@ public class TransferConnector {
         try {
             SecureRandom.getInstanceStrong().nextBytes(key);
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
         return key;
     }
@@ -206,7 +207,7 @@ public class TransferConnector {
                 }
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
     }
 
@@ -229,6 +230,7 @@ public class TransferConnector {
             if (isServer && serverSocket != null)
                 serverSocket.close();
         } catch (IOException e) {
+            Interfacing.printError(e);
             e.printStackTrace();
         }
     }

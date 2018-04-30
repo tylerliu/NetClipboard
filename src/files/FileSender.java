@@ -4,6 +4,7 @@ import files.archiver.tar.TarCompressor;
 import net.TransferConnector;
 import org.apache.commons.compress.compressors.snappy.FramedSnappyCompressorOutputStream;
 import org.apache.commons.io.IOUtils;
+import tray.Interfacing;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
@@ -56,7 +57,7 @@ public class FileSender implements Runnable, Cancelable {
             return sendStreamRun(new FileInputStream(file), port);
         } catch (FileNotFoundException e) {
             System.out.println("File not found! " + file.getAbsolutePath());
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
         return null;
     }
@@ -70,7 +71,7 @@ public class FileSender implements Runnable, Cancelable {
             return sendStream(new FileInputStream(file), port);
         } catch (FileNotFoundException e) {
             System.out.println("File not found! " + file.getAbsolutePath());
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
         return null;
     }
@@ -143,7 +144,7 @@ public class FileSender implements Runnable, Cancelable {
             if (sendSocket != null) sendSocket.close();
             if (sendServer != null) sendServer.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
     }
 
@@ -155,7 +156,7 @@ public class FileSender implements Runnable, Cancelable {
         } catch (IOException e) {
             if (isCancelled) {
                 System.out.println("File send cancel with error" + e);
-            } else e.printStackTrace();
+            } else Interfacing.printError(e);
         }
         closeConnection();
         System.out.println("File send done");
@@ -171,7 +172,7 @@ public class FileSender implements Runnable, Cancelable {
                 System.out.println("File send cancel with error");
                 return;
             }
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
         closeConnection();
         System.out.println("File send done");
@@ -194,7 +195,7 @@ public class FileSender implements Runnable, Cancelable {
                 System.out.println("File send cancel with error");
                 return;
             }
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
 
         closeConnection();

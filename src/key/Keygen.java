@@ -1,5 +1,7 @@
 package key;
 
+import tray.Interfacing;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -26,13 +28,13 @@ public class Keygen {
         try {
             System.in.readNBytes(initial, 0, initial.length);
         } catch (IOException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
         MessageDigest digest = null;
         try {
             digest = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
 
         byte[] out = new byte[keyLen];
@@ -57,7 +59,7 @@ public class Keygen {
             outputStream.write(Base64.getEncoder().encode(generateKey(keyLen)));
             outputStream.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
 
     }
@@ -69,7 +71,7 @@ public class Keygen {
             outputStream.close();
             return Base64.getDecoder().decode(bytes);
         } catch (IOException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
         return null;
     }

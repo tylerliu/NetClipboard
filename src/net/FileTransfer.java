@@ -4,6 +4,7 @@ import filechooser.NativeJFileChooser;
 import files.FileReceiver;
 import files.FileSender;
 import org.apache.commons.io.FileUtils;
+import tray.Interfacing;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
@@ -82,7 +83,7 @@ public class FileTransfer {
                 tempFolders.add(newDstFolder);
                 return newDstFolder;
             } catch (IOException e) {
-                e.printStackTrace();
+                Interfacing.printError(e);
                 return null;
             }
         } else {
@@ -152,7 +153,7 @@ public class FileTransfer {
             cipher.updateAAD(aad);
             return cipher;
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
         return null;
     }
@@ -165,7 +166,7 @@ public class FileTransfer {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Interfacing.printError(e);
             }
         }
     }

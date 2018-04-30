@@ -1,6 +1,7 @@
 package net.handshake;
 
 import key.KeyUtil;
+import tray.Interfacing;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -45,11 +46,11 @@ public class KeyBased {
                 socket.close();
                 sendSocket.close();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Interfacing.printError(e);
             }
         });
         if (!result) {
-            System.out.println("Fail To Find Connection Target");
+            Interfacing.printInfo("Fail To Find Connection Target");
             System.exit(1);
         }
         return target.get();
@@ -61,14 +62,14 @@ public class KeyBased {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Interfacing.printError(e);
             }
         }
         if (target.get() == null) {
             try {
                 target.set(InetAddress.getLocalHost());
             } catch (UnknownHostException e) {
-                e.printStackTrace();
+                Interfacing.printError(e);
             }
             return false;
         } else {
@@ -88,7 +89,7 @@ public class KeyBased {
             sendSocket = new DatagramSocket();
             socket.joinGroup(InetAddress.getByName(groupAddress));
         } catch (IOException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
             System.exit(1);
         }
     }
@@ -97,7 +98,7 @@ public class KeyBased {
         try {
             SecureRandom.getInstanceStrong().nextBytes(ran);
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
     }
 
@@ -107,7 +108,7 @@ public class KeyBased {
             md.update("Handshake key".getBytes());
             key = md.digest(KeyUtil.getKey());
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
     }
 
@@ -127,7 +128,7 @@ public class KeyBased {
                     executorService.submit(() -> auth(packet));
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                Interfacing.printError(e);
             }
         }
     }
@@ -139,7 +140,7 @@ public class KeyBased {
             mac.update(address.getAddress());
             return mac.doFinal(random);
         } catch (Exception e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
         return new byte[0];
     }
@@ -155,7 +156,7 @@ public class KeyBased {
         if (Boolean.TRUE.equals(authenticated.get(packet.getAddress())) && !target.compareAndSet(null, packet.getAddress()))
             return;
         responded.put(packet.getAddress(), true);
-        System.out.println("responding " + packet.getAddress());
+        Interfacing.printInfo("responding " + packet.getAddress());
         byte[] random = Arrays.copyOfRange(packet.getData(), 1, packet.getLength());
         try {
             byte[] response = ByteBuffer.allocate(1 + 32)
@@ -169,7 +170,7 @@ public class KeyBased {
                 Thread.sleep(1000);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
     }
 
@@ -180,7 +181,7 @@ public class KeyBased {
      */
     private static void auth(DatagramPacket packet) {
         if (authenticated.get(packet.getAddress()) != null) return;
-        System.out.println("authenticating " + packet.getAddress());
+        Interfacing.printInfo("authenticating " + packet.getAddress());
         byte[] correct = ByteBuffer.allocate(1 + 32)
                 .put((byte) -1)
                 .put(HMAC(packet.getAddress(), ran))
@@ -208,7 +209,7 @@ public class KeyBased {
             }
             sendSocket.send(packet); //last send to unclog receive
         } catch (Exception e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
     }
 }

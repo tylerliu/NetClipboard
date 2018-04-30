@@ -6,14 +6,16 @@ import net.FileTransfer;
 import net.FileTransferMode;
 import net.TransferConnector;
 import org.apache.commons.cli.*;
+import tray.Interfacing;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 
 public class Main {
 
     public static void main(String[] args) {
+
+        System.setProperty("apple.awt.UIElement", "true");
 
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd;
@@ -22,7 +24,7 @@ public class Main {
         } catch (ParseException e) {
             System.out.println(e.getLocalizedMessage());
             printHelp();
-            //e.printStackTrace();
+            //Interfacing.printError(e);
             return;
         }
 
@@ -44,21 +46,20 @@ public class Main {
         }
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("Shutdown: closing ports");
+            Interfacing.setConnStatus("Shutdown: closing ports");
             TransferConnector.close();
             FileTransfer.terminate();
         }));
 
         try {
-            System.out.println("This computer is " + InetAddress.getLocalHost().toString());
+            Interfacing.printInfo("This computer is " + InetAddress.getLocalHost().toString());
         } catch (UnknownHostException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
 
 
         if (cmd.hasOption('c')) {
             FileTransferMode.setLocalMode(FileTransferMode.Mode.CACHED);
-            args = Arrays.copyOfRange(args, 1, args.length);
         }
         if (cmd.hasOption('m')) {
             TransferConnector.setManualTarget();
@@ -67,7 +68,7 @@ public class Main {
             TransferConnector.setDirectTarget(cmd.getOptionValue('r'));
         }
 
-
+        Interfacing.init();
         TransferConnector.setTarget();
         ClipboardIO.checkNew();
         if (!TransferConnector.connect()) return;

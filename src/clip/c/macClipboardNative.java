@@ -2,11 +2,11 @@ package clip.c;
 
 import clip.MacFilesClipboard;
 import org.apache.commons.io.FileUtils;
+import tray.Interfacing;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
-import java.util.ArrayList;
 import java.util.List;
 
 public class macClipboardNative {
@@ -21,14 +21,14 @@ public class macClipboardNative {
             tempFile.deleteOnExit();
             System.out.println("Temp Library file: " + tempFile.getCanonicalPath());
         } catch (IOException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
 
-        try (InputStream inputStream = getClass().getResourceAsStream("/libClipboardJNI.dylib")) {
+        try (InputStream inputStream = getClass().getResourceAsStream("/resources/libClipboardJNI.dylib")) {
             Files.copy(inputStream, tempFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             FileUtils.deleteQuietly(tempFile);
-            e.printStackTrace();
+            Interfacing.printError(e);
         } catch (NullPointerException e) {
             FileUtils.deleteQuietly(tempFile);
             new FileNotFoundException("File " + "\"/libClipboardJNI.dylib\"" + " was not found inside JAR.").printStackTrace();
@@ -42,7 +42,7 @@ public class macClipboardNative {
         try {
             System.load(new File("./native/libClipboardJNI.dylib").getCanonicalPath());
         } catch (IOException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
         */
     }
@@ -62,7 +62,7 @@ public class macClipboardNative {
             try {
                 filePaths[i] = files.get(i).getCanonicalPath();
             } catch (IOException e) {
-                e.printStackTrace();
+                Interfacing.printError(e);
             }
         }
 

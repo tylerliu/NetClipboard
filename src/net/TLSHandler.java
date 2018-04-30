@@ -2,6 +2,7 @@ package net;
 
 import key.KeyUtil;
 import org.bouncycastle.crypto.tls.*;
+import tray.Interfacing;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,11 +19,11 @@ public class TLSHandler {
             protocol.connect(client);
         } catch (TlsFatalAlert | TlsFatalAlertReceived alert) {
             if (alert.getMessage().contains("20")) {
-                System.out.println("Authentication fails for TLS Connection.");
+                Interfacing.printInfo("Authentication fails for TLS Connection.");
             } else alert.printStackTrace();
             return null;
         } catch (IOException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
         return protocol;
     }
@@ -38,7 +39,7 @@ public class TLSHandler {
             } else alert.printStackTrace();
             return null;
         } catch (IOException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
         return protocol;
     }
@@ -97,7 +98,8 @@ public class TLSHandler {
                     CipherSuite.TLS_DHE_PSK_WITH_AES_128_CBC_SHA256,
                     CipherSuite.TLS_DHE_PSK_WITH_AES_128_GCM_SHA256,
                     CipherSuite.TLS_DHE_PSK_WITH_AES_128_CCM,
-                    CipherSuite.TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256
+                    CipherSuite.TLS_ECDHE_PSK_WITH_AES_128_CBC_SHA256,
+                    CipherSuite.DRAFT_TLS_DHE_PSK_WITH_CHACHA20_POLY1305_SHA256
             };
         }
     }

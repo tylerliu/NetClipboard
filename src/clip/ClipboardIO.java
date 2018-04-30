@@ -1,5 +1,7 @@
 package clip;
 
+import tray.Interfacing;
+
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
@@ -33,7 +35,8 @@ public class ClipboardIO {
                     lastType = ContentType.FILES;
                     lastFiles = files;
                     isFromRemote = false;
-                    System.out.println("Local Clipboard New: " + files);
+                    Interfacing.printInfo("Local Clipboard New: " + files);
+                    Interfacing.setClipStatus("Local Files");
                     return true;
                 }
                 break;
@@ -43,7 +46,9 @@ public class ClipboardIO {
                     lastType = ContentType.STRING;
                     lastString = n;
                     isFromRemote = false;
-                    System.out.println("Local Clipboard New: " + n);
+                    Interfacing.printInfo("Local Clipboard New: " + n);
+                    if (n.contains("\n")) n = n.substring(0, n.indexOf('\n')) + "...";
+                    Interfacing.setClipStatus("Local: " + (n.length() > 30 ? n.substring(0, 30) + "..." : n));
                     return true;
                 }
                 break;
@@ -88,7 +93,7 @@ public class ClipboardIO {
             if (sysClip.isDataFlavorAvailable(DataFlavor.stringFlavor)) return ContentType.STRING;
         } catch (IllegalStateException e) {
             if (!e.getMessage().contains("cannot open system clipboard")) {
-                e.printStackTrace();
+                Interfacing.printError(e);
             }
         }
         return null;
@@ -101,7 +106,7 @@ public class ClipboardIO {
         try {
             return (String) sysClip.getData(DataFlavor.stringFlavor);
         } catch (Exception e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
             return null;
         }
     }
@@ -118,7 +123,7 @@ public class ClipboardIO {
         try {
             return (List<File>) sysClip.getData(DataFlavor.javaFileListFlavor);
         } catch (Exception e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
             return null;
         }
     }

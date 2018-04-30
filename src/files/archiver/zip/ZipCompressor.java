@@ -1,6 +1,7 @@
 package files.archiver.zip;
 
 import org.apache.commons.io.IOUtils;
+import tray.Interfacing;
 
 import java.io.*;
 import java.util.List;
@@ -38,7 +39,7 @@ public class ZipCompressor {
         try {
             compress(files, new FileOutputStream(new File(dest)));
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
     }
 
@@ -56,7 +57,7 @@ public class ZipCompressor {
         try {
             out.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
     }
 
@@ -84,7 +85,7 @@ public class ZipCompressor {
             out.putNextEntry(entry);
             out.closeEntry();
         } catch (IOException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
             throw new RuntimeException(e);
         }
         //noinspection ConstantConditions
@@ -113,7 +114,7 @@ public class ZipCompressor {
             out.closeEntry();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
             throw new RuntimeException(e);
         }
     }

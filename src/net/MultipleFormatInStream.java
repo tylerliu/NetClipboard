@@ -1,5 +1,7 @@
 package net;
 
+import tray.Interfacing;
+
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +31,7 @@ class MultipleFormatInStream extends FilterInputStream {
         try {
             super.readNBytes(payload, 0, payload.length);
         } catch (IOException e) {
-            e.printStackTrace();
+            Interfacing.printError(e);
         }
     }
 
@@ -52,7 +54,7 @@ class MultipleFormatInStream extends FilterInputStream {
     /**
      * get file transfer info
      */
-    private ByteBuffer tryFiles() throws IOException {
+    private ByteBuffer tryFiles() {
         if (type != 2) return null;
         return ByteBuffer.wrap(payload);
     }
