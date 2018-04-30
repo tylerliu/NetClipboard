@@ -4,6 +4,7 @@ import clip.MacFilesClipboard;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 public class ClipTray {
@@ -22,8 +23,11 @@ public class ClipTray {
         try {
             if (MacFilesClipboard.isMac())
                 trayIcon = new TrayIcon(ImageIO.read(ClipTray.class.getResourceAsStream("/resources/clip_icon_b.png")));
-            else
-                trayIcon = new TrayIcon(ImageIO.read(ClipTray.class.getResourceAsStream("/resources/clip_icon_w.png")));
+            else {
+                BufferedImage iconImage = ImageIO.read(ClipTray.class.getResourceAsStream("/resources/clip_icon_w.png"));
+                int trayIconWidth = new TrayIcon(iconImage).getSize().width;
+                trayIcon = new TrayIcon(iconImage.getScaledInstance(trayIconWidth, -1, Image.SCALE_SMOOTH));
+            }
         } catch (IOException e) {
             e.printStackTrace();
             return;
