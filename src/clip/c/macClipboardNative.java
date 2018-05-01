@@ -2,7 +2,7 @@ package clip.c;
 
 import clip.MacFilesClipboard;
 import org.apache.commons.io.FileUtils;
-import tray.UserInterfacing;
+import ui.UserInterfacing;
 
 import java.io.*;
 import java.nio.file.Files;

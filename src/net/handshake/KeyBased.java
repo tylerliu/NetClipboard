@@ -1,7 +1,7 @@
 package net.handshake;
 
 import key.KeyUtil;
-import tray.UserInterfacing;
+import ui.UserInterfacing;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;

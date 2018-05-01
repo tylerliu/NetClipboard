@@ -1,6 +1,6 @@
 package net.handshake;
 
-import tray.UserInterfacing;
+import ui.UserInterfacing;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

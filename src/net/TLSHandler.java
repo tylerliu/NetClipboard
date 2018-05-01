@@ -2,7 +2,7 @@ package net;
 
 import key.KeyUtil;
 import org.bouncycastle.crypto.tls.*;
-import tray.UserInterfacing;
+import ui.UserInterfacing;
 
 import java.io.IOException;
 import java.io.InputStream;

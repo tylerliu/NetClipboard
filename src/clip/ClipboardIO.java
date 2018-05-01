@@ -1,6 +1,6 @@
 package clip;
 
-import tray.UserInterfacing;
+import ui.UserInterfacing;
 import format.DataFormat;
 
 import java.awt.Toolkit;

@@ -3,7 +3,7 @@ package files.archiver.tar;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
-import tray.UserInterfacing;
+import ui.UserInterfacing;
 
 import java.io.*;
 import java.util.List;

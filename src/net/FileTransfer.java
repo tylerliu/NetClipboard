@@ -1,16 +1,14 @@
 package net;
 
-import filechooser.NativeJFileChooser;
 import files.FileReceiver;
 import files.FileSender;
 import org.apache.commons.io.FileUtils;
-import tray.UserInterfacing;
+import ui.UserInterfacing;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import javax.swing.JFileChooser;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -61,7 +59,7 @@ public class FileTransfer {
 
         UserInterfacing.printInfo("File receiving from port: " + port);
         FileReceiver receiver = FileReceiver.receiveTarObj(port);
-        receivers.add(receiver);
+        if (FileTransferMode.getLocalMode() == FileTransferMode.Mode.CACHED)receivers.add(receiver);
         files = receiver.runTared(toDir, cipher);
         receivers.remove(receiver);
 
@@ -89,19 +87,7 @@ public class FileTransfer {
         } else {
             //choose destination
             //TODO track default directory
-            if (lastSavedDirectory == null) {
-                lastSavedDirectory = new File(System.getProperty("user.home"));
-            }
-            NativeJFileChooser chooser = new NativeJFileChooser(lastSavedDirectory);
-            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            chooser.setDialogTitle("Paste Files...");
-
-            int chooseResult = chooser.showDialog(null, "Paste");
-            if (chooseResult == JFileChooser.APPROVE_OPTION) {
-                return lastSavedDirectory = chooser.getSelectedFile();
-            } else {
-                return null;
-            }
+            return UserInterfacing.getSaveDir();
         }
     }
 
@@ -114,7 +100,7 @@ public class FileTransfer {
         Cipher cipher = getCipher(key, true);
         UserInterfacing.printInfo("File sending on port: " + port);
         FileSender sender = FileSender.sendFileListObj(port);
-        senders.add(sender);
+        if (FileTransferMode.getTargetMode() == FileTransferMode.Mode.CACHED) senders.add(sender);
         sender.runTared(sendFiles, cipher);
         senders.remove(sender);
         UserInterfacing.setClipStatus("File Sent");

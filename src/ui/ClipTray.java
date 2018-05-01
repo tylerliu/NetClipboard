@@ -1,4 +1,4 @@
-package tray;
+package ui;
 
 import clip.MacFilesClipboard;
 

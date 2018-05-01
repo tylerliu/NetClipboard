@@ -6,7 +6,7 @@ import format.FormattedInStream;
 import format.FormattedOutStream;
 import net.handshake.*;
 import org.bouncycastle.crypto.tls.TlsProtocol;
-import tray.UserInterfacing;
+import ui.UserInterfacing;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,7 +37,7 @@ public class TransferConnector {
      */
     public static void setTarget() {
         if (target != null) return;
-        UserInterfacing.printInfo("Connecting...");
+        UserInterfacing.setConnStatus("Connecting...");
         target = KeyBased.getTarget();
     }
 

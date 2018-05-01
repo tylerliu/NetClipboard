@@ -4,7 +4,7 @@ import files.archiver.tar.TarExtractor;
 import net.TransferConnector;
 import org.apache.commons.compress.compressors.snappy.FramedSnappyCompressorInputStream;
 import org.apache.commons.io.IOUtils;
-import tray.UserInterfacing;
+import ui.UserInterfacing;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;

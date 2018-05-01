@@ -1,12 +1,11 @@
-package tray;
+package ui;
 
+import javafx.embed.swing.JFXPanel;
 import key.KeyUtil;
-import key.Keygen;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
-import java.security.Key;
 
 public class UserInterfacing {
 
@@ -69,11 +68,11 @@ public class UserInterfacing {
         if (!isCommandLine) {
             if (isChange) {
                 new Thread(() -> {
-                    byte[] seed = KeyWindow.changeKey(isChange);
+                    byte[] seed = KeyWindow.changeKey(true);
                     if (seed != null) KeyUtil.generateKeyFromSeed(seed);
                 }).start();
             } else {
-                byte[] seed = KeyWindow.changeKey(isChange);
+                byte[] seed = KeyWindow.changeKey(false);
                 if (seed != null) KeyUtil.generateKeyFromSeed(seed);
             }
         }
@@ -82,5 +81,10 @@ public class UserInterfacing {
                 System.out.println("Encryption key file not found. Please generate encryption key: ");
             KeyUtil.generateKey();
         }
+    }
+
+    public static File getSaveDir() {
+        if (!isCommandLine) new JFXPanel();
+        return DirChooser.chooseSaveDirectory();
     }
 }

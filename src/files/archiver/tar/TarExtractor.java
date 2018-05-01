@@ -5,7 +5,7 @@ import files.archiver.NamingUtil.RenameStrategy;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.io.IOUtils;
-import tray.UserInterfacing;
+import ui.UserInterfacing;
 
 import java.io.*;
 import java.util.List;

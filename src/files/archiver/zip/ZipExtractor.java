@@ -3,7 +3,7 @@ package files.archiver.zip;
 import files.archiver.NamingUtil;
 import files.archiver.NamingUtil.RenameStrategy;
 import org.apache.commons.io.IOUtils;
-import tray.UserInterfacing;
+import ui.UserInterfacing;
 
 import java.io.*;
 import java.util.List;

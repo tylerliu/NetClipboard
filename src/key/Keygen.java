@@ -1,6 +1,6 @@
 package key;
 
-import tray.UserInterfacing;
+import ui.UserInterfacing;
 
 import java.io.File;
 import java.io.FileInputStream;

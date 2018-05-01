@@ -1,4 +1,4 @@
-package tray;
+package ui;
 
 import javafx.application.Platform;
 import javafx.scene.Node;
@@ -7,14 +7,13 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextInputDialog;
 
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 
 public class KeyWindow {
-
-    private static boolean isReady;
     private static byte[] keyResult;
 
     public static synchronized byte[] changeKey(boolean isChange) {
-        isReady = false;
+        final CountDownLatch latch = new CountDownLatch(1);
         Platform.runLater(() -> {
             TextInputDialog dialog = new TextInputDialog("");
             dialog.setTitle(isChange ? "Change Key" : "Set Key");
@@ -34,19 +33,13 @@ public class KeyWindow {
                 alert.setContentText("Restart the program for the new key to take effect.");
                 alert.showAndWait();
                 keyResult = key.getBytes();
-                isReady = true;
-            }, () -> {
-                keyResult = null;
-                isReady = true;
-            });
+            }, () -> keyResult = null);
+            latch.countDown();
         });
-
-        while (!isReady) {
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            UserInterfacing.printError(e);
         }
         return keyResult;
     }

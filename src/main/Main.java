@@ -1,13 +1,12 @@
 package main;
 
 import clip.ClipboardIO;
-import javafx.application.Platform;
 import key.KeyUtil;
 import net.FileTransfer;
 import net.FileTransferMode;
 import net.TransferConnector;
 import org.apache.commons.cli.*;
-import tray.UserInterfacing;
+import ui.UserInterfacing;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

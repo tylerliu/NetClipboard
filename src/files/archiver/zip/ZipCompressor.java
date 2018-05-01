@@ -1,7 +1,7 @@
 package files.archiver.zip;
 
 import org.apache.commons.io.IOUtils;
-import tray.UserInterfacing;
+import ui.UserInterfacing;
 
 import java.io.*;
 import java.util.List;

@@ -1,6 +1,6 @@
 package net;
 
-import tray.UserInterfacing;
+import ui.UserInterfacing;
 
 import java.io.IOException;
 import java.net.ServerSocket;
