@@ -1,8 +1,12 @@
 package tray;
 
+import key.KeyUtil;
+import key.Keygen;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.security.Key;
 
 public class UserInterfacing {
 
@@ -11,8 +15,10 @@ public class UserInterfacing {
     private static File logFile = new File("./NetClipLog.txt");
     private static PrintWriter writer;
     public static void init() {
-        if (!isCommandLine) ClipTray.init();
-        LogWindow.init();
+        if (!isCommandLine) {
+            ClipTray.init();
+            LogWindow.init();
+        }
         try {
             if (isLog) writer = new PrintWriter(logFile);
         } catch (FileNotFoundException e) {
@@ -57,5 +63,24 @@ public class UserInterfacing {
         if (isLog) e.printStackTrace(writer);
         if (isCommandLine) e.printStackTrace();
         else LogWindow.showError(e);
+    }
+
+    public static void setKey(boolean isChange) {
+        if (!isCommandLine) {
+            if (isChange) {
+                new Thread(() -> {
+                    byte[] seed = KeyWindow.changeKey(isChange);
+                    if (seed != null) KeyUtil.generateKeyFromSeed(seed);
+                }).start();
+            } else {
+                byte[] seed = KeyWindow.changeKey(isChange);
+                if (seed != null) KeyUtil.generateKeyFromSeed(seed);
+            }
+        }
+        else {
+            if (!isChange)
+                System.out.println("Encryption key file not found. Please generate encryption key: ");
+            KeyUtil.generateKey();
+        }
     }
 }

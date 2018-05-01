@@ -18,6 +18,10 @@ public class KeyUtil {
         Keygen.keyToFile(keyFile);
     }
 
+    public static void generateKeyFromSeed(byte[] seed) {
+        Keygen.keyToFile(keyFile, Keygen.generateKey(32, seed));
+    }
+
     public static boolean isKeyExist() {
         return keyFile.exists();
     }

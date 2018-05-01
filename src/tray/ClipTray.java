@@ -40,8 +40,8 @@ public class ClipTray {
         MenuItem warningItem = new MenuItem("Warnings");
         lastItem = new MenuItem("Waiting for Transfer");
         //TODO implement this to set cached or not
-        //TODO implement change password
         MenuItem settingItem = new MenuItem("Setting");
+        MenuItem changeKey = new MenuItem("Change Key");
         MenuItem exitItem = new MenuItem("Exit");
 
         //Add components to pop-up menu
@@ -50,9 +50,12 @@ public class ClipTray {
         statusMenu.add(lastItem);
         statusMenu.add(warningItem);
         popup.add(settingItem);
+        popup.add(changeKey);
+        popup.addSeparator();
         popup.add(exitItem);
         exitItem.addActionListener((e) -> System.exit(0));
         warningItem.addActionListener((e) -> LogWindow.toggle());
+        changeKey.addActionListener(e -> UserInterfacing.setKey(true));
 
         trayIcon.setPopupMenu(popup);
 

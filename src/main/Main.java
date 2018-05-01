@@ -17,6 +17,7 @@ public class Main {
     public static void main(String[] args) {
 
         System.setProperty("apple.awt.UIElement", "true");
+        UserInterfacing.init();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             UserInterfacing.setConnStatus("Shutdown: closing ports");
             TransferConnector.close();
@@ -25,8 +26,8 @@ public class Main {
 
         parseCommand(args);
         if (!KeyUtil.isKeyExist()) {
-            System.out.println("Encryption key file not found. Please generate encryption key with -g option.");
-            System.exit(1);
+            UserInterfacing.setKey(false);
+            System.exit(0);
         }
 
         try {
@@ -34,7 +35,6 @@ public class Main {
         } catch (UnknownHostException e) {
             UserInterfacing.printError(e);
         }
-        UserInterfacing.init();
         TransferConnector.setTarget();
         ClipboardIO.checkNew();
         if (!TransferConnector.connect()) return;
