@@ -5,6 +5,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextInputDialog;
+import key.KeyUtil;
 
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
@@ -17,12 +18,12 @@ public class KeyWindow {
         Platform.runLater(() -> {
             TextInputDialog dialog = new TextInputDialog("");
             dialog.setTitle(isChange ? "Change Key" : "Set Key");
-            dialog.setHeaderText("Enter Key seed with at least 32 letters");
+            dialog.setHeaderText("Enter Key seed with at least " + KeyUtil.KEY_LEN + " letters");
             dialog.setContentText("Seed:");
             Node loginButton = dialog.getDialogPane().lookupButton(ButtonType.OK);
             loginButton.setDisable(true);
             dialog.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
-                loginButton.setDisable(newValue.length() < 32);
+                loginButton.setDisable(newValue.length() < KeyUtil.KEY_LEN);
             });
 
             Optional<String> result = dialog.showAndWait();

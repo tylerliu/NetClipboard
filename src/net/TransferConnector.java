@@ -101,12 +101,11 @@ public class TransferConnector {
 
     private static void exchangeProtocol(TlsProtocol protocol) {
         try {
-            int magicNumber = 5;
+            int magicNumber = 6;
             protocol.getOutputStream().write(magicNumber);
-            protocol.getOutputStream().write(FileTransferMode.getLocalMode().ordinal());
+            protocol.getOutputStream().write(FileTransferMode.getModeForSending().ordinal());
             if (protocol.getInputStream().read() != magicNumber) {
                 UserInterfacing.printInfo("Communication protocol does not match! ");
-                //System.exit(1);
             }
             int targetMode = protocol.getInputStream().read();
             if (targetMode != -1) {
@@ -115,7 +114,6 @@ public class TransferConnector {
         } catch (Exception e) {
             UserInterfacing.printError(e);
             UserInterfacing.printInfo("protocol exchange failed");
-            //System.exit(1);
         }
     }
 
@@ -129,6 +127,8 @@ public class TransferConnector {
     private static void writer() {
         try {
             while (true) {
+                if (!FileTransferMode.getIsSent())
+                    outStream.writeModeSet(FileTransferMode.getModeForSending());
 
                 //check clipboard
                 if (ClipboardIO.checkNew()) {
@@ -146,7 +146,8 @@ public class TransferConnector {
                             FileTransfer.sendFiles(ClipboardIO.getLastFiles(), port, key);
                             break;
                         case DataFormat.END_SIGNAL:
-                            return;
+                            UserInterfacing.printError(new RuntimeException("End Signal in Clipboard"));
+                            break;
                         default:
                     }
                 }
@@ -204,6 +205,8 @@ public class TransferConnector {
                         } else {
                             ClipboardIO.unsetSysClipboard();
                         }
+                    case DataFormat.MODE_SET:
+                        FileTransferMode.setTargetMode(inStream.getMode());
                     default:
                 }
             }

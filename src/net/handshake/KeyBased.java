@@ -30,8 +30,8 @@ public class KeyBased {
     private static DatagramSocket sendSocket;
     private static ConcurrentHashMap<InetAddress, Boolean> responded;
     private static ConcurrentHashMap<InetAddress, Boolean> authenticated;
-    private static byte[] ran = new byte[32];
-    private static byte[] key = new byte[32];
+    private static byte[] ran = new byte[KeyUtil.KEY_LEN];
+    private static byte[] key = new byte[KeyUtil.KEY_LEN];
     private static ExecutorService executorService = Executors.newCachedThreadPool();
 
     public static InetAddress getTarget() {
