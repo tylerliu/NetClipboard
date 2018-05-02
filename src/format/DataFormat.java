@@ -17,4 +17,5 @@ public class DataFormat {
     public static final byte FILES = 2;
     public static final byte HTML = 3;
     public static final byte END_SIGNAL = 4;
+    public static final byte MODE_SET = 5;
 }

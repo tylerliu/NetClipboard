@@ -1,5 +1,7 @@
 package format;
 
+import net.FileTransferMode;
+
 import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -38,5 +40,8 @@ public class FormattedOutStream extends FilterOutputStream {
         writePayload(DataFormat.FILES, ByteBuffer.allocate(2 + key.length).putShort((short) port).put(key).array());
     }
 
+    public synchronized void writeModeSet(FileTransferMode.Mode mode) throws IOException {
+        writePayload(DataFormat.MODE_SET, new byte[] {(byte) mode.ordinal()});
+    }
 }
 

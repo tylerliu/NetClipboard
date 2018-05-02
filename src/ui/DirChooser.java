@@ -32,7 +32,7 @@ public class DirChooser {
             DirectoryChooser chooser = new DirectoryChooser();
             chooser.setInitialDirectory(lastSavedDirectory);
             selectedDir.set(chooser.showDialog(stage));
-            stage.close();
+            if (OS.isMac()) stage.close();
             latch.countDown();
         });
 
