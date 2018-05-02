@@ -205,6 +205,7 @@ public class TransferConnector {
                         } else {
                             ClipboardIO.unsetSysClipboard();
                         }
+                        break;
                     case DataFormat.MODE_SET:
                         FileTransferMode.setTargetMode(inStream.getMode());
                     default:
