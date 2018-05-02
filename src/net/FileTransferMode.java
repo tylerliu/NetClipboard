@@ -1,5 +1,7 @@
 package net;
 
+import ui.UserInterfacing;
+
 public class FileTransferMode {
     private static final Mode DEFAULT = Mode.CHOOSER;
     private static Mode localMode = DEFAULT;
@@ -11,6 +13,7 @@ public class FileTransferMode {
     }
 
     public static synchronized void setTargetMode(Mode targetMode) {
+        UserInterfacing.printInfo("Target Mode Changed");
         FileTransferMode.targetMode = targetMode;
     }
 
@@ -22,11 +25,13 @@ public class FileTransferMode {
         if (localMode != FileTransferMode.localMode) {
             FileTransferMode.localMode = localMode;
             isCurrentModeSent = false;
+            UserInterfacing.printInfo("LOCAL MODE CHANGED");
         }
     }
 
     public static synchronized Mode getModeForSending() {
         isCurrentModeSent = true;
+        UserInterfacing.printInfo("LOCAL MODE SENT");
         return localMode;
     }
 

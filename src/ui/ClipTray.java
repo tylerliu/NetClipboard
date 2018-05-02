@@ -41,10 +41,8 @@ public class ClipTray {
         lastItem = new MenuItem("Waiting for Transfer");
         MenuItem warningItem = new MenuItem("Warnings");
 
-        //TODO implement this to set cached or not
         Menu settingMenu = new Menu("Setting");
-        CheckboxMenuItem chooserModeItem = new CheckboxMenuItem("Chooser Mode");
-        chooserModeItem.setState(true);
+        CheckboxMenuItem chooserModeItem = new CheckboxMenuItem("Chooser Mode", true);
         CheckboxMenuItem cachedModeItem = new CheckboxMenuItem("Cached Mode");
         MenuItem changeKey = new MenuItem("Change Key");
 
@@ -63,15 +61,13 @@ public class ClipTray {
         settingMenu.addSeparator();
         settingMenu.add(changeKey);
         changeKey.addActionListener(e -> UserInterfacing.setKey(true));
-        chooserModeItem.addActionListener(e -> {
-            if (chooserModeItem.getState()) return;
-            chooserModeItem.setState(true);
+        chooserModeItem.addItemListener(e -> {
+            if (!chooserModeItem.getState()) return;
             cachedModeItem.setState(false);
             FileTransferMode.setLocalMode(FileTransferMode.Mode.CHOOSER);
         });
-        cachedModeItem.addActionListener(e -> {
-            if (cachedModeItem.getState()) return;
-            cachedModeItem.setState(true);
+        cachedModeItem.addItemListener(e -> {
+            if (!cachedModeItem.getState()) return;
             chooserModeItem.setState(false);
             FileTransferMode.setLocalMode(FileTransferMode.Mode.CACHED);
         });
