@@ -1,5 +1,8 @@
 package ui;
 
+import javafx.scene.input.Clipboard;
+import net.FileTransferMode;
+
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -35,11 +38,16 @@ public class ClipTray {
         // Create a pop-up menu components
         Menu statusMenu = new Menu("Status");
         connStatusItem = new MenuItem("Connection status");
-        MenuItem warningItem = new MenuItem("Warnings");
         lastItem = new MenuItem("Waiting for Transfer");
+        MenuItem warningItem = new MenuItem("Warnings");
+
         //TODO implement this to set cached or not
-        MenuItem settingItem = new MenuItem("Setting");
+        Menu settingMenu = new Menu("Setting");
+        CheckboxMenuItem chooserModeItem = new CheckboxMenuItem("Chooser Mode");
+        chooserModeItem.setState(true);
+        CheckboxMenuItem cachedModeItem = new CheckboxMenuItem("Cached Mode");
         MenuItem changeKey = new MenuItem("Change Key");
+
         MenuItem exitItem = new MenuItem("Exit");
 
         //Add components to pop-up menu
@@ -47,13 +55,31 @@ public class ClipTray {
         statusMenu.add(connStatusItem);
         statusMenu.add(lastItem);
         statusMenu.add(warningItem);
-        popup.add(settingItem);
-        popup.add(changeKey);
+        warningItem.addActionListener((e) -> LogWindow.toggle());
+
+        popup.add(settingMenu);
+        settingMenu.add(chooserModeItem);
+        settingMenu.add(cachedModeItem);
+        settingMenu.addSeparator();
+        settingMenu.add(changeKey);
+        changeKey.addActionListener(e -> UserInterfacing.setKey(true));
+        chooserModeItem.addActionListener(e -> {
+            if (chooserModeItem.getState()) return;
+            chooserModeItem.setState(true);
+            cachedModeItem.setState(false);
+            FileTransferMode.setLocalMode(FileTransferMode.Mode.CHOOSER);
+        });
+        cachedModeItem.addActionListener(e -> {
+            if (cachedModeItem.getState()) return;
+            cachedModeItem.setState(true);
+            chooserModeItem.setState(false);
+            FileTransferMode.setLocalMode(FileTransferMode.Mode.CACHED);
+        });
+
         popup.addSeparator();
         popup.add(exitItem);
         exitItem.addActionListener((e) -> System.exit(0));
-        warningItem.addActionListener((e) -> LogWindow.toggle());
-        changeKey.addActionListener(e -> UserInterfacing.setKey(true));
+
 
         trayIcon.setPopupMenu(popup);
 
