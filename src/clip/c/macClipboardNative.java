@@ -1,7 +1,7 @@
 package clip.c;
 
-import clip.MacFilesClipboard;
 import org.apache.commons.io.FileUtils;
+import ui.OS;
 import ui.UserInterfacing;
 
 import java.io.*;
@@ -14,7 +14,7 @@ public class macClipboardNative {
     private static macClipboardNative instance;
 
     private macClipboardNative() {
-        assert MacFilesClipboard.isMac();
+        assert OS.isMac();
         File tempFile = null;
         try {
             tempFile = File.createTempFile("NetClipboard", ".dylib");
@@ -51,7 +51,7 @@ public class macClipboardNative {
 
     public static void setClipboardFiles(List<File> files) {
         //check os
-        if (!MacFilesClipboard.isMac()) {
+        if (!OS.isMac()) {
             UserInterfacing.printInfo("Clipboard: this is not Mac!");
             return;
         }

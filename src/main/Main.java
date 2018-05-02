@@ -21,6 +21,7 @@ public class Main {
             UserInterfacing.setConnStatus("Shutdown: closing ports");
             TransferConnector.close();
             FileTransfer.terminate();
+            UserInterfacing.close();
         }));
 
         parseCommand(args);

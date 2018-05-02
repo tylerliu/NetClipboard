@@ -1,14 +1,6 @@
-package clip;
+package ui;
 
-import clip.c.macClipboardNative;
-
-import java.io.File;
-import java.util.List;
-
-/**
- * a class to support mac clipboard pasting
- */
-public class MacFilesClipboard {
+public class OS {
 
     private static boolean isEnvSet;
     private static boolean isDarwin;
@@ -22,9 +14,5 @@ public class MacFilesClipboard {
         isDarwin = (OS.contains("mac")) || (OS.contains("darwin"));
         isEnvSet = true;
         return isDarwin;
-    }
-
-    public static void setMacSysClipboardFile(List<File> files) {
-        if (isMac()) macClipboardNative.setClipboardFiles(files);
     }
 }

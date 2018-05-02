@@ -41,14 +41,14 @@ public class UserInterfacing {
     }
 
     public static void setConnStatus(String s) {
-        if (isLog) writer.println(s);
-        if (isCommandLine) System.out.println(s);
+        if (isLog) writer.println("<CONN>" + s);
+        if (isCommandLine) System.out.println("<CONN>" + s);
         else ClipTray.setStatus(s);
     }
 
     public static void setClipStatus(String s) {
-        if (isLog) writer.println(s);
-        if (isCommandLine) System.out.println(s);
+        if (isLog) writer.println("<CLIP>" + s);
+        if (isCommandLine) System.out.println("<CLIP>" + s);
         else ClipTray.setLastItem(s);
     }
 
@@ -59,7 +59,10 @@ public class UserInterfacing {
     }
 
     public static void printError(Exception e) {
-        if (isLog) e.printStackTrace(writer);
+        if (isLog) {
+            e.printStackTrace(writer);
+            writer.flush();
+        }
         if (isCommandLine) e.printStackTrace();
         else LogWindow.showError(e);
     }
@@ -86,5 +89,9 @@ public class UserInterfacing {
     public static File getSaveDir() {
         if (!isCommandLine) new JFXPanel();
         return DirChooser.chooseSaveDirectory();
+    }
+
+    public static void close() {
+        if (isLog) writer.close();
     }
 }

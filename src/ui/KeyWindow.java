@@ -31,6 +31,7 @@ public class KeyWindow {
                 alert.setTitle("Restart");
                 alert.setHeaderText(null);
                 alert.setContentText("Restart the program for the new key to take effect.");
+                alert.getDialogPane().getScene().getWindow().requestFocus();
                 alert.showAndWait();
                 keyResult = key.getBytes();
             }, () -> keyResult = null);

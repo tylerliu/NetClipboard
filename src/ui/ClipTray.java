@@ -1,7 +1,5 @@
 package ui;
 
-import clip.MacFilesClipboard;
-
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -21,7 +19,7 @@ public class ClipTray {
         final PopupMenu popup = new PopupMenu();
         TrayIcon trayIcon;
         try {
-            if (MacFilesClipboard.isMac())
+            if (OS.isMac())
                 trayIcon = new TrayIcon(ImageIO.read(ClipTray.class.getResourceAsStream("/resources/clip_icon_b.png")));
             else {
                 BufferedImage iconImage = ImageIO.read(ClipTray.class.getResourceAsStream("/resources/clip_icon_w.png"));

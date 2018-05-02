@@ -38,6 +38,7 @@ class LogWindow {
             warnings.setHeaderText("Logs for Debug and Warning");
             warnings.getDialogPane().setContent(expContent);
             warnings.show();
+            expContent.requestFocus();
         });
     }
 

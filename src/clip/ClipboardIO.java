@@ -1,5 +1,7 @@
 package clip;
 
+import clip.c.macClipboardNative;
+import ui.OS;
 import ui.UserInterfacing;
 import format.DataFormat;
 
@@ -129,8 +131,8 @@ public class ClipboardIO {
         lastType = DataFormat.FILES;
         lastFiles = files;
         isFromRemote = true;
-        if (MacFilesClipboard.isMac()) {
-            MacFilesClipboard.setMacSysClipboardFile(files);
+        if (OS.isMac()) {
+            macClipboardNative.setClipboardFiles(files);
         } else {
             FilesTransferable fileTransferable = new FilesTransferable(files);
             sysClip.setContents(fileTransferable, fileTransferable);
