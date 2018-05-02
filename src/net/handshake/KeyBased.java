@@ -51,7 +51,6 @@ public class KeyBased {
         });
         if (!result) {
             UserInterfacing.printInfo("Fail To Find Connection Target");
-            UserInterfacing.printInfo("Connection Failed");
             try {
                 Thread.sleep(10000);
             } catch (InterruptedException e) {

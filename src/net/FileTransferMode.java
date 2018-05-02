@@ -25,13 +25,12 @@ public class FileTransferMode {
         if (localMode != FileTransferMode.localMode) {
             FileTransferMode.localMode = localMode;
             isCurrentModeSent = false;
-            UserInterfacing.printInfo("LOCAL MODE CHANGED");
+            UserInterfacing.printInfo("Local Mode Changed");
         }
     }
 
     public static synchronized Mode getModeForSending() {
         isCurrentModeSent = true;
-        UserInterfacing.printInfo("LOCAL MODE SENT");
         return localMode;
     }
 

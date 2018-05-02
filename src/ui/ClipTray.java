@@ -1,6 +1,6 @@
 package ui;
 
-import javafx.scene.input.Clipboard;
+import javafx.stage.Popup;
 import net.FileTransferMode;
 
 import javax.imageio.ImageIO;
@@ -62,12 +62,18 @@ public class ClipTray {
         settingMenu.add(changeKey);
         changeKey.addActionListener(e -> UserInterfacing.setKey(true));
         chooserModeItem.addItemListener(e -> {
-            if (!chooserModeItem.getState()) return;
+            if (!chooserModeItem.getState()) {
+                chooserModeItem.setState(true);
+                return;
+            }
             cachedModeItem.setState(false);
             FileTransferMode.setLocalMode(FileTransferMode.Mode.CHOOSER);
         });
         cachedModeItem.addItemListener(e -> {
-            if (!cachedModeItem.getState()) return;
+            if (!cachedModeItem.getState()) {
+                cachedModeItem.setState(true);
+                return;
+            }
             chooserModeItem.setState(false);
             FileTransferMode.setLocalMode(FileTransferMode.Mode.CACHED);
         });
@@ -78,6 +84,7 @@ public class ClipTray {
 
 
         trayIcon.setPopupMenu(popup);
+        
 
         try {
             tray.add(trayIcon);

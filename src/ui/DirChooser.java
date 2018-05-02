@@ -1,11 +1,8 @@
 package ui;
 
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
 import javafx.stage.DirectoryChooser;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 
 import java.io.*;
 import java.util.concurrent.CountDownLatch;

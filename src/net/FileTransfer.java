@@ -85,8 +85,6 @@ public class FileTransfer {
                 return null;
             }
         } else {
-            //choose destination
-            //TODO track default directory
             return UserInterfacing.getSaveDir();
         }
     }
