@@ -4,7 +4,9 @@ import clip.ClipboardIO;
 import format.DataFormat;
 import format.FormattedInStream;
 import format.FormattedOutStream;
-import net.handshake.*;
+import net.handshake.DirectConnect;
+import net.handshake.KeyBased;
+import net.handshake.Manual;
 import org.bouncycastle.crypto.tls.TlsProtocol;
 import ui.UserInterfacing;
 

@@ -1,13 +1,13 @@
 package ui;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 class LogWindow {
     private static Alert warnings = null;
@@ -45,8 +45,7 @@ class LogWindow {
     /**
      * This method appends the data to the text area.
      *
-     * @param data
-     *            the Logging information data
+     * @param data the Logging information data
      */
     public static void showInfo(String data) {
         init();

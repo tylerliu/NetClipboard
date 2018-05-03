@@ -57,8 +57,7 @@ public class TarExtractor {
                 if (entry.isDirectory()) {
                     outFile.mkdir();
                     continue;
-                }
-                else outFile.createNewFile();
+                } else outFile.createNewFile();
             }
 
             FileOutputStream out = new FileOutputStream(outFile);

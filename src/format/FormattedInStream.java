@@ -34,8 +34,8 @@ public class FormattedInStream extends FilterInputStream {
     private byte[] loadContent(int type) throws IOException {
         if (this.type != type) throw new IOException("Packet Type Does Not Match");
         read = true;
-        byte[] content = new byte[(int)length];
-        readNBytes(content, 0, (int)length);
+        byte[] content = new byte[(int) length];
+        readNBytes(content, 0, (int) length);
         return content;
     }
 

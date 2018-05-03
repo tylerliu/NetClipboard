@@ -4,8 +4,8 @@ import java.io.File;
 
 public class KeyUtil {
 
-    private static final File keyFile = new File("./.NetClipboardKey");
     public static final int KEY_LEN = 32;
+    private static final File keyFile = new File("./.NetClipboardKey");
 
     public static File getKeyFile() {
         return keyFile;

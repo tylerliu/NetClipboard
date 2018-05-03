@@ -50,8 +50,7 @@ public class ZipExtractor {
                 if (entry.isDirectory()) {
                     outFile.mkdir();
                     continue;
-                }
-                else outFile.createNewFile();
+                } else outFile.createNewFile();
             }
 
             InputStream input = zipFile.getInputStream(entry);

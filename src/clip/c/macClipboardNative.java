@@ -4,7 +4,10 @@ import org.apache.commons.io.FileUtils;
 import ui.OS;
 import ui.UserInterfacing;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
@@ -47,8 +50,6 @@ public class macClipboardNative {
         */
     }
 
-    private native void setClipboardFiles(String[] files);
-
     public static void setClipboardFiles(List<File> files) {
         //check os
         if (!OS.isMac()) {
@@ -58,7 +59,7 @@ public class macClipboardNative {
         if (instance == null) instance = new macClipboardNative();
 
         String[] filePaths = new String[files.size()];
-        for (int i = 0; i < filePaths.length; i ++) {
+        for (int i = 0; i < filePaths.length; i++) {
             try {
                 filePaths[i] = files.get(i).getCanonicalPath();
             } catch (IOException e) {
@@ -68,4 +69,6 @@ public class macClipboardNative {
 
         instance.setClipboardFiles(filePaths);
     }
+
+    private native void setClipboardFiles(String[] files);
 }

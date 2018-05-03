@@ -59,7 +59,7 @@ public class FileTransfer {
 
         UserInterfacing.printInfo("File receiving from port: " + port);
         FileReceiver receiver = FileReceiver.receiveTarObj(port);
-        if (FileTransferMode.getLocalMode() == FileTransferMode.Mode.CACHED)receivers.add(receiver);
+        if (FileTransferMode.getLocalMode() == FileTransferMode.Mode.CACHED) receivers.add(receiver);
         files = receiver.runTared(toDir, cipher);
         receivers.remove(receiver);
 

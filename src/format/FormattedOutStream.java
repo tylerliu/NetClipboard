@@ -41,7 +41,7 @@ public class FormattedOutStream extends FilterOutputStream {
     }
 
     public synchronized void writeModeSet(FileTransferMode.Mode mode) throws IOException {
-        writePayload(DataFormat.MODE_SET, new byte[] {(byte) mode.ordinal()});
+        writePayload(DataFormat.MODE_SET, new byte[]{(byte) mode.ordinal()});
     }
 }
 

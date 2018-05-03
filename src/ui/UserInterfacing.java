@@ -14,6 +14,7 @@ public class UserInterfacing {
     private static boolean isLog = false;
     private static File logFile = new File("./NetClipLog.txt");
     private static PrintWriter writer;
+
     public static void init() {
         if (!isCommandLine) {
             ClipTray.init();
@@ -32,11 +33,13 @@ public class UserInterfacing {
 
     /**
      * have to be called before init
+     *
      * @param isCommandLine1
      */
     public static void setCommandLine(boolean isCommandLine1) {
         isCommandLine = isCommandLine1;
     }
+
     public static void setLogging(boolean isLog1) {
         isLog = isLog1;
     }
@@ -79,8 +82,7 @@ public class UserInterfacing {
                 byte[] seed = KeyWindow.changeKey(false);
                 if (seed != null) KeyUtil.generateKeyFromSeed(seed);
             }
-        }
-        else {
+        } else {
             if (!isChange)
                 System.out.println("Encryption key file not found. Please generate encryption key: ");
             KeyUtil.generateKey();

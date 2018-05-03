@@ -4,8 +4,8 @@ public class OS {
 
     private static boolean isEnvSet;
     private static boolean isDarwin;
+
     /**
-     *
      * @return
      */
     public static boolean isMac() {

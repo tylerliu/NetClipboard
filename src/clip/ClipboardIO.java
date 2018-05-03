@@ -1,11 +1,11 @@
 package clip;
 
 import clip.c.macClipboardNative;
+import format.DataFormat;
 import ui.OS;
 import ui.UserInterfacing;
-import format.DataFormat;
 
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
