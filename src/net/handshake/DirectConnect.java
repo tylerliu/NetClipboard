@@ -11,8 +11,7 @@ public class DirectConnect {
         try {
             return InetAddress.getByName(name);
         } catch (UnknownHostException e) {
-            UserInterfacing.printInfo("Target " + name + " is unknown");
+            return UserInterfacing.handleConnFail("Computer \"" + name + "\" is unknown");
         }
-        return null;
     }
 }

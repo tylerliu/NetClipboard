@@ -25,14 +25,14 @@ public class KeyBased {
     private static final int WAIT_TIME = 30000; //in milli-second
     private static final int port = 8800;
     private static final String groupAddress = "224.0.0.127"; //"255.255.255.255" for broadcast
-    private static final AtomicReference<InetAddress> target = new AtomicReference<>();
+    private static AtomicReference<InetAddress> target;
     private static MulticastSocket socket;
     private static DatagramSocket sendSocket;
     private static ConcurrentHashMap<InetAddress, Boolean> responded;
     private static ConcurrentHashMap<InetAddress, Boolean> authenticated;
     private static byte[] ran = new byte[KeyUtil.KEY_LEN];
     private static byte[] key = new byte[KeyUtil.KEY_LEN];
-    private static ExecutorService executorService = Executors.newCachedThreadPool();
+    private static ExecutorService executorService;
 
     public static InetAddress getTarget() {
         initHandShake();
@@ -42,7 +42,7 @@ public class KeyBased {
         executorService.shutdown();
         CompletableFuture.runAsync(() -> {
             try {
-                executorService.awaitTermination(1, TimeUnit.MINUTES);
+                executorService.awaitTermination(10, TimeUnit.SECONDS);
                 socket.close();
                 sendSocket.close();
             } catch (InterruptedException e) {
@@ -50,13 +50,7 @@ public class KeyBased {
             }
         });
         if (!result) {
-            UserInterfacing.printInfo("Fail To Find Connection Target");
-            try {
-                Thread.sleep(10000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-            System.exit(1);
+            return UserInterfacing.handleConnFail("Fail To Find Connection Target");
         }
         return target.get();
     }
@@ -86,6 +80,7 @@ public class KeyBased {
         try {
             randomize();
             getKey();
+            target = new AtomicReference<>();
             responded = new ConcurrentHashMap<>();
             responded.put(InetAddress.getLocalHost(), true); //prevent connecting itself
             authenticated = new ConcurrentHashMap<>();
@@ -93,6 +88,7 @@ public class KeyBased {
             socket = new MulticastSocket(port);
             sendSocket = new DatagramSocket();
             socket.joinGroup(InetAddress.getByName(groupAddress));
+            executorService = Executors.newCachedThreadPool();
         } catch (IOException e) {
             UserInterfacing.printError(e);
             System.exit(1);

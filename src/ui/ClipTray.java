@@ -1,10 +1,16 @@
 package ui;
 
-import javafx.stage.Popup;
 import net.FileTransferMode;
 
 import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.AWTException;
+import java.awt.CheckboxMenuItem;
+import java.awt.Image;
+import java.awt.Menu;
+import java.awt.MenuItem;
+import java.awt.PopupMenu;
+import java.awt.SystemTray;
+import java.awt.TrayIcon;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 

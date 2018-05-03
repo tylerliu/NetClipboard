@@ -6,6 +6,7 @@ import key.KeyUtil;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 
 public class UserInterfacing {
 
@@ -93,5 +94,14 @@ public class UserInterfacing {
 
     public static void close() {
         if (isLog) writer.close();
+    }
+
+    public static InetAddress handleConnFail(String reason) {
+        if (isLog) writer.println(reason);
+        if (isCommandLine) {
+            System.out.println(reason);
+            return null;
+        }
+        return DirectConnectWindow.showConnFailWarning(reason);
     }
 }

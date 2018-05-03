@@ -37,10 +37,9 @@ public class Main {
         }
         TransferConnector.setTarget();
         ClipboardIO.checkNew();
-        if (!TransferConnector.connect()) return;
+        if (!TransferConnector.connect()) System.exit(0);
         TransferConnector.DataTransferExecute();
         TransferConnector.close();
-        System.exit(0);
     }
 
     public static void parseCommand(String[] args) {

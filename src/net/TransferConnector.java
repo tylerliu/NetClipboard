@@ -73,6 +73,7 @@ public class TransferConnector {
 
     public static boolean connect() {
         try {
+            if (target == null || target == InetAddress.getLocalHost()) return false;
             checkServer();
             UserInterfacing.printInfo("This is configured as " + (isServer ? "Server. " : "Client. "));
             if (isServer) {
