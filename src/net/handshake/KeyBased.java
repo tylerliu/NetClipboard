@@ -1,6 +1,7 @@
 package net.handshake;
 
 import key.KeyUtil;
+import ui.UserInterfacing;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -24,14 +25,14 @@ public class KeyBased {
     private static final int WAIT_TIME = 30000; //in milli-second
     private static final int port = 8800;
     private static final String groupAddress = "224.0.0.127"; //"255.255.255.255" for broadcast
-    private static final AtomicReference<InetAddress> target = new AtomicReference<>();
+    private static AtomicReference<InetAddress> target;
     private static MulticastSocket socket;
     private static DatagramSocket sendSocket;
     private static ConcurrentHashMap<InetAddress, Boolean> responded;
     private static ConcurrentHashMap<InetAddress, Boolean> authenticated;
-    private static byte[] ran = new byte[32];
-    private static byte[] key = new byte[32];
-    private static ExecutorService executorService = Executors.newCachedThreadPool();
+    private static byte[] ran = new byte[KeyUtil.KEY_LEN];
+    private static byte[] key = new byte[KeyUtil.KEY_LEN];
+    private static ExecutorService executorService;
 
     public static InetAddress getTarget() {
         initHandShake();
@@ -41,16 +42,15 @@ public class KeyBased {
         executorService.shutdown();
         CompletableFuture.runAsync(() -> {
             try {
-                executorService.awaitTermination(1, TimeUnit.MINUTES);
+                executorService.awaitTermination(10, TimeUnit.SECONDS);
                 socket.close();
                 sendSocket.close();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                UserInterfacing.printError(e);
             }
         });
         if (!result) {
-            System.out.println("Fail To Find Connection Target");
-            System.exit(1);
+            return UserInterfacing.handleConnFail("Fail To Find Connection Target");
         }
         return target.get();
     }
@@ -61,14 +61,14 @@ public class KeyBased {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                UserInterfacing.printError(e);
             }
         }
         if (target.get() == null) {
             try {
                 target.set(InetAddress.getLocalHost());
             } catch (UnknownHostException e) {
-                e.printStackTrace();
+                UserInterfacing.printError(e);
             }
             return false;
         } else {
@@ -80,6 +80,7 @@ public class KeyBased {
         try {
             randomize();
             getKey();
+            target = new AtomicReference<>();
             responded = new ConcurrentHashMap<>();
             responded.put(InetAddress.getLocalHost(), true); //prevent connecting itself
             authenticated = new ConcurrentHashMap<>();
@@ -87,8 +88,9 @@ public class KeyBased {
             socket = new MulticastSocket(port);
             sendSocket = new DatagramSocket();
             socket.joinGroup(InetAddress.getByName(groupAddress));
+            executorService = Executors.newCachedThreadPool();
         } catch (IOException e) {
-            e.printStackTrace();
+            UserInterfacing.printError(e);
             System.exit(1);
         }
     }
@@ -97,7 +99,7 @@ public class KeyBased {
         try {
             SecureRandom.getInstanceStrong().nextBytes(ran);
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            UserInterfacing.printError(e);
         }
     }
 
@@ -107,7 +109,7 @@ public class KeyBased {
             md.update("Handshake key".getBytes());
             key = md.digest(KeyUtil.getKey());
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            UserInterfacing.printError(e);
         }
     }
 
@@ -127,7 +129,7 @@ public class KeyBased {
                     executorService.submit(() -> auth(packet));
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                UserInterfacing.printError(e);
             }
         }
     }
@@ -139,7 +141,7 @@ public class KeyBased {
             mac.update(address.getAddress());
             return mac.doFinal(random);
         } catch (Exception e) {
-            e.printStackTrace();
+            UserInterfacing.printError(e);
         }
         return new byte[0];
     }
@@ -155,7 +157,7 @@ public class KeyBased {
         if (Boolean.TRUE.equals(authenticated.get(packet.getAddress())) && !target.compareAndSet(null, packet.getAddress()))
             return;
         responded.put(packet.getAddress(), true);
-        System.out.println("responding " + packet.getAddress());
+        UserInterfacing.printInfo("responding " + packet.getAddress());
         byte[] random = Arrays.copyOfRange(packet.getData(), 1, packet.getLength());
         try {
             byte[] response = ByteBuffer.allocate(1 + 32)
@@ -169,7 +171,7 @@ public class KeyBased {
                 Thread.sleep(1000);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            UserInterfacing.printError(e);
         }
     }
 
@@ -180,7 +182,7 @@ public class KeyBased {
      */
     private static void auth(DatagramPacket packet) {
         if (authenticated.get(packet.getAddress()) != null) return;
-        System.out.println("authenticating " + packet.getAddress());
+        UserInterfacing.printInfo("authenticating " + packet.getAddress());
         byte[] correct = ByteBuffer.allocate(1 + 32)
                 .put((byte) -1)
                 .put(HMAC(packet.getAddress(), ran))
@@ -208,7 +210,7 @@ public class KeyBased {
             }
             sendSocket.send(packet); //last send to unclog receive
         } catch (Exception e) {
-            e.printStackTrace();
+            UserInterfacing.printError(e);
         }
     }
 }

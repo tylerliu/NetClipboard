@@ -1,5 +1,7 @@
 package key;
 
+import ui.UserInterfacing;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -16,29 +18,19 @@ public class Keygen {
 
     private static final int KEY_LEN = 1 << 5;
 
-    public static byte[] generateKey() {
-        return generateKey(KEY_LEN);
-    }
-
-    public static byte[] generateKey(int keyLen) {
-        System.out.println("Enter Key generation seed, at least " + keyLen + " Characters long");
-        byte[] initial = new byte[keyLen];
-        try {
-            System.in.readNBytes(initial, 0, initial.length);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    static byte[] generateKey(int keyLen, byte[] seed) {
+        assert seed.length >= keyLen;
         MessageDigest digest = null;
         try {
             digest = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            UserInterfacing.printError(e);
         }
 
         byte[] out = new byte[keyLen];
         int written = 0;
         while (written < keyLen) {
-            byte[] temp = digest.digest(Arrays.copyOfRange(initial, written, written + 32));
+            byte[] temp = digest.digest(Arrays.copyOfRange(seed, written, written + 32));
             for (int i = 0; i < Math.min(temp.length, out.length - written); i++) {
                 out[written + i] = temp[i];
             }
@@ -47,19 +39,37 @@ public class Keygen {
         return out;
     }
 
+    public static byte[] generateKeyCMD() {
+        return generateKeyCMD(KEY_LEN);
+    }
+
+    public static byte[] generateKeyCMD(int keyLen) {
+        System.out.println("Enter Key generation seed, at least " + keyLen + " Characters long");
+        byte[] initial = new byte[keyLen];
+        try {
+            System.in.readNBytes(initial, 0, initial.length);
+        } catch (IOException e) {
+            UserInterfacing.printError(e);
+        }
+        return generateKey(keyLen, initial);
+    }
+
     public static void keyToFile(File file) {
         keyToFile(file, KEY_LEN);
     }
 
     public static void keyToFile(File file, int keyLen) {
+        keyToFile(file, generateKeyCMD(keyLen));
+    }
+
+    public static void keyToFile(File file, byte[] key) {
         try {
             FileOutputStream outputStream = new FileOutputStream(file);
-            outputStream.write(Base64.getEncoder().encode(generateKey(keyLen)));
+            outputStream.write(Base64.getEncoder().encode(key));
             outputStream.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            UserInterfacing.printError(e);
         }
-
     }
 
     public static byte[] fileToKey(File file) {
@@ -69,7 +79,7 @@ public class Keygen {
             outputStream.close();
             return Base64.getDecoder().decode(bytes);
         } catch (IOException e) {
-            e.printStackTrace();
+            UserInterfacing.printError(e);
         }
         return null;
     }

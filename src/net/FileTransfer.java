@@ -1,15 +1,14 @@
 package net;
 
-import filechooser.NativeJFileChooser;
 import files.FileReceiver;
 import files.FileSender;
 import org.apache.commons.io.FileUtils;
+import ui.UserInterfacing;
 
 import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-import javax.swing.JFileChooser;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -51,16 +50,16 @@ public class FileTransfer {
 
         File toDir = getSavingDirectory();
         if (toDir != null) {
-            System.out.println("Retrieve files to: " + toDir.getAbsolutePath());
+            UserInterfacing.printInfo("Retrieve files to: " + toDir.getAbsolutePath());
         } else {
-            System.out.println("Cancelled Pasting.");
+            UserInterfacing.setClipStatus("Cancelled File Pasting");
             FileReceiver.cancelConnection(port);
             return null;
         }
 
-        System.out.println("File receiving from port: " + port);
+        UserInterfacing.printInfo("File receiving from port: " + port);
         FileReceiver receiver = FileReceiver.receiveTarObj(port);
-        receivers.add(receiver);
+        if (FileTransferMode.getLocalMode() == FileTransferMode.Mode.CACHED) receivers.add(receiver);
         files = receiver.runTared(toDir, cipher);
         receivers.remove(receiver);
 
@@ -70,7 +69,7 @@ public class FileTransfer {
         }
 
         deleteTempFolder(toDir);
-        System.out.println("File receive done");
+        UserInterfacing.setClipStatus("File received");
         return files;
     }
 
@@ -82,25 +81,11 @@ public class FileTransfer {
                 tempFolders.add(newDstFolder);
                 return newDstFolder;
             } catch (IOException e) {
-                e.printStackTrace();
+                UserInterfacing.printError(e);
                 return null;
             }
         } else {
-            //choose destination
-            //TODO track default directory
-            if (lastSavedDirectory == null) {
-                lastSavedDirectory = new File(System.getProperty("user.home"));
-            }
-            NativeJFileChooser chooser = new NativeJFileChooser(lastSavedDirectory);
-            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            chooser.setDialogTitle("Paste Files...");
-
-            int chooseResult = chooser.showDialog(null, "Paste");
-            if (chooseResult == JFileChooser.APPROVE_OPTION) {
-                return lastSavedDirectory = chooser.getSelectedFile();
-            } else {
-                return null;
-            }
+            return UserInterfacing.getSaveDir();
         }
     }
 
@@ -111,22 +96,23 @@ public class FileTransfer {
 
     public static void sendFilesWorker(List<File> sendFiles, int port, byte[] key) {
         Cipher cipher = getCipher(key, true);
-        System.out.println("File sending on port: " + port);
+        UserInterfacing.printInfo("File sending on port: " + port);
         FileSender sender = FileSender.sendFileListObj(port);
-        senders.add(sender);
+        if (FileTransferMode.getTargetMode() == FileTransferMode.Mode.CACHED) senders.add(sender);
         sender.runTared(sendFiles, cipher);
         senders.remove(sender);
+        UserInterfacing.setClipStatus("File Sent");
     }
 
     public synchronized static void cancelReceive() {
-        if (!receivers.isEmpty()) System.out.println("File receive cancelled");
+        if (!receivers.isEmpty()) UserInterfacing.setClipStatus("Cancelled File Pasting");
         for (FileReceiver receiver : receivers) {
             receiver.cancel();
         }
     }
 
     public synchronized static void cancelSend() {
-        if (!senders.isEmpty()) System.out.println("File send cancelled");
+        if (!senders.isEmpty()) UserInterfacing.setClipStatus("Cancelled File Sending");
         for (FileSender sender : senders) {
             sender.cancel();
         }
@@ -152,7 +138,7 @@ public class FileTransfer {
             cipher.updateAAD(aad);
             return cipher;
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException e) {
-            e.printStackTrace();
+            UserInterfacing.printError(e);
         }
         return null;
     }
@@ -161,11 +147,11 @@ public class FileTransfer {
         attemptCancelTransfer();
         executor.shutdown();
         while (!executor.isTerminated()) {
-            System.out.println("Wait for transferring...");
+            UserInterfacing.setConnStatus("Wait for transferring...");
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                UserInterfacing.printError(e);
             }
         }
     }

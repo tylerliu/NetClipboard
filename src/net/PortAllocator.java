@@ -1,5 +1,7 @@
 package net;
 
+import ui.UserInterfacing;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 
@@ -13,10 +15,10 @@ public class PortAllocator {
             ServerSocket socket = new ServerSocket(0);
             int port = socket.getLocalPort();
             socket.close();
-            System.out.println("Allocated: " + port);
+            UserInterfacing.printInfo("Allocated: " + port);
             return port;
         } catch (IOException e) {
-            e.printStackTrace();
+            UserInterfacing.printError(e);
             System.exit(1);
         }
         return 0;

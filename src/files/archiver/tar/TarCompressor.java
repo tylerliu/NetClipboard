@@ -3,6 +3,7 @@ package files.archiver.tar;
 import org.apache.commons.compress.archivers.ArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveOutputStream;
 import org.apache.commons.io.IOUtils;
+import ui.UserInterfacing;
 
 import java.io.*;
 import java.util.List;
@@ -38,7 +39,7 @@ public class TarCompressor {
         try {
             compress(files, new FileOutputStream(new File(dest)));
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            UserInterfacing.printError(e);
         }
     }
 
@@ -62,7 +63,7 @@ public class TarCompressor {
             out.finish();
             out.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            UserInterfacing.printError(e);
         }
     }
 
@@ -70,7 +71,7 @@ public class TarCompressor {
      * recursively compress a file or directory
      */
     private static void compress(File file, TarArchiveOutputStream out, String basedir) {
-        System.out.println("Compress：" + basedir + file.getName());
+        UserInterfacing.printInfo("Compress：" + basedir + file.getName());
         //categorize
         if (file.isDirectory()) {
             compressDirectory(file, out, basedir);
@@ -91,7 +92,7 @@ public class TarCompressor {
             out.putArchiveEntry(entry);
             out.closeArchiveEntry();
         } catch (IOException e) {
-            e.printStackTrace();
+            UserInterfacing.printError(e);
             throw new RuntimeException(e);
         }
 
@@ -120,7 +121,7 @@ public class TarCompressor {
             is.close();
             out.closeArchiveEntry();
         } catch (Exception e) {
-            e.printStackTrace();
+            UserInterfacing.printError(e);
             throw new RuntimeException(e);
         }
     }

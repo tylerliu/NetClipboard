@@ -1,6 +1,7 @@
 package files.archiver.zip;
 
 import org.apache.commons.io.IOUtils;
+import ui.UserInterfacing;
 
 import java.io.*;
 import java.util.List;
@@ -38,7 +39,7 @@ public class ZipCompressor {
         try {
             compress(files, new FileOutputStream(new File(dest)));
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            UserInterfacing.printError(e);
         }
     }
 
@@ -56,7 +57,7 @@ public class ZipCompressor {
         try {
             out.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            UserInterfacing.printError(e);
         }
     }
 
@@ -64,7 +65,7 @@ public class ZipCompressor {
      * recursively compress a file or directory
      */
     private static void compress(File file, ZipOutputStream out, String basedir) {
-        System.out.println("Compress：" + basedir + file.getName());
+        UserInterfacing.printInfo("Compress：" + basedir + file.getName());
         //categorize
         if (file.isDirectory()) {
             compressDirectory(file, out, basedir);
@@ -84,7 +85,7 @@ public class ZipCompressor {
             out.putNextEntry(entry);
             out.closeEntry();
         } catch (IOException e) {
-            e.printStackTrace();
+            UserInterfacing.printError(e);
             throw new RuntimeException(e);
         }
         //noinspection ConstantConditions
@@ -113,7 +114,7 @@ public class ZipCompressor {
             out.closeEntry();
 
         } catch (Exception e) {
-            e.printStackTrace();
+            UserInterfacing.printError(e);
             throw new RuntimeException(e);
         }
     }

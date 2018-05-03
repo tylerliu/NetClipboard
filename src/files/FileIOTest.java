@@ -3,7 +3,6 @@ package files;
 import net.TransferConnector;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;

@@ -4,6 +4,7 @@ import files.archiver.tar.TarCompressor;
 import net.TransferConnector;
 import org.apache.commons.compress.compressors.snappy.FramedSnappyCompressorOutputStream;
 import org.apache.commons.io.IOUtils;
+import ui.UserInterfacing;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
@@ -55,8 +56,8 @@ public class FileSender implements Runnable, Cancelable {
         try {
             return sendStreamRun(new FileInputStream(file), port);
         } catch (FileNotFoundException e) {
-            System.out.println("File not found! " + file.getAbsolutePath());
-            e.printStackTrace();
+            UserInterfacing.printInfo("File not found! " + file.getAbsolutePath());
+            UserInterfacing.printError(e);
         }
         return null;
     }
@@ -69,8 +70,8 @@ public class FileSender implements Runnable, Cancelable {
         try {
             return sendStream(new FileInputStream(file), port);
         } catch (FileNotFoundException e) {
-            System.out.println("File not found! " + file.getAbsolutePath());
-            e.printStackTrace();
+            UserInterfacing.printInfo("File not found! " + file.getAbsolutePath());
+            UserInterfacing.printError(e);
         }
         return null;
     }
@@ -104,12 +105,12 @@ public class FileSender implements Runnable, Cancelable {
             sendServer = new ServerSocket(listenPort);
             sendSocket = sendServer.accept();
             if (!sendSocket.getInetAddress().equals(TransferConnector.getTarget())) {
-                System.out.println("Wrong connection: " + sendSocket.getInetAddress());
+                UserInterfacing.printInfo("Wrong connection: " + sendSocket.getInetAddress());
                 sendSocket.close();
                 sendSocket = sendServer.accept();
             }
             sendOutputStream = sendSocket.getOutputStream();
-            System.out.println("Sender connected");
+            UserInterfacing.setClipStatus("Local File Sending");
         } catch (IOException e) {
             return false;
         }
@@ -143,7 +144,7 @@ public class FileSender implements Runnable, Cancelable {
             if (sendSocket != null) sendSocket.close();
             if (sendServer != null) sendServer.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            UserInterfacing.printError(e);
         }
     }
 
@@ -154,11 +155,10 @@ public class FileSender implements Runnable, Cancelable {
             IOUtils.copy(inputStream, sendOutputStream);
         } catch (IOException e) {
             if (isCancelled) {
-                System.out.println("File send cancel with error" + e);
-            } else e.printStackTrace();
+                UserInterfacing.printInfo("File send cancel with error: " + e);
+            } else UserInterfacing.printError(e);
         }
         closeConnection();
-        System.out.println("File send done");
     }
 
     public void runTared(List<File> files) {
@@ -168,13 +168,12 @@ public class FileSender implements Runnable, Cancelable {
             TarCompressor.compress(files, getSendOutputStream());
         } catch (Exception e) {
             if (isCancelled) {
-                System.out.println("File send cancel with error");
+                UserInterfacing.printInfo("File send cancel with error: " + e);
                 return;
             }
-            e.printStackTrace();
+            UserInterfacing.printError(e);
         }
         closeConnection();
-        System.out.println("File send done");
     }
 
     /**
@@ -191,13 +190,12 @@ public class FileSender implements Runnable, Cancelable {
             TarCompressor.compress(files, getSendOutputStream());
         } catch (Exception e) {
             if (isCancelled) {
-                System.out.println("File send cancel with error");
+                UserInterfacing.printInfo("File send cancel with error: " + e);
                 return;
             }
-            e.printStackTrace();
+            UserInterfacing.printError(e);
         }
 
         closeConnection();
-        System.out.println("File send done");
     }
 }

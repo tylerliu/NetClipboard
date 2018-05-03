@@ -1,8 +1,11 @@
 package clip;
 
+import clip.c.macClipboardNative;
 import format.DataFormat;
+import ui.OS;
+import ui.UserInterfacing;
 
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
@@ -35,7 +38,8 @@ public class ClipboardIO {
                     lastType = DataFormat.FILES;
                     lastFiles = files;
                     isFromRemote = false;
-                    System.out.println("Local Clipboard New: " + files);
+                    UserInterfacing.printInfo("Local Clipboard New: " + files);
+                    UserInterfacing.setClipStatus("Local Files");
                     return true;
                 }
                 break;
@@ -45,7 +49,9 @@ public class ClipboardIO {
                     lastType = DataFormat.STRING;
                     lastString = n;
                     isFromRemote = false;
-                    System.out.println("Local Clipboard New: " + n);
+                    UserInterfacing.printInfo("Local Clipboard New: " + n);
+                    if (n.contains("\n")) n = n.substring(0, n.indexOf('\n')) + "...";
+                    UserInterfacing.setClipStatus("Local: " + (n.length() > 30 ? n.substring(0, 30) + "..." : n));
                     return true;
                 }
                 break;
@@ -86,7 +92,7 @@ public class ClipboardIO {
             if (sysClip.isDataFlavorAvailable(DataFlavor.stringFlavor)) return DataFormat.STRING;
         } catch (IllegalStateException e) {
             if (!e.getMessage().contains("cannot open system clipboard")) {
-                e.printStackTrace();
+                UserInterfacing.printError(e);
             }
         }
         return DataFormat.NULL;
@@ -99,7 +105,7 @@ public class ClipboardIO {
         try {
             return (String) sysClip.getData(DataFlavor.stringFlavor);
         } catch (Exception e) {
-            e.printStackTrace();
+            UserInterfacing.printError(e);
             return null;
         }
     }
@@ -116,7 +122,7 @@ public class ClipboardIO {
         try {
             return (List<File>) sysClip.getData(DataFlavor.javaFileListFlavor);
         } catch (Exception e) {
-            e.printStackTrace();
+            UserInterfacing.printError(e);
             return null;
         }
     }
@@ -125,8 +131,8 @@ public class ClipboardIO {
         lastType = DataFormat.FILES;
         lastFiles = files;
         isFromRemote = true;
-        if (MacFilesClipboard.isMac()) {
-            MacFilesClipboard.setMacSysClipboardFile(files);
+        if (OS.isMac()) {
+            macClipboardNative.setClipboardFiles(files);
         } else {
             FilesTransferable fileTransferable = new FilesTransferable(files);
             sysClip.setContents(fileTransferable, fileTransferable);

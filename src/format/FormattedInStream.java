@@ -1,5 +1,7 @@
 package format;
 
+import net.FileTransferMode;
+
 import java.io.FilterInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,8 +34,8 @@ public class FormattedInStream extends FilterInputStream {
     private byte[] loadContent(int type) throws IOException {
         if (this.type != type) throw new IOException("Packet Type Does Not Match");
         read = true;
-        byte[] content = new byte[(int)length];
-        readNBytes(content, 0, (int)length);
+        byte[] content = new byte[(int) length];
+        readNBytes(content, 0, (int) length);
         return content;
     }
 
@@ -57,5 +59,9 @@ public class FormattedInStream extends FilterInputStream {
      */
     public String getHTML() throws IOException {
         return new String(loadContent(DataFormat.HTML));
+    }
+
+    public FileTransferMode.Mode getMode() throws IOException {
+        return FileTransferMode.Mode.values()[loadContent(DataFormat.MODE_SET)[0]];
     }
 }
