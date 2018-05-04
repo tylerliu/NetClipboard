@@ -37,9 +37,9 @@ public class Main {
         }
         TransferConnector.setTarget();
         ClipboardIO.checkNew();
-        if (!TransferConnector.connect()) System.exit(0);
-        TransferConnector.DataTransferExecute();
-        TransferConnector.close();
+        if (TransferConnector.connect())
+            TransferConnector.DataTransferExecute();
+        System.exit(0);
     }
 
     private static void parseCommand(String[] args) {
