@@ -1,12 +1,12 @@
 package main;
 
-import ui.clip.ClipboardIO;
 import key.KeyUtil;
 import net.FileTransfer;
 import net.FileTransferMode;
 import net.TransferConnector;
 import org.apache.commons.cli.*;
 import ui.UserInterfacing;
+import ui.clip.ClipboardIO;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

@@ -13,9 +13,14 @@ package format;
 public class DataFormat {
 
     public static final byte NULL = 0;
-    public static final byte STRING = 1;
-    public static final byte FILES = 2;
-    public static final byte HTML = 3;
-    public static final byte END_SIGNAL = 4;
-    public static final byte MODE_SET = 5;
+    public static final byte FORMAT_COUNT = 1;
+    public static final byte END_SIGNAL = 2;
+    public static final byte MODE_SET = 3;
+    public static final byte STRING = 4;
+    public static final byte FILES = 5;
+    public static final byte IMAGE = 6;
+    public static final byte HTML = 7;
+    public static final byte RTF = 8;
+    public static final byte URL = 9;
+
 }

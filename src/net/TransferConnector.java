@@ -1,6 +1,5 @@
 package net;
 
-import ui.clip.ClipboardIO;
 import format.DataFormat;
 import format.FormattedInStream;
 import format.FormattedOutStream;
@@ -9,6 +8,7 @@ import net.handshake.KeyBased;
 import net.handshake.Manual;
 import org.bouncycastle.crypto.tls.TlsProtocol;
 import ui.UserInterfacing;
+import ui.clip.ClipboardIO;
 
 import java.io.File;
 import java.io.IOException;
@@ -104,7 +104,7 @@ public class TransferConnector {
 
     private static void exchangeProtocol(TlsProtocol protocol) {
         try {
-            int magicNumber = 6;
+            int magicNumber = 7;
             protocol.getOutputStream().write(magicNumber);
             protocol.getOutputStream().write(FileTransferMode.getModeForSending().ordinal());
             if (protocol.getInputStream().read() != magicNumber) {

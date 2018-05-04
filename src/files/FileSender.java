@@ -177,7 +177,7 @@ public class FileSender implements Runnable {
     /**
      * Encryption by initialized cipher
      *
-     * @param files the files to be send
+     * @param files  the files to be send
      * @param cipher the initialized cipher to be used
      */
     public void runTared(List<File> files, Cipher cipher) {

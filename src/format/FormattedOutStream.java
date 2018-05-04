@@ -28,8 +28,8 @@ public class FormattedOutStream extends FilterOutputStream {
         writePayload(DataFormat.STRING, s.getBytes());
     }
 
-    public synchronized void writeHTML(String s) throws IOException {
-        writePayload(DataFormat.HTML, s.getBytes());
+    public synchronized void writeSTRING(byte format, String s) throws IOException {
+        writePayload(format, s.getBytes());
     }
 
     public synchronized void writeEND() throws IOException {

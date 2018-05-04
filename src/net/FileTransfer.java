@@ -31,10 +31,10 @@ import java.util.concurrent.Executors;
 public class FileTransfer {
 
     private static final ConcurrentLinkedDeque<File> tempFolders = new ConcurrentLinkedDeque<>();
-    private static File lastSavedDirectory;
     private static final ExecutorService executor = Executors.newWorkStealingPool();
     private static final List<FileReceiver> receivers = Collections.synchronizedList(new LinkedList<>());
     private static final List<FileSender> senders = Collections.synchronizedList(new LinkedList<>());
+    private static File lastSavedDirectory;
 
     public synchronized static CompletableFuture<List<File>> receiveFiles(ByteBuffer spec) {
         if (FileTransferMode.getLocalMode() == FileTransferMode.Mode.CACHED) cancelReceive(); //cancel other receive

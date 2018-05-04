@@ -57,8 +57,8 @@ public class FormattedInStream extends FilterInputStream {
     /**
      * Used only when sure the next is HTML
      */
-    public String getHTML() throws IOException {
-        return new String(loadContent(DataFormat.HTML));
+    public String getString(byte format) throws IOException {
+        return new String(loadContent(format));
     }
 
     public FileTransferMode.Mode getMode() throws IOException {

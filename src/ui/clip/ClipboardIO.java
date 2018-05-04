@@ -2,10 +2,10 @@ package ui.clip;
 
 import format.DataFormat;
 import javafx.application.Platform;
+import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import ui.UserInterfacing;
 
-import javafx.scene.input.Clipboard;
 import java.io.File;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
