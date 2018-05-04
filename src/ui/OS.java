@@ -6,7 +6,7 @@ public class OS {
     private static boolean isDarwin;
 
     /**
-     * @return
+     * @return true if this computer is a mac
      */
     public static boolean isMac() {
         if (isEnvSet) return isDarwin;

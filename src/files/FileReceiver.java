@@ -15,10 +15,10 @@ import java.util.List;
 /**
  * Created by TylerLiu on 2018/03/22.
  */
-public class FileReceiver implements Runnable, Cancelable {
+public class FileReceiver implements Runnable {
 
-    private static int DEFAULT_PORT = 61803;
-    private int listenPort;
+    private static final int DEFAULT_PORT = 61803;
+    private final int listenPort;
     private Socket recvSocket;
     private InputStream recvInputStream;
     private OutputStream outputStream;
@@ -140,14 +140,12 @@ public class FileReceiver implements Runnable, Cancelable {
         }
     }
 
-    @Override
     public synchronized void cancel() {
         if (isCancelled) return;
         isCancelled = true;
         closeConnection();
     }
 
-    @Override
     public boolean isCancelled() {
         return isCancelled;
     }
@@ -183,8 +181,8 @@ public class FileReceiver implements Runnable, Cancelable {
     /**
      * Decryption by initialized cipher
      *
-     * @param base
-     * @param cipher
+     * @param base the base receiving folder
+     * @param cipher the initialized cipher
      */
     public List<File> runTared(File base, Cipher cipher) {
         if (!openConnection()) return null;

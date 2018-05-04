@@ -7,7 +7,7 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
-public class ClipTray {
+class ClipTray {
 
     private static MenuItem connStatusItem;
     private static MenuItem lastItem;

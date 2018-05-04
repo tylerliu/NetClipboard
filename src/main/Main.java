@@ -1,6 +1,6 @@
 package main;
 
-import clip.ClipboardIO;
+import ui.clip.ClipboardIO;
 import key.KeyUtil;
 import net.FileTransfer;
 import net.FileTransferMode;
@@ -42,7 +42,7 @@ public class Main {
         TransferConnector.close();
     }
 
-    public static void parseCommand(String[] args) {
+    private static void parseCommand(String[] args) {
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd;
         try {
@@ -70,7 +70,7 @@ public class Main {
         if (cmd.hasOption('m')) TransferConnector.setManualTarget();
     }
 
-    public static Options getOptions() {
+    private static Options getOptions() {
         Options options = new Options();
 
         options.addOption(Option.builder("c")
@@ -95,7 +95,7 @@ public class Main {
         return options;
     }
 
-    public static void printHelp() {
+    private static void printHelp() {
         String header = "Shared Clipboard between computers";
         String footer = "";
         HelpFormatter formatter = new HelpFormatter();

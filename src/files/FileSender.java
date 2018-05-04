@@ -16,10 +16,10 @@ import java.util.List;
 /**
  * Created by TylerLiu on 2018/03/22.
  */
-public class FileSender implements Runnable, Cancelable {
+public class FileSender implements Runnable {
 
-    private static int DEFAULT_PORT = 61803;
-    private int listenPort;
+    private static final int DEFAULT_PORT = 61803;
+    private final int listenPort;
     private ServerSocket sendServer;
     private Socket sendSocket;
     private OutputStream sendOutputStream;
@@ -43,7 +43,7 @@ public class FileSender implements Runnable, Cancelable {
     }
 
     public static Thread sendStream(InputStream inputStream, int port) {
-        Thread thread = new Thread(sendStream(inputStream, port), "Sender");
+        Thread thread = new Thread(sendStreamRun(inputStream, port), "Sender");
         thread.start();
         return thread;
     }
@@ -126,14 +126,12 @@ public class FileSender implements Runnable, Cancelable {
         return this;
     }
 
-    @Override
     public synchronized void cancel() {
         if (isCancelled) return;
         isCancelled = true;
         closeConnection();
     }
 
-    @Override
     public boolean isCancelled() {
         return isCancelled;
     }
@@ -179,7 +177,7 @@ public class FileSender implements Runnable, Cancelable {
     /**
      * Encryption by initialized cipher
      *
-     * @param files
+     * @param files the files to be send
      * @param cipher the initialized cipher to be used
      */
     public void runTared(List<File> files, Cipher cipher) {

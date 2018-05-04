@@ -1,6 +1,6 @@
 package net;
 
-import clip.ClipboardIO;
+import ui.clip.ClipboardIO;
 import format.DataFormat;
 import format.FormattedInStream;
 import format.FormattedOutStream;
@@ -139,14 +139,14 @@ public class TransferConnector {
                     FileTransfer.deleteTempFolder();
                     switch (ClipboardIO.getLastType()) {
                         case DataFormat.STRING:
-                            outStream.writeSTRING(ClipboardIO.getLastString());
+                            outStream.writeSTRING(ClipboardIO.getLastContent().getString());
                             break;
                         case DataFormat.HTML:
                         case DataFormat.FILES:
                             int port = PortAllocator.alloc();
                             byte[] key = getTransKey();
                             outStream.writeFiles(port, key);
-                            FileTransfer.sendFiles(ClipboardIO.getLastFiles(), port, key);
+                            FileTransfer.sendFiles(ClipboardIO.getLastContent().getFiles(), port, key);
                             break;
                         case DataFormat.END_SIGNAL:
                             UserInterfacing.printError(new RuntimeException("End Signal in Clipboard"));

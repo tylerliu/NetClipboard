@@ -29,7 +29,7 @@ public class FileIOTest {
         }
     }
 
-    public static void receive() {
+    private static void receive() {
         try {
             FileReceiver.receiveTar(new File("src_2")).join();
         } catch (InterruptedException e) {
@@ -37,7 +37,7 @@ public class FileIOTest {
         }
     }
 
-    public static void send() {
+    private static void send() {
         List<File> files = new ArrayList<>();
         files.add(new File("src/key"));
         try {
