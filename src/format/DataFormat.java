@@ -17,10 +17,30 @@ public class DataFormat {
     public static final byte END_SIGNAL = 2;
     public static final byte MODE_SET = 3;
     public static final byte STRING = 4;
-    public static final byte FILES = 5;
-    public static final byte IMAGE = 6;
-    public static final byte HTML = 7;
-    public static final byte RTF = 8;
-    public static final byte URL = 9;
+    public static final byte HTML = 5;
+    public static final byte RTF = 6;
+    public static final byte URL = 7;
+    public static final byte IMAGE = 8;
+    public static final byte FILES = 9;
 
+    public static final javafx.scene.input.DataFormat[] FXFormats = new javafx.scene.input.DataFormat[] {
+            null,
+            null,
+            null,
+            null,
+            javafx.scene.input.DataFormat.PLAIN_TEXT,
+            javafx.scene.input.DataFormat.HTML,
+            javafx.scene.input.DataFormat.RTF,
+            javafx.scene.input.DataFormat.URL,
+            javafx.scene.input.DataFormat.IMAGE,
+            javafx.scene.input.DataFormat.FILES
+
+    };
+
+    public static byte getFormat(javafx.scene.input.DataFormat dataFormat) {
+        for (byte i = 4; i < FXFormats.length; i ++) {
+            if (dataFormat.equals(FXFormats[i])) return i;
+        }
+        return DataFormat.NULL;
+    }
 }

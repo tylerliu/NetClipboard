@@ -40,6 +40,15 @@ public class FormattedInStream extends FilterInputStream {
     }
 
 
+    public FileTransferMode.Mode getMode() throws IOException {
+        return FileTransferMode.Mode.values()[loadContent(DataFormat.MODE_SET)[0]];
+    }
+
+    public byte getFormatCount() throws IOException {
+        return loadContent(DataFormat.FORMAT_COUNT)[0];
+    }
+
+
     /**
      * Used only when sure the next is string
      */
@@ -59,9 +68,5 @@ public class FormattedInStream extends FilterInputStream {
      */
     public String getString(byte format) throws IOException {
         return new String(loadContent(format));
-    }
-
-    public FileTransferMode.Mode getMode() throws IOException {
-        return FileTransferMode.Mode.values()[loadContent(DataFormat.MODE_SET)[0]];
     }
 }

@@ -1,13 +1,10 @@
 package ui.clip;
 
-import format.DataFormat;
 import javafx.application.Platform;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import ui.UserInterfacing;
 
-import java.io.File;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -25,52 +22,15 @@ public class ClipboardIO {
      */
     public static synchronized boolean checkNew() {
         ClipboardContent content = getClipContent();
-        byte type = getType(content);
-        if (type == DataFormat.NULL) return false;
-        switch (type) {
-            case DataFormat.FILES:
-                List<File> files = content.getFiles();
-                if (isNewFiles(files)) {
-                    lastContent = content;
-                    isFromRemote = false;
-                    UserInterfacing.printInfo("Local Clipboard New: " + files);
-                    UserInterfacing.setClipStatus("Local Files");
-                    return true;
-                }
-                break;
-            case DataFormat.STRING:
-                String n = content.getString();
-                if (isNewString(n)) {
-                    lastContent = content;
-                    isFromRemote = false;
-                    UserInterfacing.printInfo("Local Clipboard New: " + n);
-                    if (n.contains("\n")) n = n.substring(0, n.indexOf('\n')) + "...";
-                    UserInterfacing.setClipStatus("Local: " + (n.length() > 30 ? n.substring(0, 30) + "..." : n));
-                    return true;
-                }
-                break;
-            default:
-        }
-        return false;
+        if (!isNewContent(content)) return false;
+        lastContent = content;
+        isFromRemote = false;
+        ContentUtil.printContent(content, "Local");
+        return true;
     }
 
-    private static boolean isNewString(String data) {
-        return data != null && (lastContent == null || DataFormat.STRING != getLastType() || !lastContent.getString().equals(data));
-    }
-
-    private static boolean isNewFiles(List<File> data) {
-        return data != null && (lastContent == null || DataFormat.FILES != getLastType() || !lastContent.getFiles().equals(data));
-    }
-
-    //TODO support Image, html?
-    public static byte getLastType() {
-        return getType(lastContent);
-    }
-
-    private static byte getType(ClipboardContent content) {
-        if (content.hasFiles()) return DataFormat.FILES;
-        if (content.hasString()) return DataFormat.STRING;
-        return DataFormat.NULL;
+    private static boolean isNewContent(ClipboardContent data) {
+        return data != null && (lastContent == null || !ContentUtil.isContentEqual(lastContent, data));
     }
 
     public static ClipboardContent getLastContent() {
@@ -81,18 +41,9 @@ public class ClipboardIO {
         return isFromRemote;
     }
 
-    public static synchronized void setSysClipboardText(String s) {
+    public static synchronized void setSysClipboardContent(ClipboardContent content) {
         isFromRemote = true;
-        lastContent = new ClipboardContent();
-        lastContent.putString(s);
-        setClipContent(lastContent);
-    }
-
-    public static synchronized void setSysClipboardFiles(List<File> files) {
-        isFromRemote = true;
-        lastContent = new ClipboardContent();
-        lastContent.putFiles(files);
-        setClipContent(lastContent);
+        setClipContent(content);
     }
 
     public static synchronized void unsetSysClipboard() {

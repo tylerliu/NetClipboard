@@ -3,12 +3,14 @@ package net;
 import format.DataFormat;
 import format.FormattedInStream;
 import format.FormattedOutStream;
+import javafx.scene.input.ClipboardContent;
 import net.handshake.DirectConnect;
 import net.handshake.KeyBased;
 import net.handshake.Manual;
 import org.bouncycastle.crypto.tls.TlsProtocol;
 import ui.UserInterfacing;
 import ui.clip.ClipboardIO;
+import ui.clip.ContentUtil;
 
 import java.io.File;
 import java.io.IOException;
@@ -137,21 +139,31 @@ public class TransferConnector {
                 if (ClipboardIO.checkNew()) {
                     FileTransfer.attemptCancelTransfer();//if file Transferring
                     FileTransfer.deleteTempFolder();
-                    switch (ClipboardIO.getLastType()) {
-                        case DataFormat.STRING:
-                            outStream.writeSTRING(ClipboardIO.getLastContent().getString());
-                            break;
-                        case DataFormat.HTML:
-                        case DataFormat.FILES:
-                            int port = PortAllocator.alloc();
-                            byte[] key = getTransKey();
-                            outStream.writeFiles(port, key);
-                            FileTransfer.sendFiles(ClipboardIO.getLastContent().getFiles(), port, key);
-                            break;
-                        case DataFormat.END_SIGNAL:
-                            UserInterfacing.printError(new RuntimeException("End Signal in Clipboard"));
-                            break;
-                        default:
+
+                    //write content
+                    boolean hasFile = false;
+                    if (ClipboardIO.getLastContent().keySet().size() > 1)
+                        outStream.writeFormatCount((byte) ClipboardIO.getLastContent().keySet().size());
+                    for (javafx.scene.input.DataFormat FXFormat : ClipboardIO.getLastContent().keySet()) {
+                        switch (DataFormat.getFormat(FXFormat)) {
+                            case DataFormat.STRING:
+                            case DataFormat.HTML:
+                            case DataFormat.RTF:
+                            case DataFormat.URL:
+                                outStream.writeSTRING(DataFormat.getFormat(FXFormat), ClipboardIO.getLastContent().getString());
+                                break;
+                            case DataFormat.FILES:
+                                hasFile = true; //leave until the last
+                                break;
+                            default:
+                        }
+                    }
+
+                    if (hasFile) {
+                        int port = PortAllocator.alloc();
+                        byte[] key = getTransKey();
+                        outStream.writeFiles(port, key);
+                        FileTransfer.sendFiles(ClipboardIO.getLastContent().getFiles(), port, key);
                     }
                 }
 
@@ -182,40 +194,59 @@ public class TransferConnector {
         //read
         try {
             while (true) {
+                ClipboardContent content = new ClipboardContent();
+                int entryCount = 1;
+                boolean asyncPush = false;
                 int type = inStream.nextEntry();
+                if (type == DataFormat.END_SIGNAL) {
+                    terminateInitiated = true;
+                    return;
+                }
+                if (type == DataFormat.MODE_SET) {
+                    FileTransferMode.setTargetMode(inStream.getMode());
+                    continue;
+                }
+                if (type == DataFormat.FORMAT_COUNT) {
+                    entryCount = inStream.getFormatCount();
+                    type = inStream.nextEntry();
+                }
                 FileTransfer.attemptCancelTransfer(); //cancel if file transferring
                 FileTransfer.deleteTempFolder();
-                switch (type) {
-                    case DataFormat.STRING:
-                        String s = inStream.getString();
-                        ClipboardIO.setSysClipboardText(s);
-                        UserInterfacing.printInfo("Remote Clipboard New: " + s);
-                        if (s.contains("\n")) s = s.substring(0, s.indexOf('\n')) + "...";
-                        UserInterfacing.setClipStatus("Remote: " + (s.length() > 30 ? s.substring(0, 30) + "..." : s));
-                        break;
-                    case DataFormat.END_SIGNAL:
-                        terminateInitiated = true;
-                        return;
-                    case DataFormat.FILES:
-                        CompletableFuture<List<File>> re = FileTransfer.receiveFiles(inStream.getFiles());
-                        if (FileTransferMode.getLocalMode() == FileTransferMode.Mode.CACHED) {
-                            re.thenAccept((files) -> {
-                                if (files == null) return;
-                                UserInterfacing.printInfo("Remote Clipboard New: " + files);
-                                UserInterfacing.setClipStatus("Remote Files");
-                                ClipboardIO.setSysClipboardFiles(files);
-                            });
-                        } else {
-                            ClipboardIO.unsetSysClipboard();
-                        }
-                        break;
-                    case DataFormat.MODE_SET:
-                        FileTransferMode.setTargetMode(inStream.getMode());
-                    default:
+                for (int i = 0; i < entryCount; i++) {
+                    if (i != 0 || type == DataFormat.FORMAT_COUNT) type = inStream.nextEntry();
+                    switch (type) {
+                        case DataFormat.STRING:
+                        case DataFormat.HTML:
+                        case DataFormat.RTF:
+                        case DataFormat.URL:
+                            String s = inStream.getString((byte) type);
+                            content.put(DataFormat.FXFormats[type], s);
+                            break;
+                        case DataFormat.FILES:
+                            asyncPush = true;
+                            CompletableFuture<List<File>> re = FileTransfer.receiveFiles(inStream.getFiles());
+                            if (FileTransferMode.getLocalMode() == FileTransferMode.Mode.CACHED) {
+                                re.thenAccept((files) -> {
+                                    if (files == null) return;
+                                    content.putFiles(files);
+                                    ContentUtil.printContent(content, "Remote");
+                                    ClipboardIO.setSysClipboardContent(content);
+                                });
+                            } else {
+                                ClipboardIO.unsetSysClipboard();
+                            }
+                            break;
+                        default:
+                            UserInterfacing.printError(new IOException("Unacceptable format"));
+                    }
+
+                }
+                if (!asyncPush) {
+                    ContentUtil.printContent(content, "Remote");
+                    ClipboardIO.setSysClipboardContent(content);
                 }
             }
         } catch (IOException e) {
-
             if (!terminateInitiated) UserInterfacing.printError(e);
         }
     }
