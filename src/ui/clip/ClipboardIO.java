@@ -90,13 +90,6 @@ public class ClipboardIO {
             content.putString(name);
         }
 
-        if (content.hasUrl()) {
-            try {
-                new URI(content.getUrl());
-            } catch (URISyntaxException ex) {
-                content.remove(DataFormat.URL);
-            }
-        }
         return content;
     }
 
