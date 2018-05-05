@@ -33,6 +33,7 @@ public class ContentUtil {
         }
         if (content.hasString()) {
             String s = content.getString();
+            if (s.indexOf('\r') >= 0) s = s.substring(s.lastIndexOf('\r') + 1);
             UserInterfacing.printInfo(attribute + " New: " + s);
             if (s.contains("\n")) s = s.substring(0, s.indexOf('\n')) + "...";
             UserInterfacing.setClipStatus(attribute + ": " + (s.length() > 30 ? s.substring(0, 30) + "..." : s));

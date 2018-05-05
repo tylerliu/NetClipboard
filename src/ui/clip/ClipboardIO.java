@@ -8,6 +8,8 @@ import ui.OS;
 import ui.UserInterfacing;
 
 import java.io.File;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -69,17 +71,9 @@ public class ClipboardIO {
             if (clipboard.hasUrl()) content.putUrl(clipboard.getUrl());
             if (clipboard.hasFiles()) content.putFiles(clipboard.getFiles());
 
-            if (content.hasFiles() && !content.hasString()) {
-                String name = content.getFiles().get(0).getAbsolutePath();
-                while (name.charAt(name.length()) == File.separatorChar) name = name.substring(0, name.length() - 1);
-                name = name.substring(name.lastIndexOf(File.separatorChar));
-                content.putString(name);
-            }
-
             /*for (javafx.scene.input.DataFormat format : Clipboard.getSystemClipboard().getContentTypes()) {
                     content.put(format, Clipboard.getSystemClipboard().getContent(format));
             }*/
-            if (content.hasFiles()) System.out.println(content.keySet().size());
             latch.countDown();
         });
         try {
@@ -88,6 +82,21 @@ public class ClipboardIO {
             UserInterfacing.printError(e);
         }
 
+        //pre-process content
+        if (content.hasFiles() && !content.hasString()) {
+            String name = content.getFiles().get(0).getAbsolutePath();
+            while (name.charAt(name.length() - 1) == File.separatorChar) name = name.substring(0, name.length() - 1);
+            name = name.substring(name.lastIndexOf(File.separatorChar) + 1);
+            content.putString(name);
+        }
+
+        if (content.hasUrl()) {
+            try {
+                new URI(content.getUrl());
+            } catch (URISyntaxException ex) {
+                content.remove(DataFormat.URL);
+            }
+        }
         return content;
     }
 
