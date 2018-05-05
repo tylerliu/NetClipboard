@@ -15,7 +15,7 @@ public class ContentUtil {
         if (a.hasString() && !a.getString().equals(b.getString())) return false;
         if (a.hasHtml() && !a.getHtml().equals(b.getHtml())) return false;
         if (a.hasRtf() && !a.getRtf().equals(b.getRtf())) return false;
-        if (a.hasUrl() && !a.getHtml().equals(b.getUrl())) return false;
+        if (a.hasUrl() && !a.getUrl().equals(b.getUrl())) return false;
 
         //file comparison
         if (a.hasFiles() && !a.getFiles().equals(b.getFiles())) return false;
