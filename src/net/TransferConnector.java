@@ -236,7 +236,7 @@ public class TransferConnector {
                             }
                             break;
                         default:
-                            UserInterfacing.printError(new IOException("Unacceptable format"));
+                            if (!terminateInitiated) UserInterfacing.printError(new IOException("Unacceptable format"));
                     }
 
                 }

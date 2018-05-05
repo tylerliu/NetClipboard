@@ -21,7 +21,7 @@ public class ClipboardIO {
      *
      * @return true if change happens
      */
-    public static synchronized boolean checkNew() {
+    public static boolean checkNew() {
         ClipboardContent content = getClipContent();
         if (!isNewContent(content)) return false;
         lastContent = content;
@@ -42,12 +42,12 @@ public class ClipboardIO {
         return isFromRemote;
     }
 
-    public static synchronized void setSysClipboardContent(ClipboardContent content) {
+    public static void setSysClipboardContent(ClipboardContent content) {
         isFromRemote = true;
         setClipContent(content);
     }
 
-    public static synchronized void unsetSysClipboard() {
+    public static void unsetSysClipboard() {
         isFromRemote = true;
         lastContent = new ClipboardContent();
         lastContent.putString("");
@@ -80,7 +80,7 @@ public class ClipboardIO {
         return content;
     }
 
-    private static void setClipContent(ClipboardContent content) {
+    private static synchronized void setClipContent(ClipboardContent content) {
         CountDownLatch latch = new CountDownLatch(1);
         Platform.runLater(() -> {
             Clipboard.getSystemClipboard().setContent(content);
