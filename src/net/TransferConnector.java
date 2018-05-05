@@ -150,7 +150,7 @@ public class TransferConnector {
                             case DataFormat.HTML:
                             case DataFormat.RTF:
                             case DataFormat.URL:
-                                outStream.writeSTRING(DataFormat.getFormat(FXFormat), ClipboardIO.getLastContent().getString());
+                                outStream.writeSTRING(DataFormat.getFormat(FXFormat), (String)ClipboardIO.getLastContent().get(FXFormat));
                                 break;
                             case DataFormat.FILES:
                                 hasFile = true; //leave until the last

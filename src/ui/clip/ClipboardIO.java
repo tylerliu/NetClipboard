@@ -58,9 +58,7 @@ public class ClipboardIO {
         CountDownLatch latch = new CountDownLatch(1);
         Platform.runLater(() -> {
             for (javafx.scene.input.DataFormat format : Clipboard.getSystemClipboard().getContentTypes()) {
-                if (Clipboard.getSystemClipboard().getContent(format) != null)
                     content.put(format, Clipboard.getSystemClipboard().getContent(format));
-                else System.out.println("NULL on " + format.toString());
             }
             latch.countDown();
         });
