@@ -3,6 +3,7 @@ package ui.clip;
 import javafx.application.Platform;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DataFormat;
 import ui.UserInterfacing;
 
 import java.util.concurrent.CountDownLatch;
@@ -57,9 +58,17 @@ public class ClipboardIO {
         ClipboardContent content = new ClipboardContent();
         CountDownLatch latch = new CountDownLatch(1);
         Platform.runLater(() -> {
-            for (javafx.scene.input.DataFormat format : Clipboard.getSystemClipboard().getContentTypes()) {
+            Clipboard clipboard = Clipboard.getSystemClipboard();
+            //get only supported content
+            if (clipboard.hasString()) content.putString(clipboard.getString());
+            if (clipboard.hasHtml()) content.putString(clipboard.getHtml());
+            if (clipboard.hasRtf()) content.putString(clipboard.getRtf());
+            if (clipboard.hasUrl()) content.putUrl(clipboard.getUrl());
+            if (clipboard.hasFiles()) content.putFiles(clipboard.getFiles());
+
+            /*for (javafx.scene.input.DataFormat format : Clipboard.getSystemClipboard().getContentTypes()) {
                     content.put(format, Clipboard.getSystemClipboard().getContent(format));
-            }
+            }*/
             latch.countDown();
         });
         try {
