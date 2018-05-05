@@ -208,7 +208,6 @@ public class TransferConnector {
                 }
                 if (type == DataFormat.FORMAT_COUNT) {
                     entryCount = inStream.getFormatCount();
-                    type = inStream.nextEntry();
                 }
                 FileTransfer.attemptCancelTransfer(); //cancel if file transferring
                 FileTransfer.deleteTempFolder();

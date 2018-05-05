@@ -53,7 +53,7 @@ public class ClipboardIO {
         setClipContent(lastContent);
     }
 
-    private static ClipboardContent getClipContent() {
+    private synchronized static ClipboardContent getClipContent() {
         ClipboardContent content = new ClipboardContent();
         CountDownLatch latch = new CountDownLatch(1);
         Platform.runLater(() -> {
@@ -72,6 +72,16 @@ public class ClipboardIO {
     }
 
     private static void setClipContent(ClipboardContent content) {
-        Platform.runLater(() -> Clipboard.getSystemClipboard().setContent(content));
+        CountDownLatch latch = new CountDownLatch(1);
+        Platform.runLater(() -> {
+            Clipboard.getSystemClipboard().setContent(content);
+            latch.countDown();
+        });
+
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
