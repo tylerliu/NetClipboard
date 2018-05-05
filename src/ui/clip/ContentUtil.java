@@ -10,7 +10,7 @@ public class ContentUtil {
     /* protected */ static boolean isContentEqual(ClipboardContent a, ClipboardContent b) {
         if (a == b) return true;
         if (a == null || b == null) return false;
-        if (a.keySet() != b.keySet()) return false;
+        if (!a.keySet().equals(b.keySet())) return false;
         //String comparison first
         if (a.hasString() && !a.getString().equals(b.getString())) return false;
         if (a.hasHtml() && !a.getHtml().equals(b.getHtml())) return false;
