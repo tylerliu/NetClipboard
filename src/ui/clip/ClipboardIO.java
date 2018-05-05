@@ -61,8 +61,8 @@ public class ClipboardIO {
             Clipboard clipboard = Clipboard.getSystemClipboard();
             //get only supported content
             if (clipboard.hasString()) content.putString(clipboard.getString());
-            if (clipboard.hasHtml()) content.putString(clipboard.getHtml());
-            if (clipboard.hasRtf()) content.putString(clipboard.getRtf());
+            if (clipboard.hasHtml()) content.putHtml(clipboard.getHtml());
+            if (clipboard.hasRtf()) content.putRtf(clipboard.getRtf());
             if (clipboard.hasUrl()) content.putUrl(clipboard.getUrl());
             if (clipboard.hasFiles()) content.putFiles(clipboard.getFiles());
 
