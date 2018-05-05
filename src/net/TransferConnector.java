@@ -240,7 +240,7 @@ public class TransferConnector {
                     }
 
                 }
-                if (!asyncPush) {
+                if (!asyncPush && !terminateInitiated) {
                     ContentUtil.printContent(content, "Remote");
                     ClipboardIO.setSysClipboardContent(content);
                 }

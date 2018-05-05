@@ -44,6 +44,7 @@ public class ClipboardIO {
 
     public static void setSysClipboardContent(ClipboardContent content) {
         isFromRemote = true;
+        lastContent = content;
         setClipContent(content);
     }
 
