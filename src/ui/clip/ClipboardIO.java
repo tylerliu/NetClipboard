@@ -4,8 +4,10 @@ import javafx.application.Platform;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
+import ui.OS;
 import ui.UserInterfacing;
 
+import java.io.File;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -67,9 +69,17 @@ public class ClipboardIO {
             if (clipboard.hasUrl()) content.putUrl(clipboard.getUrl());
             if (clipboard.hasFiles()) content.putFiles(clipboard.getFiles());
 
+            if (content.hasFiles() && !content.hasString()) {
+                String name = content.getFiles().get(0).getAbsolutePath();
+                while (name.charAt(name.length()) == File.separatorChar) name = name.substring(0, name.length() - 1);
+                name = name.substring(name.lastIndexOf(File.separatorChar));
+                content.putString(name);
+            }
+
             /*for (javafx.scene.input.DataFormat format : Clipboard.getSystemClipboard().getContentTypes()) {
                     content.put(format, Clipboard.getSystemClipboard().getContent(format));
             }*/
+            if (content.hasFiles()) System.out.println(content.keySet().size());
             latch.countDown();
         });
         try {
