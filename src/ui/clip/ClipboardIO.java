@@ -42,13 +42,13 @@ public class ClipboardIO {
         return isFromRemote;
     }
 
-    public static void setSysClipboardContent(ClipboardContent content) {
+    public static synchronized void setSysClipboardContent(ClipboardContent content) {
         isFromRemote = true;
         lastContent = content;
         setClipContent(content);
     }
 
-    public static void unsetSysClipboard() {
+    public static synchronized void unsetSysClipboard() {
         isFromRemote = true;
         lastContent = new ClipboardContent();
         lastContent.putString("");
