@@ -32,7 +32,7 @@ public class ContentUtil {
             UserInterfacing.printInfo(attribute + " New: " + content.getFiles());
         }
         if (content.hasString()) {
-            String s = content.getString();
+            String s = content.getString().replaceAll("\r\n", "\n");
             if (s.indexOf('\r') >= 0) s = s.substring(s.lastIndexOf('\r') + 1);
             UserInterfacing.printInfo(attribute + " New: " + s);
             if (s.contains("\n")) s = s.substring(0, s.indexOf('\n')) + "...";
