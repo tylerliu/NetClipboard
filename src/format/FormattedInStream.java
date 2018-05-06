@@ -75,8 +75,8 @@ public class FormattedInStream extends FilterInputStream {
 
     public Image getImage(String potentialURL) throws IOException {
         byte[] content = loadContent(DataFormat.IMAGE);
-        if (content[0] == 0) return new Image(potentialURL);
-        if (content[0] == 1) return new Image(new String(Arrays.copyOfRange(content, 1, content.length)));
+        if (content[0] == 0) return new Image(potentialURL, true);
+        if (content[0] == 1) return new Image(new String(Arrays.copyOfRange(content, 1, content.length)), true);
         if (content[0] == 2) return new Image(new ByteArrayInputStream(Arrays.copyOfRange(content, 1, content.length)));
         return null;
     }

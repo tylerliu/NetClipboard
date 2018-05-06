@@ -69,7 +69,7 @@ public class ClipboardIO {
             if (clipboard.hasUrl()) content.putUrl(clipboard.getUrl());
             if (clipboard.hasFiles()) content.putFiles(clipboard.getFiles());
             else if (clipboard.hasImage()) {
-                if (clipboard.hasUrl()) content.putImage(new Image(clipboard.getUrl()));
+                if (clipboard.hasUrl()) content.putImage(new Image(clipboard.getUrl(), true));
                 content.putImage(clipboard.getImage());
             }
 
