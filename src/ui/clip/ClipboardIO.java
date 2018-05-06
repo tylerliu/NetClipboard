@@ -68,10 +68,10 @@ public class ClipboardIO {
             if (clipboard.hasRtf()) content.putRtf(clipboard.getRtf());
             if (clipboard.hasUrl()) content.putUrl(clipboard.getUrl());
             if (clipboard.hasFiles()) content.putFiles(clipboard.getFiles());
-            else if (clipboard.hasImage()) {
+            /* else if (clipboard.hasImage()) {
                 if (clipboard.hasUrl()) content.putImage(new Image(clipboard.getUrl(), true));
                 content.putImage(clipboard.getImage());
-            }
+            } */
 
             /*for (javafx.scene.input.DataFormat format : Clipboard.getSystemClipboard().getContentTypes()) {
                     content.put(format, Clipboard.getSystemClipboard().getContent(format));
