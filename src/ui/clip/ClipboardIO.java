@@ -3,13 +3,9 @@ package ui.clip;
 import javafx.application.Platform;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
-import javafx.scene.input.DataFormat;
-import ui.OS;
 import ui.UserInterfacing;
 
 import java.io.File;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.concurrent.CountDownLatch;
 
 /**
