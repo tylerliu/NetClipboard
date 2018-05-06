@@ -10,12 +10,13 @@ import java.net.InetAddress;
 
 public class UserInterfacing {
 
+    private static final File logFile = new File("./NetClipLog.txt");
     private static boolean isCommandLine = false;
     private static boolean isLog = false;
-    private static File logFile = new File("./NetClipLog.txt");
     private static PrintWriter writer;
 
     public static void init() {
+        new JFXPanel(); //initialize JavaFX Environment
         if (!isCommandLine) {
             ClipTray.init();
             LogWindow.init();
@@ -32,16 +33,22 @@ public class UserInterfacing {
     }
 
     /**
+     * set the interfacing mode of the program
      * have to be called before init
      *
-     * @param isCommandLine1
+     * @param isCommandLine is the current program running in command line mode
      */
-    public static void setCommandLine(boolean isCommandLine1) {
-        isCommandLine = isCommandLine1;
+    public static void setCommandLine(boolean isCommandLine) {
+        UserInterfacing.isCommandLine = isCommandLine;
     }
 
-    public static void setLogging(boolean isLog1) {
-        isLog = isLog1;
+    /**
+     * set the logging mode of the program
+     *
+     * @param isLog is the current program logging the activity
+     */
+    public static void setLogging(boolean isLog) {
+        UserInterfacing.isLog = isLog;
     }
 
     public static void setConnStatus(String s) {

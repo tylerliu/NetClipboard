@@ -1,11 +1,15 @@
 package format;
 
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.image.Image;
+import javafx.util.Pair;
 import net.FileTransferMode;
 
-import java.io.FilterInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import javax.swing.*;
+import java.io.*;
+import java.net.URL;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 /**
  * An input stream wrapper
@@ -40,11 +44,12 @@ public class FormattedInStream extends FilterInputStream {
     }
 
 
-    /**
-     * Used only when sure the next is string
-     */
-    public String getString() throws IOException {
-        return new String(loadContent(DataFormat.STRING));
+    public FileTransferMode.Mode getMode() throws IOException {
+        return FileTransferMode.Mode.values()[loadContent(DataFormat.MODE_SET)[0]];
+    }
+
+    public byte getFormatCount() throws IOException {
+        return loadContent(DataFormat.FORMAT_COUNT)[0];
     }
 
     /**
@@ -54,14 +59,31 @@ public class FormattedInStream extends FilterInputStream {
         return ByteBuffer.wrap(loadContent(DataFormat.FILES));
     }
 
-    /**
-     * Used only when sure the next is HTML
-     */
-    public String getHTML() throws IOException {
-        return new String(loadContent(DataFormat.HTML));
+    public Image getImage(String potentialURL) throws IOException {
+        byte[] content = loadContent(DataFormat.IMAGE);
+        if (content[0] == 0) return new Image(potentialURL, true);
+        if (content[0] == 1) return new Image(new String(Arrays.copyOfRange(content, 1, content.length)), true);
+        if (content[0] == 2) return new Image(new ByteArrayInputStream(Arrays.copyOfRange(content, 1, content.length)));
+        return null;
     }
 
-    public FileTransferMode.Mode getMode() throws IOException {
-        return FileTransferMode.Mode.values()[loadContent(DataFormat.MODE_SET)[0]];
+    public Pair<javafx.scene.input.DataFormat, String> getGeneralString() throws IOException {
+        byte[] bytes = loadContent(DataFormat.GENERAL_STRING);
+        int index = new String(bytes).indexOf('\0');
+        String identifier = new String(Arrays.copyOfRange(bytes, 0, index));
+        String data = new String(Arrays.copyOfRange(bytes, index + 1, bytes.length));
+        javafx.scene.input.DataFormat format = javafx.scene.input.DataFormat.lookupMimeType(identifier);
+        if (format == null) format = new javafx.scene.input.DataFormat(identifier);
+        return new Pair<>(format, data);
+    }
+
+    public Pair<javafx.scene.input.DataFormat, ByteBuffer> getByteBuffer() throws IOException {
+        byte[] bytes = loadContent(DataFormat.BYTEBUFFER);
+        int index = new String(bytes).indexOf('\0');
+        String identifier = new String(Arrays.copyOfRange(bytes, 0, index));
+        ByteBuffer data = ByteBuffer.wrap(Arrays.copyOfRange(bytes, index + 1, bytes.length));
+        javafx.scene.input.DataFormat format = javafx.scene.input.DataFormat.lookupMimeType(identifier);
+        if (format == null) format = new javafx.scene.input.DataFormat(identifier);
+        return new Pair<>(format, data);
     }
 }

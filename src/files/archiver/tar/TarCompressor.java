@@ -16,8 +16,8 @@ public class TarCompressor {
     /**
      * recursively compress a path
      *
-     * @param srcPathName
-     * @param dest
+     * @param srcPathName source path of the files
+     * @param dest        the destination file
      */
     public static void compress(String srcPathName, String dest) {
         File file = new File(srcPathName);

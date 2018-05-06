@@ -12,9 +12,9 @@ import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class DirectConnectWindow {
+class DirectConnectWindow {
 
-    public static InetAddress showConnFailWarning(String reason) {
+    static InetAddress showConnFailWarning(String reason) {
         AtomicReference<Optional<ButtonType>> selected = new AtomicReference<>();
         CountDownLatch latch = new CountDownLatch(1);
         ButtonType tryAgainButton = new ButtonType("Try again");
@@ -48,7 +48,7 @@ public class DirectConnectWindow {
         }
     }
 
-    public static String getDirectConnIP() {
+    private static String getDirectConnIP() {
         AtomicReference<String> ret = new AtomicReference<>();
         CountDownLatch latch = new CountDownLatch(1);
         Platform.runLater(() -> {

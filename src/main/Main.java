@@ -1,12 +1,12 @@
 package main;
 
-import clip.ClipboardIO;
 import key.KeyUtil;
 import net.FileTransfer;
 import net.FileTransferMode;
 import net.TransferConnector;
 import org.apache.commons.cli.*;
 import ui.UserInterfacing;
+import ui.clip.ClipboardIO;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -37,12 +37,12 @@ public class Main {
         }
         TransferConnector.setTarget();
         ClipboardIO.checkNew();
-        if (!TransferConnector.connect()) System.exit(0);
-        TransferConnector.DataTransferExecute();
-        TransferConnector.close();
+        if (TransferConnector.connect())
+            TransferConnector.DataTransferExecute();
+        System.exit(0);
     }
 
-    public static void parseCommand(String[] args) {
+    private static void parseCommand(String[] args) {
         CommandLineParser parser = new DefaultParser();
         CommandLine cmd;
         try {
@@ -70,7 +70,7 @@ public class Main {
         if (cmd.hasOption('m')) TransferConnector.setManualTarget();
     }
 
-    public static Options getOptions() {
+    private static Options getOptions() {
         Options options = new Options();
 
         options.addOption(Option.builder("c")
@@ -95,7 +95,7 @@ public class Main {
         return options;
     }
 
-    public static void printHelp() {
+    private static void printHelp() {
         String header = "Shared Clipboard between computers";
         String footer = "";
         HelpFormatter formatter = new HelpFormatter();

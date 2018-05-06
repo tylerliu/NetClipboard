@@ -10,21 +10,20 @@ import key.KeyUtil;
 import java.util.Optional;
 import java.util.concurrent.CountDownLatch;
 
-public class KeyWindow {
+class KeyWindow {
     private static byte[] keyResult;
 
-    public static synchronized byte[] changeKey(boolean isChange) {
+    static synchronized byte[] changeKey(boolean isChange) {
         final CountDownLatch latch = new CountDownLatch(1);
         Platform.runLater(() -> {
             TextInputDialog dialog = new TextInputDialog("");
             dialog.setTitle(isChange ? "Change Key" : "Set Key");
-            dialog.setHeaderText("Enter Key seed with at least " + KeyUtil.KEY_LEN + " letters");
+            dialog.setHeaderText("Enter key seed with at least " + KeyUtil.KEY_LEN + " letters");
             dialog.setContentText("Seed:");
             Node loginButton = dialog.getDialogPane().lookupButton(ButtonType.OK);
             loginButton.setDisable(true);
-            dialog.getEditor().textProperty().addListener((observable, oldValue, newValue) -> {
-                loginButton.setDisable(newValue.length() < KeyUtil.KEY_LEN);
-            });
+            dialog.getEditor().textProperty().addListener((observable, oldValue, newValue) ->
+                    loginButton.setDisable(newValue.length() < KeyUtil.KEY_LEN));
 
             Optional<String> result = dialog.showAndWait();
             result.ifPresentOrElse(key -> {

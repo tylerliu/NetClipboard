@@ -8,7 +8,7 @@ import java.io.File;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class DirChooser {
+class DirChooser {
 
 
     private static File lastSavedDirectory = new File(System.getProperty("user.home"));

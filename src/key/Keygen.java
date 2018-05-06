@@ -31,9 +31,7 @@ public class Keygen {
         int written = 0;
         while (written < keyLen) {
             byte[] temp = digest.digest(Arrays.copyOfRange(seed, written, written + 32));
-            for (int i = 0; i < Math.min(temp.length, out.length - written); i++) {
-                out[written + i] = temp[i];
-            }
+            System.arraycopy(temp, 0, out, written, Math.min(temp.length, out.length - written));
             written += temp.length;
         }
         return out;
