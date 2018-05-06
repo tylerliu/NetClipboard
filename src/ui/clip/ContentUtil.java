@@ -6,6 +6,7 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import ui.UserInterfacing;
 
+import java.nio.ByteBuffer;
 import java.util.Random;
 
 public class ContentUtil {
@@ -29,7 +30,7 @@ public class ContentUtil {
 
         if (!a.hasImage() && !b.hasImage()) return true;
         if (!a.hasImage() || !b.hasImage()) return false;
-        if (a.hasUrl()) return true;
+        if (a.keySet().size() > 1) return true;
         else return compareImage(a.getImage(), b.getImage());
     }
 

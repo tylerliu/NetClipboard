@@ -11,7 +11,7 @@ import java.net.InetAddress;
 public class UserInterfacing {
 
     private static final File logFile = new File("./NetClipLog.txt");
-    private static boolean isCommandLine = true;
+    private static boolean isCommandLine = false;
     private static boolean isLog = false;
     private static PrintWriter writer;
 
