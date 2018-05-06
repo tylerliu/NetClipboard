@@ -77,6 +77,7 @@ public class FormattedInStream extends FilterInputStream {
         byte[] content = loadContent(DataFormat.IMAGE);
         if (content[0] == 0) return new Image(potentialURL);
         if (content[0] == 1) return new Image(new String(Arrays.copyOfRange(content, 1, content.length)));
-        return new Image(new ByteArrayInputStream(Arrays.copyOfRange(content, 1, content.length)));
+        if (content[0] == 2) return new Image(new ByteArrayInputStream(Arrays.copyOfRange(content, 1, content.length)));
+        return null;
     }
 }
