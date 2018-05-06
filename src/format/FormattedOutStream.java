@@ -62,10 +62,18 @@ public class FormattedOutStream extends FilterOutputStream {
 
     public synchronized void writeGeneralString(javafx.scene.input.DataFormat format, String str) throws IOException{
         assert format.getIdentifiers().size() == 1;
-        String iden = format.getIdentifiers().iterator().next();
-        ByteBuffer buffer = ByteBuffer.allocate(iden.getBytes().length + 1 + str.getBytes().length);
-        buffer.put(iden.getBytes()).put((byte) 0).put(str.getBytes());
+        String identifier = format.getIdentifiers().iterator().next();
+        ByteBuffer buffer = ByteBuffer.allocate(identifier.getBytes().length + 1 + str.getBytes().length);
+        buffer.put(identifier.getBytes()).put((byte) 0).put(str.getBytes());
         writePayload(DataFormat.GENERAL_STRING, buffer.array());
+    }
+
+    public synchronized void writeByteBuffer(javafx.scene.input.DataFormat format, ByteBuffer value) throws IOException{
+        assert format.getIdentifiers().size() == 1;
+        String identifier = format.getIdentifiers().iterator().next();
+        ByteBuffer buffer = ByteBuffer.allocate(identifier.getBytes().length + 1 + value.array().length);
+        buffer.put(identifier.getBytes()).put((byte) 0).put(value.array());
+        writePayload(DataFormat.BYTEBUFFER, buffer.array());
     }
 }
 

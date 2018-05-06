@@ -76,4 +76,14 @@ public class FormattedInStream extends FilterInputStream {
         if (format == null) format = new javafx.scene.input.DataFormat(identifier);
         return new Pair<>(format, data);
     }
+
+    public Pair<javafx.scene.input.DataFormat, ByteBuffer> getByteBuffer() throws IOException {
+        byte[] bytes = loadContent(DataFormat.BYTEBUFFER);
+        int index = new String(bytes).indexOf('\0');
+        String identifier = new String(Arrays.copyOfRange(bytes, 0, index));
+        ByteBuffer data = ByteBuffer.wrap(Arrays.copyOfRange(bytes, index + 1, bytes.length));
+        javafx.scene.input.DataFormat format = javafx.scene.input.DataFormat.lookupMimeType(identifier);
+        if (format == null) format = new javafx.scene.input.DataFormat(identifier);
+        return new Pair<>(format, data);
+    }
 }

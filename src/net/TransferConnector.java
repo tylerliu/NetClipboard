@@ -16,6 +16,7 @@ import ui.clip.ContentUtil;
 import java.io.File;
 import java.io.IOException;
 import java.net.*;
+import java.nio.ByteBuffer;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Arrays;
@@ -142,24 +143,27 @@ public class TransferConnector {
                     FileTransfer.deleteTempFolder();
 
                     //write content
-                    if (ClipboardIO.getLastContent().keySet().size() > 1)
-                        outStream.writeFormatCount((byte) ClipboardIO.getLastContent().keySet().size());
-                    for (javafx.scene.input.DataFormat FXFormat : ClipboardIO.getLastContent().keySet()) {
-                        if (ClipboardIO.getLastContent().get(FXFormat) instanceof String) {
-                            outStream.writeGeneralString(FXFormat, (String) ClipboardIO.getLastContent().get(FXFormat));
+                    ClipboardContent content = ClipboardIO.getLastContent();
+                    if (content.keySet().size() > 1)
+                        outStream.writeFormatCount((byte) content.keySet().size());
+                    for (javafx.scene.input.DataFormat FXFormat : content.keySet()) {
+                        if (content.get(FXFormat) instanceof String) {
+                            outStream.writeGeneralString(FXFormat, (String) content.get(FXFormat));
                         }
-
+                        if (content.get(FXFormat) instanceof ByteBuffer) {
+                            outStream.writeByteBuffer(FXFormat, (ByteBuffer) content.get(FXFormat));
+                        }
                     }
 
-                    if (ClipboardIO.getLastContent().hasFiles()) {
+                    if (content.hasFiles()) {
                         int port = PortAllocator.alloc();
                         byte[] key = getTransKey();
                         outStream.writeFiles(port, key);
-                        FileTransfer.sendFiles(ClipboardIO.getLastContent().getFiles(), port, key);
+                        FileTransfer.sendFiles(content.getFiles(), port, key);
                     }
-                    else if (ClipboardIO.getLastContent().hasImage()) {
-                        if (ClipboardIO.getLastContent().hasUrl()) outStream.writeImageAsUrl();
-                        else outStream.writeImage(ClipboardIO.getLastContent().getImage());
+                    else if (content.hasImage()) {
+                        if (content.hasUrl()) outStream.writeImageAsUrl();
+                        else outStream.writeImage(content.getImage());
                     }
                 }
 
@@ -213,6 +217,10 @@ public class TransferConnector {
                         case DataFormat.GENERAL_STRING:
                             Pair<javafx.scene.input.DataFormat, String> entry = inStream.getGeneralString();
                             content.put(entry.getKey(), entry.getValue());
+                            break;
+                        case DataFormat.BYTEBUFFER:
+                            Pair<javafx.scene.input.DataFormat, ByteBuffer> bufferEntry = inStream.getByteBuffer();
+                            content.put(bufferEntry.getKey(), bufferEntry.getValue());
                             break;
                         case DataFormat.FILES:
                             asyncPush = true;
