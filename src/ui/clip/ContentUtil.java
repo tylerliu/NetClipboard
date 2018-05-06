@@ -28,6 +28,8 @@ public class ContentUtil {
         if (a.hasRtf() && !a.getRtf().equals(b.getRtf())) return false;
         if (a.hasUrl() && !a.getUrl().equals(b.getUrl())) return false;
 
+        if (!a.hasImage() && !b.hasImage()) return true;
+        if (!a.hasImage() || !b.hasImage()) return false;
         if (a.hasUrl()) return true;
         else return compareImage(a.getImage(), b.getImage());
     }
