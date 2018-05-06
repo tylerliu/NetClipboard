@@ -1,13 +1,14 @@
 package format;
 
-import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
+import javafx.scene.input.DataFormat;
 import javafx.util.Pair;
 import net.FileTransferMode;
 
-import javax.swing.*;
-import java.io.*;
-import java.net.URL;
+import java.io.ByteArrayInputStream;
+import java.io.FilterInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -45,45 +46,45 @@ public class FormattedInStream extends FilterInputStream {
 
 
     public FileTransferMode.Mode getMode() throws IOException {
-        return FileTransferMode.Mode.values()[loadContent(DataFormat.MODE_SET)[0]];
+        return FileTransferMode.Mode.values()[loadContent(TransferFormat.MODE_SET)[0]];
     }
 
     public byte getFormatCount() throws IOException {
-        return loadContent(DataFormat.FORMAT_COUNT)[0];
+        return loadContent(TransferFormat.FORMAT_COUNT)[0];
     }
 
     /**
      * get file transfer info
      */
     public ByteBuffer getFiles() throws IOException {
-        return ByteBuffer.wrap(loadContent(DataFormat.FILES));
+        return ByteBuffer.wrap(loadContent(TransferFormat.FILES));
     }
 
     public Image getImage(String potentialURL) throws IOException {
-        byte[] content = loadContent(DataFormat.IMAGE);
+        byte[] content = loadContent(TransferFormat.IMAGE);
         if (content[0] == 0) return new Image(potentialURL, true);
         if (content[0] == 1) return new Image(new String(Arrays.copyOfRange(content, 1, content.length)), true);
         if (content[0] == 2) return new Image(new ByteArrayInputStream(Arrays.copyOfRange(content, 1, content.length)));
         return null;
     }
 
-    public Pair<javafx.scene.input.DataFormat, String> getGeneralString() throws IOException {
-        byte[] bytes = loadContent(DataFormat.GENERAL_STRING);
+    public Pair<DataFormat, String> getGeneralString() throws IOException {
+        byte[] bytes = loadContent(TransferFormat.GENERAL_STRING);
         int index = new String(bytes).indexOf('\0');
         String identifier = new String(Arrays.copyOfRange(bytes, 0, index));
         String data = new String(Arrays.copyOfRange(bytes, index + 1, bytes.length));
-        javafx.scene.input.DataFormat format = javafx.scene.input.DataFormat.lookupMimeType(identifier);
-        if (format == null) format = new javafx.scene.input.DataFormat(identifier);
+        DataFormat format = DataFormat.lookupMimeType(identifier);
+        if (format == null) format = new DataFormat(identifier);
         return new Pair<>(format, data);
     }
 
-    public Pair<javafx.scene.input.DataFormat, ByteBuffer> getByteBuffer() throws IOException {
-        byte[] bytes = loadContent(DataFormat.BYTEBUFFER);
+    public Pair<DataFormat, ByteBuffer> getByteBuffer() throws IOException {
+        byte[] bytes = loadContent(TransferFormat.BYTE_BUFFER);
         int index = new String(bytes).indexOf('\0');
         String identifier = new String(Arrays.copyOfRange(bytes, 0, index));
         ByteBuffer data = ByteBuffer.wrap(Arrays.copyOfRange(bytes, index + 1, bytes.length));
-        javafx.scene.input.DataFormat format = javafx.scene.input.DataFormat.lookupMimeType(identifier);
-        if (format == null) format = new javafx.scene.input.DataFormat(identifier);
+        DataFormat format = DataFormat.lookupMimeType(identifier);
+        if (format == null) format = new DataFormat(identifier);
         return new Pair<>(format, data);
     }
 }

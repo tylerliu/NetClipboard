@@ -6,14 +6,13 @@ import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import ui.UserInterfacing;
 
-import java.nio.ByteBuffer;
 import java.util.Random;
 
 public class ContentUtil {
 
 
-
-    /* protected */ static boolean isContentEqual(ClipboardContent a, ClipboardContent b) {
+    /* protected */
+    static boolean isContentEqual(ClipboardContent a, ClipboardContent b) {
         if (a == b) return true;
         if (a == null || b == null) return false;
         if (!a.keySet().equals(b.keySet())) return false;
@@ -71,9 +70,9 @@ public class ContentUtil {
         if (!readerA.getPixelFormat().equals(readerB.getPixelFormat())) return false;
         int trials = (int) Math.sqrt(a.getHeight() * a.getWidth()) + 1;
         Random random = new Random();
-        for (int i = 0; i < trials; i ++) {
-            int x = random.nextInt((int)a.getWidth());
-            int y = random.nextInt((int)a.getHeight());
+        for (int i = 0; i < trials; i++) {
+            int x = random.nextInt((int) a.getWidth());
+            int y = random.nextInt((int) a.getHeight());
             if (readerA.getArgb(x, y) != readerB.getArgb(x, y)) return false;
         }
         return true;

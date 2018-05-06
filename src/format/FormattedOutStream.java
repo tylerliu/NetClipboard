@@ -5,9 +5,10 @@ import javafx.scene.image.Image;
 import net.FileTransferMode;
 
 import javax.imageio.ImageIO;
-import javax.imageio.stream.ImageInputStream;
-import javax.swing.*;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 /**
@@ -26,54 +27,53 @@ public class FormattedOutStream extends FilterOutputStream {
     }
 
     public synchronized void writeEND() throws IOException {
-        writePayload(DataFormat.END_SIGNAL, new byte[]{});
+        writePayload(TransferFormat.END_SIGNAL, new byte[]{});
     }
 
     public synchronized void writeModeSet(FileTransferMode.Mode mode) throws IOException {
-        writePayload(DataFormat.MODE_SET, new byte[]{(byte) mode.ordinal()});
+        writePayload(TransferFormat.MODE_SET, new byte[]{(byte) mode.ordinal()});
     }
-
 
 
     //format specific operations
 
     public synchronized void writeFormatCount(byte count) throws IOException {
-        writePayload(DataFormat.FORMAT_COUNT, new byte[]{count});
+        writePayload(TransferFormat.FORMAT_COUNT, new byte[]{count});
     }
 
     public synchronized void writeFiles(int port, byte[] key) throws IOException {
-        writePayload(DataFormat.FILES, ByteBuffer.allocate(2 + key.length).putShort((short) port).put(key).array());
+        writePayload(TransferFormat.FILES, ByteBuffer.allocate(2 + key.length).putShort((short) port).put(key).array());
     }
 
     public synchronized void writeImageAsUrl() throws IOException {
-        writePayload(DataFormat.IMAGE, new byte[]{0});
+        writePayload(TransferFormat.IMAGE, new byte[]{0});
     }
 
     public synchronized void writeImage(Image image) throws IOException {
         if (image.getUrl() != null) {
-            writePayload(DataFormat.IMAGE, ByteBuffer.allocate(1 + image.getUrl().length()).put((byte) 1).put(image.getUrl().getBytes()).array());
+            writePayload(TransferFormat.IMAGE, ByteBuffer.allocate(1 + image.getUrl().length()).put((byte) 1).put(image.getUrl().getBytes()).array());
         }
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         byteArrayOutputStream.write(2);
         ImageIO.write(SwingFXUtils.fromFXImage(image, null), "png", byteArrayOutputStream);
         byteArrayOutputStream.close();
-        writePayload(DataFormat.IMAGE, byteArrayOutputStream.toByteArray());
+        writePayload(TransferFormat.IMAGE, byteArrayOutputStream.toByteArray());
     }
 
-    public synchronized void writeGeneralString(javafx.scene.input.DataFormat format, String str) throws IOException{
+    public synchronized void writeGeneralString(javafx.scene.input.DataFormat format, String str) throws IOException {
         assert format.getIdentifiers().size() == 1;
         String identifier = format.getIdentifiers().iterator().next();
         ByteBuffer buffer = ByteBuffer.allocate(identifier.getBytes().length + 1 + str.getBytes().length);
         buffer.put(identifier.getBytes()).put((byte) 0).put(str.getBytes());
-        writePayload(DataFormat.GENERAL_STRING, buffer.array());
+        writePayload(TransferFormat.GENERAL_STRING, buffer.array());
     }
 
-    public synchronized void writeByteBuffer(javafx.scene.input.DataFormat format, ByteBuffer value) throws IOException{
+    public synchronized void writeByteBuffer(javafx.scene.input.DataFormat format, ByteBuffer value) throws IOException {
         assert format.getIdentifiers().size() == 1;
         String identifier = format.getIdentifiers().iterator().next();
         ByteBuffer buffer = ByteBuffer.allocate(identifier.getBytes().length + 1 + value.array().length);
         buffer.put(identifier.getBytes()).put((byte) 0).put(value.array());
-        writePayload(DataFormat.BYTEBUFFER, buffer.array());
+        writePayload(TransferFormat.BYTE_BUFFER, buffer.array());
     }
 }
 

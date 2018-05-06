@@ -1,9 +1,10 @@
 package net;
 
-import format.DataFormat;
 import format.FormattedInStream;
 import format.FormattedOutStream;
+import format.TransferFormat;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DataFormat;
 import javafx.util.Pair;
 import net.handshake.DirectConnect;
 import net.handshake.KeyBased;
@@ -146,7 +147,7 @@ public class TransferConnector {
                     ClipboardContent content = ClipboardIO.getLastContent();
                     if (content.keySet().size() > 1)
                         outStream.writeFormatCount((byte) content.keySet().size());
-                    for (javafx.scene.input.DataFormat FXFormat : content.keySet()) {
+                    for (DataFormat FXFormat : content.keySet()) {
                         if (content.get(FXFormat) instanceof String) {
                             outStream.writeGeneralString(FXFormat, (String) content.get(FXFormat));
                         }
@@ -160,8 +161,7 @@ public class TransferConnector {
                         byte[] key = getTransKey();
                         outStream.writeFiles(port, key);
                         FileTransfer.sendFiles(content.getFiles(), port, key);
-                    }
-                    else if (content.hasImage()) {
+                    } else if (content.hasImage()) {
                         if (content.hasUrl()) outStream.writeImageAsUrl();
                         else outStream.writeImage(content.getImage());
                     }
@@ -198,31 +198,31 @@ public class TransferConnector {
                 int entryCount = 1;
                 boolean asyncPush = false;
                 int type = inStream.nextEntry();
-                if (type == DataFormat.END_SIGNAL) {
+                if (type == TransferFormat.END_SIGNAL) {
                     terminateInitiated = true;
                     return;
                 }
-                if (type == DataFormat.MODE_SET) {
+                if (type == TransferFormat.MODE_SET) {
                     FileTransferMode.setTargetMode(inStream.getMode());
                     continue;
                 }
-                if (type == DataFormat.FORMAT_COUNT) {
+                if (type == TransferFormat.FORMAT_COUNT) {
                     entryCount = inStream.getFormatCount();
                 }
                 FileTransfer.attemptCancelTransfer(); //cancel if file transferring
                 FileTransfer.deleteTempFolder();
                 for (int i = 0; i < entryCount; i++) {
-                    if (i != 0 || type == DataFormat.FORMAT_COUNT) type = inStream.nextEntry();
+                    if (i != 0 || type == TransferFormat.FORMAT_COUNT) type = inStream.nextEntry();
                     switch (type) {
-                        case DataFormat.GENERAL_STRING:
-                            Pair<javafx.scene.input.DataFormat, String> entry = inStream.getGeneralString();
+                        case TransferFormat.GENERAL_STRING:
+                            Pair<DataFormat, String> entry = inStream.getGeneralString();
                             content.put(entry.getKey(), entry.getValue());
                             break;
-                        case DataFormat.BYTEBUFFER:
-                            Pair<javafx.scene.input.DataFormat, ByteBuffer> bufferEntry = inStream.getByteBuffer();
+                        case TransferFormat.BYTE_BUFFER:
+                            Pair<DataFormat, ByteBuffer> bufferEntry = inStream.getByteBuffer();
                             content.put(bufferEntry.getKey(), bufferEntry.getValue());
                             break;
-                        case DataFormat.FILES:
+                        case TransferFormat.FILES:
                             asyncPush = true;
                             CompletableFuture<List<File>> re = FileTransfer.receiveFiles(inStream.getFiles());
                             if (FileTransferMode.getLocalMode() == FileTransferMode.Mode.CACHED) {
@@ -236,7 +236,7 @@ public class TransferConnector {
                                 ClipboardIO.unsetSysClipboard();
                             }
                             break;
-                        case DataFormat.IMAGE:
+                        case TransferFormat.IMAGE:
                             content.putImage(inStream.getImage(content.getUrl()));
                             break;
                         default:

@@ -1,7 +1,6 @@
 package ui.clip;
 
 import javafx.application.Platform;
-import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
@@ -64,7 +63,7 @@ public class ClipboardIO {
         Platform.runLater(() -> {
             Clipboard clipboard = Clipboard.getSystemClipboard();
             //get only supported content
-            for (javafx.scene.input.DataFormat format : Clipboard.getSystemClipboard().getContentTypes()) {
+            for (DataFormat format : Clipboard.getSystemClipboard().getContentTypes()) {
                 if (format.equals(DataFormat.FILES)
                         || Clipboard.getSystemClipboard().getContent(format) instanceof String
                         || Clipboard.getSystemClipboard().getContent(format) instanceof ByteBuffer)
