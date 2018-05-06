@@ -1,7 +1,12 @@
 package ui.clip;
 
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.image.Image;
+import javafx.scene.image.PixelReader;
 import javafx.scene.input.ClipboardContent;
 import ui.UserInterfacing;
+
+import java.util.Random;
 
 public class ContentUtil {
 
@@ -23,8 +28,8 @@ public class ContentUtil {
         if (a.hasRtf() && !a.getRtf().equals(b.getRtf())) return false;
         if (a.hasUrl() && !a.getUrl().equals(b.getUrl())) return false;
 
-        //TODO image
-        return true;
+        if (a.hasUrl()) return true;
+        else return compareImage(a.getImage(), b.getImage());
     }
 
     public static void printContent(ClipboardContent content, String attribute) {
@@ -40,11 +45,35 @@ public class ContentUtil {
         } else if (content.hasFiles()) {
             UserInterfacing.setClipStatus(attribute + " Files");
         } else if (content.hasImage()) {
+            if (content.hasUrl()) {
+                String s = content.getUrl().substring(content.getUrl().lastIndexOf('/') + 1);
+                UserInterfacing.printInfo("New " + attribute + " Image: " + s);
+                UserInterfacing.setClipStatus(attribute + " Image: " + s);
+            }
             UserInterfacing.printInfo("New " + attribute + " Image");
-            UserInterfacing.setClipStatus("New " + attribute + " Image");
+            UserInterfacing.setClipStatus(attribute + " Image");
         } else {
             UserInterfacing.printInfo("New " + attribute + " Content");
-            UserInterfacing.setClipStatus("New " + attribute + " Content");
+            UserInterfacing.setClipStatus(attribute + " Content");
         }
+    }
+
+    private static boolean compareImage(Image a, Image b) {
+        if (a == null && b == null) return true;
+        if (a == null || b == null) return false;
+        if (a.getUrl() != null) return a.getUrl().equals(b.getUrl());
+        if (b.getUrl() != null) return false;
+        if (a.getHeight() != b.getHeight() || a.getWidth() != b.getWidth()) return false;
+        PixelReader readerA = a.getPixelReader();
+        PixelReader readerB = b.getPixelReader();
+        if (!readerA.getPixelFormat().equals(readerB.getPixelFormat())) return false;
+        int trials = (int) Math.sqrt(a.getHeight() * a.getWidth()) + 1;
+        Random random = new Random();
+        for (int i = 0; i < trials; i ++) {
+            int x = random.nextInt((int)a.getWidth());
+            int y = random.nextInt((int)a.getHeight());
+            if (readerA.getArgb(x, y) != readerB.getArgb(x, y)) return false;
+        }
+        return true;
     }
 }

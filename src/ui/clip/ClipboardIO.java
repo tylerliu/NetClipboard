@@ -3,6 +3,7 @@ package ui.clip;
 import javafx.application.Platform;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DataFormat;
 import ui.UserInterfacing;
 
 import java.io.File;
@@ -66,6 +67,7 @@ public class ClipboardIO {
             if (clipboard.hasRtf()) content.putRtf(clipboard.getRtf());
             if (clipboard.hasUrl()) content.putUrl(clipboard.getUrl());
             if (clipboard.hasFiles()) content.putFiles(clipboard.getFiles());
+            else if (clipboard.hasImage()) content.putImage(clipboard.getImage());
 
             /*for (javafx.scene.input.DataFormat format : Clipboard.getSystemClipboard().getContentTypes()) {
                     content.put(format, Clipboard.getSystemClipboard().getContent(format));

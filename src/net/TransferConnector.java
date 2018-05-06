@@ -141,7 +141,6 @@ public class TransferConnector {
                     FileTransfer.deleteTempFolder();
 
                     //write content
-                    boolean hasFile = false;
                     if (ClipboardIO.getLastContent().keySet().size() > 1)
                         outStream.writeFormatCount((byte) ClipboardIO.getLastContent().keySet().size());
                     for (javafx.scene.input.DataFormat FXFormat : ClipboardIO.getLastContent().keySet()) {
@@ -152,18 +151,19 @@ public class TransferConnector {
                             case DataFormat.URL:
                                 outStream.writeSTRING(DataFormat.getFormat(FXFormat), (String)ClipboardIO.getLastContent().get(FXFormat));
                                 break;
-                            case DataFormat.FILES:
-                                hasFile = true; //leave until the last
-                                break;
                             default:
                         }
                     }
 
-                    if (hasFile) {
+                    if (ClipboardIO.getLastContent().hasFiles()) {
                         int port = PortAllocator.alloc();
                         byte[] key = getTransKey();
                         outStream.writeFiles(port, key);
                         FileTransfer.sendFiles(ClipboardIO.getLastContent().getFiles(), port, key);
+                    }
+                    else if (ClipboardIO.getLastContent().hasImage()) {
+                        if (ClipboardIO.getLastContent().hasUrl()) outStream.writeImageAsUrl();
+                        else outStream.writeImage(ClipboardIO.getLastContent().getImage());
                     }
                 }
 
@@ -235,6 +235,8 @@ public class TransferConnector {
                                 ClipboardIO.unsetSysClipboard();
                             }
                             break;
+                        case DataFormat.IMAGE:
+                            content.putImage(inStream.getImage(content.getUrl()));
                         default:
                             if (!terminateInitiated) UserInterfacing.printError(new IOException("Unacceptable format"));
                     }
