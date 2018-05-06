@@ -41,14 +41,6 @@ public class FormattedOutStream extends FilterOutputStream {
         writePayload(DataFormat.FORMAT_COUNT, new byte[]{count});
     }
 
-    public synchronized void writeSTRING(String s) throws IOException {
-        writePayload(DataFormat.STRING, s.getBytes());
-    }
-
-    public synchronized void writeSTRING(byte format, String s) throws IOException {
-        writePayload(format, s.getBytes());
-    }
-
     public synchronized void writeFiles(int port, byte[] key) throws IOException {
         writePayload(DataFormat.FILES, ByteBuffer.allocate(2 + key.length).putShort((short) port).put(key).array());
     }

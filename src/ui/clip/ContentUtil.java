@@ -1,6 +1,5 @@
 package ui.clip;
 
-import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.input.ClipboardContent;

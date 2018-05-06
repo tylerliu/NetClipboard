@@ -52,26 +52,11 @@ public class FormattedInStream extends FilterInputStream {
         return loadContent(DataFormat.FORMAT_COUNT)[0];
     }
 
-
-    /**
-     * Used only when sure the next is string
-     */
-    public String getString() throws IOException {
-        return new String(loadContent(DataFormat.STRING));
-    }
-
     /**
      * get file transfer info
      */
     public ByteBuffer getFiles() throws IOException {
         return ByteBuffer.wrap(loadContent(DataFormat.FILES));
-    }
-
-    /**
-     * Used only when sure the next is HTML
-     */
-    public String getString(byte format) throws IOException {
-        return new String(loadContent(format));
     }
 
     public Image getImage(String potentialURL) throws IOException {

@@ -145,17 +145,8 @@ public class TransferConnector {
                     if (ClipboardIO.getLastContent().keySet().size() > 1)
                         outStream.writeFormatCount((byte) ClipboardIO.getLastContent().keySet().size());
                     for (javafx.scene.input.DataFormat FXFormat : ClipboardIO.getLastContent().keySet()) {
-                        switch (DataFormat.getFormat(FXFormat)) {
-                            case DataFormat.STRING:
-                            case DataFormat.HTML:
-                            case DataFormat.RTF:
-                            case DataFormat.URL:
-                                outStream.writeSTRING(DataFormat.getFormat(FXFormat), (String)ClipboardIO.getLastContent().get(FXFormat));
-                                break;
-                            default:
-                                if (ClipboardIO.getLastContent().get(FXFormat) instanceof String) {
-                                    outStream.writeGeneralString(FXFormat, (String) ClipboardIO.getLastContent().get(FXFormat));
-                                }
+                        if (ClipboardIO.getLastContent().get(FXFormat) instanceof String) {
+                            outStream.writeGeneralString(FXFormat, (String) ClipboardIO.getLastContent().get(FXFormat));
                         }
 
                     }
@@ -219,12 +210,9 @@ public class TransferConnector {
                 for (int i = 0; i < entryCount; i++) {
                     if (i != 0 || type == DataFormat.FORMAT_COUNT) type = inStream.nextEntry();
                     switch (type) {
-                        case DataFormat.STRING:
-                        case DataFormat.HTML:
-                        case DataFormat.RTF:
-                        case DataFormat.URL:
-                            String s = inStream.getString((byte) type);
-                            content.put(DataFormat.FXFormats[type], s);
+                        case DataFormat.GENERAL_STRING:
+                            Pair<javafx.scene.input.DataFormat, String> entry = inStream.getGeneralString();
+                            content.put(entry.getKey(), entry.getValue());
                             break;
                         case DataFormat.FILES:
                             asyncPush = true;
@@ -242,10 +230,6 @@ public class TransferConnector {
                             break;
                         case DataFormat.IMAGE:
                             content.putImage(inStream.getImage(content.getUrl()));
-                            break;
-                        case DataFormat.GENERAL_STRING:
-                            Pair<javafx.scene.input.DataFormat, String> entry = inStream.getGeneralString();
-                            content.put(entry.getKey(), entry.getValue());
                             break;
                         default:
                             if (!terminateInitiated) UserInterfacing.printError(new IOException("Unacceptable format"));
