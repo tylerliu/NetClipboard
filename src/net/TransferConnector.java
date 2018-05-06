@@ -237,6 +237,7 @@ public class TransferConnector {
                             break;
                         case DataFormat.IMAGE:
                             content.putImage(inStream.getImage(content.getUrl()));
+                            break;
                         default:
                             if (!terminateInitiated) UserInterfacing.printError(new IOException("Unacceptable format"));
                     }
