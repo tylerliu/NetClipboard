@@ -63,19 +63,14 @@ public class ClipboardIO {
         Platform.runLater(() -> {
             Clipboard clipboard = Clipboard.getSystemClipboard();
             //get only supported content
-            if (clipboard.hasString()) content.putString(clipboard.getString());
-            if (clipboard.hasHtml()) content.putHtml(clipboard.getHtml());
-            if (clipboard.hasRtf()) content.putRtf(clipboard.getRtf());
-            if (clipboard.hasUrl()) content.putUrl(clipboard.getUrl());
-            if (clipboard.hasFiles()) content.putFiles(clipboard.getFiles());
+            for (javafx.scene.input.DataFormat format : Clipboard.getSystemClipboard().getContentTypes()) {
+                if (format.equals(DataFormat.FILES) || Clipboard.getSystemClipboard().getContent(format) instanceof String)
+                    content.put(format, Clipboard.getSystemClipboard().getContent(format));
+            }
             /* else if (clipboard.hasImage()) {
                 if (clipboard.hasUrl()) content.putImage(new Image(clipboard.getUrl(), true));
                 content.putImage(clipboard.getImage());
             } */
-
-            /*for (javafx.scene.input.DataFormat format : Clipboard.getSystemClipboard().getContentTypes()) {
-                    content.put(format, Clipboard.getSystemClipboard().getContent(format));
-            }*/
             latch.countDown();
         });
         try {

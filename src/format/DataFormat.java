@@ -22,6 +22,8 @@ public class DataFormat {
     public static final byte URL = 7;
     public static final byte IMAGE = 8;
     public static final byte FILES = 9;
+    public static final byte GENERAL_STRING = 10;
+    public static final byte BYTEBUFFER = 11;
 
     public static final javafx.scene.input.DataFormat[] FXFormats = new javafx.scene.input.DataFormat[] {
             null,

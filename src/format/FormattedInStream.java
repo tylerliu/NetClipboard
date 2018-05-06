@@ -2,6 +2,7 @@ package format;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
+import javafx.util.Pair;
 import net.FileTransferMode;
 
 import javax.swing.*;
@@ -79,5 +80,15 @@ public class FormattedInStream extends FilterInputStream {
         if (content[0] == 1) return new Image(new String(Arrays.copyOfRange(content, 1, content.length)), true);
         if (content[0] == 2) return new Image(new ByteArrayInputStream(Arrays.copyOfRange(content, 1, content.length)));
         return null;
+    }
+
+    public Pair<javafx.scene.input.DataFormat, String> getGeneralString() throws IOException {
+        byte[] bytes = loadContent(DataFormat.GENERAL_STRING);
+        int index = new String(bytes).indexOf('\0');
+        String identifier = new String(Arrays.copyOfRange(bytes, 0, index));
+        String data = new String(Arrays.copyOfRange(bytes, index + 1, bytes.length));
+        javafx.scene.input.DataFormat format = javafx.scene.input.DataFormat.lookupMimeType(identifier);
+        if (format == null) format = new javafx.scene.input.DataFormat(identifier);
+        return new Pair<>(format, data);
     }
 }

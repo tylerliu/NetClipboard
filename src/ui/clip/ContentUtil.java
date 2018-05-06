@@ -4,6 +4,7 @@ import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
 import javafx.scene.image.PixelReader;
 import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.DataFormat;
 import ui.UserInterfacing;
 
 import java.util.Random;
@@ -23,10 +24,9 @@ public class ContentUtil {
         }
 
         //String comparison
-        if (a.hasString() && !a.getString().equals(b.getString())) return false;
-        if (a.hasHtml() && !a.getHtml().equals(b.getHtml())) return false;
-        if (a.hasRtf() && !a.getRtf().equals(b.getRtf())) return false;
-        if (a.hasUrl() && !a.getUrl().equals(b.getUrl())) return false;
+        for (DataFormat format : a.keySet()) {
+            if (a.get(format) instanceof String && !a.get(format).equals(b.get(format))) return false;
+        }
 
         if (!a.hasImage() && !b.hasImage()) return true;
         if (!a.hasImage() || !b.hasImage()) return false;

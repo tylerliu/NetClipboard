@@ -4,6 +4,7 @@ import format.DataFormat;
 import format.FormattedInStream;
 import format.FormattedOutStream;
 import javafx.scene.input.ClipboardContent;
+import javafx.util.Pair;
 import net.handshake.DirectConnect;
 import net.handshake.KeyBased;
 import net.handshake.Manual;
@@ -152,7 +153,11 @@ public class TransferConnector {
                                 outStream.writeSTRING(DataFormat.getFormat(FXFormat), (String)ClipboardIO.getLastContent().get(FXFormat));
                                 break;
                             default:
+                                if (ClipboardIO.getLastContent().get(FXFormat) instanceof String) {
+                                    outStream.writeGeneralString(FXFormat, (String) ClipboardIO.getLastContent().get(FXFormat));
+                                }
                         }
+
                     }
 
                     if (ClipboardIO.getLastContent().hasFiles()) {
@@ -237,6 +242,10 @@ public class TransferConnector {
                             break;
                         case DataFormat.IMAGE:
                             content.putImage(inStream.getImage(content.getUrl()));
+                            break;
+                        case DataFormat.GENERAL_STRING:
+                            Pair<javafx.scene.input.DataFormat, String> entry = inStream.getGeneralString();
+                            content.put(entry.getKey(), entry.getValue());
                             break;
                         default:
                             if (!terminateInitiated) UserInterfacing.printError(new IOException("Unacceptable format"));
