@@ -1,5 +1,7 @@
 package format;
 
+import javafx.scene.input.DataFormat;
+
 import java.io.IOException;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
@@ -16,9 +18,9 @@ public class MFTest {
 
             FormattedOutStream outStream = new FormattedOutStream(out);
             FormattedInStream inStream = new FormattedInStream(in);
-            outStream.writeSTRING("你好\n");
+            outStream.writeGeneralString(DataFormat.PLAIN_TEXT, "你好\n");
             inStream.nextEntry();
-            System.out.println(inStream.getString());
+            System.out.println(inStream.getGeneralString().getValue());
             outStream.writeFiles(8800, new byte[48]);
             inStream.nextEntry();
             System.out.println(Short.toUnsignedInt(inStream.getFiles().getShort()));
