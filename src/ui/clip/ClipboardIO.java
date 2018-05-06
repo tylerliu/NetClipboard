@@ -8,6 +8,7 @@ import javafx.scene.input.DataFormat;
 import ui.UserInterfacing;
 
 import java.io.File;
+import java.nio.ByteBuffer;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -64,7 +65,9 @@ public class ClipboardIO {
             Clipboard clipboard = Clipboard.getSystemClipboard();
             //get only supported content
             for (javafx.scene.input.DataFormat format : Clipboard.getSystemClipboard().getContentTypes()) {
-                if (format.equals(DataFormat.FILES) || Clipboard.getSystemClipboard().getContent(format) instanceof String)
+                if (format.equals(DataFormat.FILES)
+                        || Clipboard.getSystemClipboard().getContent(format) instanceof String
+                        || Clipboard.getSystemClipboard().getContent(format) instanceof ByteBuffer)
                     content.put(format, Clipboard.getSystemClipboard().getContent(format));
             }
             /* else if (clipboard.hasImage()) {
