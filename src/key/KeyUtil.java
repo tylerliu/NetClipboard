@@ -1,29 +1,30 @@
 package key;
 
+import ui.UserInterfacing;
+
 import java.io.File;
 
 public class KeyUtil {
 
     public static final int KEY_LEN = 32;
-    private static final File keyFile = new File("./.NetClipboardKey");
 
-    public static File getKeyFile() {
-        return keyFile;
+    private static File getKeyFile() {
+        return UserInterfacing.getKeyFile();
     }
 
     public static byte[] getKey() {
-        return key.Keygen.fileToKey(keyFile);
+        return key.Keygen.fileToKey(getKeyFile());
     }
 
     public static void generateKey() {
-        Keygen.keyToFile(keyFile);
+        Keygen.keyToFile(getKeyFile());
     }
 
     public static void generateKeyFromSeed(byte[] seed) {
-        Keygen.keyToFile(keyFile, Keygen.generateKey(KEY_LEN, seed));
+        Keygen.keyToFile(getKeyFile(), Keygen.generateKey(KEY_LEN, seed));
     }
 
     public static boolean isKeyExist() {
-        return keyFile.exists();
+        return getKeyFile().exists();
     }
 }

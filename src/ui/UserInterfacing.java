@@ -2,20 +2,31 @@ package ui;
 
 import javafx.embed.swing.JFXPanel;
 import key.KeyUtil;
+import main.Main;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
+import java.net.URISyntaxException;
 
 public class UserInterfacing {
 
-    private static final File logFile = new File("./NetClipLog.txt");
+    private static File currentDir;
+    private static File logFile;
+    private static File keyFile;
     private static boolean isCommandLine = false;
     private static boolean isLog = false;
     private static PrintWriter writer;
 
     public static void init() {
+        try {
+            currentDir = new File(UserInterfacing.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+            logFile = new File(currentDir + "/.NetClipLog.txt");
+            keyFile = new File(currentDir + "/.NetClipboardKey");
+        } catch (URISyntaxException e) {
+            System.exit(1);
+        }
         new JFXPanel(); //initialize JavaFX Environment
         if (!isCommandLine) {
             ClipTray.init();
@@ -112,5 +123,10 @@ public class UserInterfacing {
             return null;
         }
         return DirectConnectWindow.showConnFailWarning(reason);
+    }
+
+    public static File getKeyFile() {
+        assert keyFile != null;
+        return keyFile;
     }
 }

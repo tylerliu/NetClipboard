@@ -8,7 +8,9 @@ import org.apache.commons.cli.*;
 import ui.UserInterfacing;
 import ui.clip.ClipboardIO;
 
+import java.io.File;
 import java.net.InetAddress;
+import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 
 public class Main {
