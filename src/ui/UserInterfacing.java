@@ -22,8 +22,10 @@ public class UserInterfacing {
     public static void init() {
         try {
             currentDir = new File(UserInterfacing.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-            logFile = new File(currentDir + "/.NetClipLog.txt");
-            keyFile = new File(currentDir + "/.NetClipboardKey");
+            String currentDirPath = currentDir.getAbsolutePath();
+            if (currentDirPath.endsWith(".jar")) currentDir = new File(currentDirPath.substring(0, currentDirPath.lastIndexOf(File.separatorChar)));
+            logFile = new File(currentDir + File.separator + ".NetClipLog.txt");
+            keyFile = new File(currentDir + File.separator + ".NetClipboardKey");
         } catch (URISyntaxException e) {
             System.exit(1);
         }
