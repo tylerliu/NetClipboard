@@ -43,6 +43,9 @@ class DirectConnectWindow {
             return KeyBased.getTarget();
         } else if (selected.get().get() == directConnButton) {
             return DirectConnect.getTarget(getDirectConnIP());
+        } else if (selected.get().get() == exitButton) {
+            System.exit(0);
+            return null;
         } else {
             return null;
         }

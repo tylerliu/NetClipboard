@@ -1,5 +1,5 @@
 Manifest-Version: 1.0
-Class-Path: commons-io-2.6.jar commons-cli-1.4.jar commons-compress-1.
- 16.1.jar objenesis-2.6.jar bcprov-jdk15on-1.59.jar
+Class-Path: objenesis-2.6.jar commons-io-2.6.jar commons-cli-1.4.jar b
+ cprov-jdk15on-1.59.jar commons-compress-1.16.1.jar
 Main-Class: main.Main
 
