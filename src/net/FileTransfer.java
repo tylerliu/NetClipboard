@@ -17,9 +17,8 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
@@ -32,9 +31,8 @@ public class FileTransfer {
 
     private static final ConcurrentLinkedDeque<File> tempFolders = new ConcurrentLinkedDeque<>();
     private static final ExecutorService executor = Executors.newWorkStealingPool();
-    private static final List<FileReceiver> receivers = Collections.synchronizedList(new LinkedList<>());
-    private static final List<FileSender> senders = Collections.synchronizedList(new LinkedList<>());
-    private static File lastSavedDirectory;
+    private static final Vector<FileReceiver> receivers = new Vector<>();
+    private static final Vector<FileSender> senders = new Vector<>();
 
     public synchronized static CompletableFuture<List<File>> receiveFiles(ByteBuffer spec) {
         if (FileTransferMode.getLocalMode() == FileTransferMode.Mode.CACHED) cancelReceive(); //cancel other receive
