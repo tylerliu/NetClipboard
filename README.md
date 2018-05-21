@@ -2,6 +2,6 @@
 
 Sharing clipboard content (including files) over internet between two computers
 
-##License
+## License
 
 This repository is licensed under MIT license.
