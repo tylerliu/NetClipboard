@@ -2,28 +2,28 @@ package ui;
 
 import javafx.embed.swing.JFXPanel;
 import key.KeyUtil;
-import main.Main;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.URISyntaxException;
+import java.util.Objects;
 
 public class UserInterfacing {
 
-    private static File currentDir;
     private static File logFile;
     private static File keyFile;
-    private static boolean isCommandLine = false;
+    private static boolean isCommandLine = true;
     private static boolean isLog = false;
     private static PrintWriter writer;
 
     public static void init() {
         try {
-            currentDir = new File(UserInterfacing.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+            File currentDir = new File(UserInterfacing.class.getProtectionDomain().getCodeSource().getLocation().toURI());
             String currentDirPath = currentDir.getAbsolutePath();
-            if (currentDirPath.endsWith(".jar")) currentDir = new File(currentDirPath.substring(0, currentDirPath.lastIndexOf(File.separatorChar)));
+            if (currentDirPath.endsWith(".jar"))
+                currentDir = new File(currentDirPath.substring(0, currentDirPath.lastIndexOf(File.separatorChar)));
             logFile = new File(currentDir + File.separator + ".NetClipLog.txt");
             keyFile = new File(currentDir + File.separator + ".NetClipboardKey");
         } catch (URISyntaxException e) {
@@ -128,7 +128,6 @@ public class UserInterfacing {
     }
 
     public static File getKeyFile() {
-        assert keyFile != null;
-        return keyFile;
+        return Objects.requireNonNull(keyFile);
     }
 }
